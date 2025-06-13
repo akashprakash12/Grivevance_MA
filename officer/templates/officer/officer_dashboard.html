@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Officer Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, {{ request.user.get_full_name }} (Officer)</h2>
+    
+    <p><strong>Username:</strong> {{ request.user.username }}</p>
+    <p><strong>Email:</strong> {{ request.user.email }}</p>
+
+    <hr>
+    <h3>Department Info</h3>
+    <p><strong>Department Code:</strong> {{ department.code }}</p>
+    <p><strong>Department Name:</strong> {{ department.name }}</p>
+
+    <a href="{% url 'logout' %}">Logout</a>
+</body>
+</html>

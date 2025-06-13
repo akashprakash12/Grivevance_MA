@@ -1,0 +1,55 @@
+<!-- templates/user/view_public_users.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Public Users</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Public Users</h2>
+    <a href="{% url 'public_user:create_public_user' %}">Create Public User</a>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Village</th>
+            <th>Panchayath</th>
+            <th>Thaluk</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for u in public_users %}
+            <tr>
+                <td>{{ u.user.get_full_name }}</td>
+                <td>{{ u.user.username }}</td>
+                <td>{{ u.user.phone }}</td>
+                <td>{{ u.address }}</td>
+                <td>{{ u.village }}</td>
+                <td>{{ u.panchayath }}</td>
+                <td>{{ u.thaluk }}</td>
+                <td>
+                    <a href="{% url 'public_user:update_public_user' u.user.username %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'public_user:delete_public_user' u.user.username %}" class="btn btn-sm btn-danger">Delete</a>
+                    
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="8">No public users found.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% for msg in messages %}
+        <div class="alert alert-info">{{ msg }}</div>
+    {% endfor %}
+</div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+}
+
+.container {
+    max-width: 600px;
+}
+
+.card {
+    border-radius: 12px;
+    /* Optional: box-shadow for subtle elevation */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+.btn {
+    min-width: 100px;
+}
+
+h6 {
+    font-size: 0.5rem;  /* specify units */
+    color: #13848b;
+}

@@ -1,0 +1,7 @@
+<h2>Edit Officer</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ user.as_p }}
+  {{ user_profile.as_p }}
+  <button type="submit">Update</button>
+</form>

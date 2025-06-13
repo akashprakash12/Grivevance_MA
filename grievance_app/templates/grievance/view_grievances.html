@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grievance List</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>All Grievances</h2>
+    <a href="{% url 'create_grievance' %}" class="btn btn-primary mb-3">+ New Grievance</a>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Date Filed</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grievance in grievances %}
+            <tr>
+                <td>{{ grievance.grievance_id }}</td>
+                <td>{{ grievance.subject }}</td>
+                <td>{{ grievance.status }}</td>
+                <td>{{ grievance.date_filed }}</td>
+                <td>
+                    <a href="{% url 'grievance_detail' grievance.grievance_id %}" class="btn btn-info btn-sm">View</a>
+                    <a href="{% url 'update_grievance' grievance.grievance_id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'delete_grievance' grievance.grievance_id %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No grievances filed yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

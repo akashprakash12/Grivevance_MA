@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Collector</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Update Collector Details</h2>
+
+        {% if messages %}
+        <div>
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- User fields -->
+            <div class="card p-4 mb-4">
+                <h5>User Information</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ user_form.first_name.label_tag }}  
+                        {{ user_form.first_name }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ user_form.last_name.label_tag }}  
+                        {{ user_form.last_name }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ user_form.email.label_tag }}  
+                        {{ user_form.email }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ user_form.phone.label_tag }}  
+                        {{ user_form.phone }}
+                    </div>
+
+                   
+                </div>
+            </div>
+
+            <!-- Profile fields -->
+            <div class="card p-4 mb-4">
+                <h5>Profile Information</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ profile_form.district.label_tag }}  
+                        {{ profile_form.district }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ profile_form.tenure_start.label_tag }}  
+                        {{ profile_form.tenure_start }}
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        {{ profile_form.official_address.label_tag }}  
+                        {{ profile_form.official_address }}
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        {{ profile_form.profile_picture.label_tag }}  
+                        {{ profile_form.profile_picture }}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+</body>
+</html>

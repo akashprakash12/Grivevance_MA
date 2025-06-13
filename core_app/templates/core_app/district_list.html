@@ -1,0 +1,3 @@
+<h2>Districts</h2>
+<a href="{% url 'core:district_create' %}">Add District</a>
+<ul>{% for d in districts %}<li>{{ d.name }} ({{ d.code }})</li>{% endfor %}</ul>

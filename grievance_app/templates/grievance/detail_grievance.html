@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grievance Detail</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Grievance Detail</h2>
+    <dl class="row">
+        <dt class="col-sm-3">Grievance ID:</dt>
+        <dd class="col-sm-9">{{ grievance.grievance_id }}</dd>
+
+        <dt class="col-sm-3">Subject:</dt>
+        <dd class="col-sm-9">{{ grievance.subject }}</dd>
+
+        <dt class="col-sm-3">Description:</dt>
+        <dd class="col-sm-9">{{ grievance.description }}</dd>
+
+        <dt class="col-sm-3">Status:</dt>
+        <dd class="col-sm-9">{{ grievance.status }}</dd>
+
+        <dt class="col-sm-3">Priority:</dt>
+        <dd class="col-sm-9">{{ grievance.priority }}</dd>
+
+        <dt class="col-sm-3">Filed On:</dt>
+        <dd class="col-sm-9">{{ grievance.date_filed }}</dd>
+    </dl>
+    <a href="{% url 'grievance_list' %}" class="btn btn-secondary">Back to List</a>
+</div>
+</body>
+</html>

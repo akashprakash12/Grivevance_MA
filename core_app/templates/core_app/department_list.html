@@ -1,0 +1,3 @@
+<h2>Departments</h2>
+<a href="{% url 'core:create_department' %}">Add Department</a> |
+<ul>{% for dept in departments %}<li>{{ dept.name }} ({{ dept.district.name }})</li>{% endfor %}</ul>

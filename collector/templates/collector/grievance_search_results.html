@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Grievance Search – Collector Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .navbar {
+      background-color: #002855;
+    }
+
+    .navbar-brand, .nav-link {
+      color: white !important;
+    }
+
+    .filter-section {
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+
+    .grievance-card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .grievance-title {
+      font-weight: 600;
+      font-size: 18px;
+      color: #002855;
+    }
+
+    .form-control, .form-select {
+      border-radius: 8px;
+    }
+
+    .badge-status {
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      text-transform: capitalize;
+    }
+
+    .no-results {
+      text-align: center;
+      font-size: 16px;
+      color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="#">Collector Dashboard</a>
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}">Profile</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container">
+  <form method="get" id="grievanceSearchForm" action="{% url 'search_grievance_by_id' %}">
+    <div class="filter-section">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <input type="text" name="grievance_id" value="{{ request.GET.grievance_id }}" class="form-control" placeholder="Search by Grievance ID">
+        </div>
+        <div class="col-md-4">
+          <input type="text" name="department_search" value="{{ request.GET.department_search }}" class="form-control" placeholder="Search by Department">
+        </div>
+        <div class="col-md-4">
+          <select name="department_filter" class="form-select">
+            <option value="">All Departments</option>
+            {% for dept in departments %}
+              <option value="{{ dept.name }}" {% if request.GET.department_filter == dept.name %}selected{% endif %}>{{ dept.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Grievance Results -->
+  {% if grievances %}
+    {% for grievance in grievances %}
+    <div class="grievance-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <div class="grievance-title">{{ grievance.grievance_id }} – {{ grievance.department.name }}</div>
+        <span class="badge bg-{% if grievance.status == 'PENDING' %}danger{% else %}success{% endif %} badge-status">
+          {{ grievance.status }}
+        </span>
+      </div>
+      <p><strong>User:</strong> {{ grievance.user.get_full_name }}</p>
+      <p><strong>Description:</strong> {{ grievance.description }}</p>
+      <p><strong>Created:</strong> {{ grievance.created_at|date:"Y-m-d H:i" }}</p>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="no-results">No grievances found matching your search.</div>
+  {% endif %}
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("grievanceSearchForm");
+
+    const inputs = form.querySelectorAll('input[type="text"]');
+    inputs.forEach(input => {
+      input.addEventListener("input", function () {
+        clearTimeout(input._timeout);
+        input._timeout = setTimeout(() => form.submit(), 500); // Delay for better UX
+      });
+    });
+
+    const select = form.querySelector("select[name='department_filter']");
+    if (select) {
+      select.addEventListener("change", () => form.submit());
+    }
+  });
+</script>
+
+</body>
+</html>

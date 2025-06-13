@@ -1,0 +1,16 @@
+<h2>Collectors</h2>
+<ul>
+    {% for c in collectors %}
+        <li>
+            {{ c.collector_id }} — {{ c.user.first_name }} {{ c.user.last_name }}
+            {% if c.profile_picture %}
+                <br><img src="{{ c.profile_picture.url }}" alt="Profile Picture" width="100">
+            {% endif %}
+            (
+            <a href="{% url 'collector:update_collector' c.user.username %}">Edit</a> |
+            <a href="{% url 'collector:delete_collector' c.user.username %}">Delete</a>
+            )
+        </li>
+    {% endfor %}
+    </ul>
+    

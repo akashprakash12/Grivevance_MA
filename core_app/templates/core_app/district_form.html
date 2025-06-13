@@ -1,0 +1,6 @@
+<h2>{{ form.instance.pk|yesno:"Edit,Create" }} District</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">{{ form.instance.pk|yesno:"Update,Save" }}</button>
+</form>

@@ -1,0 +1,17 @@
+<h2>Officers</h2>
+<a href="/officer/create/">➕ Add Officer</a>
+<table>
+  <tr><th>Username</th><th>Name</th><th>Dept.</th><th>HOD?</th><th>Actions</th></tr>
+  {% for o in officers %}
+  <tr>
+    <td>{{ o.user.username }}</td>
+    <td>{{ o.user.first_name }} {{ o.user.last_name }}</td>
+    <td>{{ o.department.name }}</td>
+    <td>{{ o.is_hod }}</td>
+    <td>
+      <a href="/officer/update/{{ o.user.username }}/">Edit</a> |
+      <a href="/officer/delete/{{ o.user.username }}/">Delete</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>

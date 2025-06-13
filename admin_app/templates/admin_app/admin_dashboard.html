@@ -1,0 +1,94 @@
+<h2>Admin Dashboard</h2>
+<!-- Navigation Links using Django template tags -->
+<a href="{% url 'core:create_department' %}">Add Department</a> |
+<a href="{% url 'core:district_create' %}">Add District</a>
+<a href="{% url 'collector:create_collector' %}">Add Collector</a> |
+<a href="{% url 'officer:create_officer' %}">Add Officer</a> |
+<a href="{% url 'public_user:create_public_user' %}">Create Public User</a>
+<a href="{% url 'create_grievance' %}">Create grievance</a>
+<!-- fdsdf -->
+<hr>
+<h3>Departments</h3>
+<ul>
+    {% for d in departments %}
+        <li>
+            {{ d.name }}
+            <a href="{% url 'core:department_update' d.code %}">Edit</a>
+            <a href="{% url 'core:department_delete' d.code %}">Delete</a>
+        </li>
+    {% empty %}
+        <li>No departments found.</li>
+    {% endfor %}
+</ul>
+<h3>Districts</h3>
+<ul>
+    {% for d in districts %}
+        <li>
+            {{ d.name }}
+            <a href="{% url 'core:district_update' d.code %}">Edit</a>
+            <a href="{% url 'core:district_delete' d.code %}">Delete</a>
+        </li>
+    {% empty %}
+        <li>No districts found.</li>
+    {% endfor %}
+</ul>
+<h3>Collectors</h3>
+<ul>
+    {% for c in collectors %}
+        <li>
+            <strong>{{ c.user.get_full_name }}</strong> - {{ c.district.name }}<br>
+
+            {% if c.profile_picture %}
+                <img src="{{ c.profile_picture.url }}" alt="Profile Picture" width="100" height="100" style="object-fit: cover; border-radius: 50%;">
+            {% else %}
+                <em>No profile picture</em><br>
+            {% endif %}
+
+            <a href="{% url 'collector:update_collector' c.user.username %}">Edit</a> |
+            <a href="{% url 'collector:delete_collector' c.user.username %}">Delete</a>
+        </li>
+    {% empty %}
+        <li>No collectors found.</li>
+    {% endfor %}
+</ul>
+
+
+<h3>Officers</h3>
+<ul>
+    {% for o in officers %}
+        <li>
+            {{ o.user.get_full_name }} - {{ o.department.name }}
+            <a href="{% url 'officer:update_officer' o.user.username %}">Edit</a>
+            <a href="{% url 'officer:delete_officer' o.user.username %}">Delete</a>
+        </li>
+    {% empty %}
+        <li>No officers found.</li>
+    {% endfor %}
+</ul>
+<h3>Public Users</h3>
+<ul>
+    {% for u in public_users %}
+        <li>
+            {{ u.user.get_full_name }}
+            <a href="{% url 'public_user:update_public_user' u.user.username %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'public_user:delete_public_user' u.user.username %}" class="btn btn-sm btn-danger">Delete</a>
+
+        </li>
+    {% empty %}
+        <li>No public users found.</li>
+    {% endfor %}
+</ul>
+<h3>Grievances</h3>
+<ul>
+    {% for g in grievances %}
+        <li>
+            {{ g.subject }} by {{ g.user.get_full_name }} - {{ g.status }}
+            <a href="{% url 'grievance:update_grievance' g.grievance_id %}">Edit</a>
+            <a href="{% url 'grievance:delete_grievance' g.grievance_id %}">Delete</a>
+        </li>
+    {% empty %}
+        <li>No grievances found.</li>
+    {% endfor %}
+</ul>
+
+

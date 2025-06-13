@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HOD Officers</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f8fb;
+            padding: 30px;
+            margin: 0;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 90%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #154360;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #d0e4f5;
+        }
+
+        td {
+            color: #2c3e50;
+        }
+
+        .no-data {
+            text-align: center;
+            font-style: italic;
+            color: gray;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>HOD Officers in {{ district }}</h2>
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+
+        {% for officer in hod_officers %}
+        <tr>
+            <td>{{ officer.user.first_name }} {{ officer.user.last_name }}</td>
+            <td>{{ officer.department.name }}</td>
+            <td>{{ officer.user.email }}</td>
+            <td>{{ officer.user.phone }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="no-data">No HODs found in your district.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
