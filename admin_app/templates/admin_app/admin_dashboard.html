@@ -24,6 +24,7 @@
             display: flex;
             flex-direction: column;
         }
+
         body::before {
             content: '';
             position: fixed;
@@ -34,6 +35,7 @@
             background: rgba(255, 255, 255, 0.75);
             z-index: -1;
         }
+
         .dashboard-title {
             font-weight: 700;
             color: #2c3e50;
@@ -49,6 +51,21 @@
             z-index: 1000;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
+        .top-right-buttons {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1001;
+        }
+
+        .top-right-buttons a {
+            font-size: 1.2rem;
+            margin-left: 1rem;
+            color: #343a40;
+            text-decoration: none;
+        }
+
         .dashboard-card {
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%);
             border: none;
@@ -58,20 +75,23 @@
             overflow: hidden;
             position: relative;
             padding: 1.5rem;
-            width: 200px;
-            flex: 0 0 auto;
+            width: 220px;
+            flex: 0 1 auto;
             animation: fadeIn 0.5s ease-in-out forwards;
             opacity: 0;
         }
+
         .dashboard-card:nth-child(1) { animation-delay: 0.1s; transform: translateY(-10px); }
         .dashboard-card:nth-child(2) { animation-delay: 0.2s; transform: translateY(10px); }
         .dashboard-card:nth-child(3) { animation-delay: 0.3s; transform: translateY(-10px); }
         .dashboard-card:nth-child(4) { animation-delay: 0.4s; transform: translateY(10px); }
+
         .dashboard-card:hover {
             transform: translateY(-15px) rotate(2deg);
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
             background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
         }
+
         .dashboard-card::before {
             content: '';
             position: absolute;
@@ -82,9 +102,11 @@
             background: linear-gradient(to right, #0d6efd, #6610f2);
             transition: height 0.3s ease;
         }
+
         .dashboard-card:hover::before {
             height: 8px;
         }
+
         .dashboard-link {
             color: #0d6efd;
             font-weight: 600;
@@ -92,59 +114,57 @@
             font-size: 1.1rem;
             transition: color 0.3s ease;
         }
+
         .dashboard-link:hover {
             color: #004aad;
             text-decoration: underline;
         }
+
         .card-icon {
             font-size: 1.8rem;
             color: #0d6efd;
             margin-bottom: 0.75rem;
         }
+
         .card-text {
             color: #6c757d;
             font-size: 0.85rem;
             line-height: 1.4;
         }
+
         .main-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 5rem 1rem 2rem;
+            padding: 6rem 1rem 2rem;
         }
+
         .card-container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.5rem;
-            max-width: 500px; /* Adjusted to fit two cards per row */
+            justify-content: space-around;
+            gap: 2rem;
+            padding-top: 1rem;
         }
-        .card-row {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            width: 100%;
-        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         @media (max-width: 576px) {
             .dashboard-card {
                 width: 160px;
             }
+
             .card-container {
-                max-width: 100%;
                 padding: 0.5rem;
             }
+
             .main-container {
                 padding-top: 5rem;
-            }
-            .card-row {
-                flex-direction: column;
-                align-items: center;
             }
         }
     </style>
@@ -153,50 +173,52 @@
     <!-- Skip to content link for accessibility -->
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:bg-white focus:p-2 focus:rounded focus:shadow-md">Skip to main content</a>
 
+    <!-- Dashboard Title -->
     <h1 class="dashboard-title">Admin Dashboard</h1>
 
+    <!-- Top right icons -->
+    <div class="top-right-buttons">
+        <a href="settings.html" title="Settings"><i class="fas fa-cog"></i></a>
+        <a href="logout.html" title="Logout"><i class="fas fa-sign-out-alt text-danger"></i></a>
+    </div>
+
+    <!-- Main Dashboard Content -->
     <div class="main-container" id="main-content">
         <div class="card-container">
-            <!-- First Row: Districts and Collectors -->
-            <div class="card-row">
-                <!-- District Card -->
-                <div class="card dashboard-card">
-                    <i class="fas fa-map-marked-alt card-icon"></i>
-                    <h5>
-                        <a href="district_page.html" class="dashboard-link" aria-label="Manage Districts">Districts</a>
-                    </h5>
-                    <p class="card-text">View, add, edit, or delete district information</p>
-                </div>
-
-                <!-- Collector Card -->
-                <div class="card dashboard-card">
-                    <i class="fas fa-user-tie card-icon"></i>
-                    <h5>
-                        <a href="collector_page.html" class="dashboard-link" aria-label="Manage Collectors">Collectors</a>
-                    </h5>
-                    <p class="card-text">Manage collector details and assignments</p>
-                </div>
+            <!-- District Card -->
+            <div class="card dashboard-card">
+                <i class="fas fa-map-marked-alt card-icon"></i>
+                <h5>
+                    <a href="district_page.html" class="dashboard-link" aria-label="Manage Districts">Districts</a>
+                </h5>
+                <p class="card-text">View, add, edit, or delete district information</p>
             </div>
 
-            <!-- Second Row: Officers and Departments -->
-            <div class="card-row">
-                <!-- Officers Card -->
-                <div class="card dashboard-card">
-                    <i class="fas fa-users card-icon"></i>
-                    <h5>
-                        <a href="officers_page.html" class="dashboard-link" aria-label="Manage Officers">Officers</a>
-                    </h5>
-                    <p class="card-text">View, add, edit, or delete officer information</p>
-                </div>
+            <!-- Collector Card -->
+            <div class="card dashboard-card">
+                <i class="fas fa-user-tie card-icon"></i>
+                <h5>
+                    <a href="collector_page.html" class="dashboard-link" aria-label="Manage Collectors">Collectors</a>
+                </h5>
+                <p class="card-text">Manage collector details and assignments</p>
+            </div>
 
-                <!-- Departments Card -->
-                <div class="card dashboard-card">
-                    <i class="fas fa-building card-icon"></i>
-                    <h5>
-                        <a href="departments_page.html" class="dashboard-link" aria-label="Manage Departments">Departments</a>
-                    </h5>
-                    <p class="card-text">Manage department details and configurations</p>
-                </div>
+            <!-- Officers Card -->
+            <div class="card dashboard-card">
+                <i class="fas fa-users card-icon"></i>
+                <h5>
+                    <a href="officers_page.html" class="dashboard-link" aria-label="Manage Officers">Officers</a>
+                </h5>
+                <p class="card-text">View, add, edit, or delete officer information</p>
+            </div>
+
+            <!-- Departments Card -->
+            <div class="card dashboard-card">
+                <i class="fas fa-building card-icon"></i>
+                <h5>
+                    <a href="departments_page.html" class="dashboard-link" aria-label="Manage Departments">Departments</a>
+                </h5>
+                <p class="card-text">Manage department details and configurations</p>
             </div>
         </div>
     </div>
@@ -210,7 +232,3 @@
     </script>
 </body>
 </html>
-
-
-
-<!-- hello -->
