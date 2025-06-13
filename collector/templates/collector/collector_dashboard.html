@@ -5,189 +5,222 @@
   <meta charset="UTF-8">
   <title>Collector Dashboard - Grievance Management</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pIVnZg9+2eBFVkMsYh/9VZzlb7tbF8P5LVJDRvFosOZZa2CvP9UxwhvK7HRlyUOCeFiq/f1iQb4NO2mhZkK+Yg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     body {
       background-color: #f4f6f9;
+      font-family: 'Segoe UI', sans-serif;
     }
-
     .navbar {
       background-color: #002855;
+      width: 100vw;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      border-bottom: 4px solid #0056b3;
     }
-
-    .navbar-brand, .nav-link {
-      color: white !important;
-    }
-
+    .navbar-brand, .nav-link { color: white !important; }
     .stat-box {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      text-align: center;
+      background: #fff; border-radius: 12px; padding: 25px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.07);
+      transition: transform 0.2s;
     }
-
-    .stat-box h5 {
-      font-weight: bold;
-    }
-
+    .stat-box:hover { transform: translateY(-3px); }
+    .stat-box h5 { font-weight: 600; margin-bottom: 10px; }
     .stat-box .count {
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 48px; font-weight: 800; color: #002855;
     }
-
     .card-dept {
-      border-left: 6px solid;
-      border-radius: 10px;
-      background-color: #fff;
-      padding: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-left: 6px solid; border-radius: 12px;
+      background: #fff; padding: 20px; margin-bottom: 20px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+      transition: all 0.3s ease; cursor: pointer;
     }
-
+    .card-dept:hover {
+      background: #f0f8ff; transform: scale(1.015);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
     .badge-percent {
-      float: right;
-      font-size: 14px;
-      padding: 5px 10px;
-      border-radius: 20px;
+      float: right; font-size: 14px;
+      padding: 5px 12px; border-radius: 50px;
     }
-
     .dept-title {
-      font-weight: 600;
-      font-size: 18px;
+      font-weight: 600; font-size: 18px; color: #002855;
+      margin-bottom: 8px;
     }
-
-    .sort-btn {
-      margin-right: 10px;
-    }
-
     .filter-section {
-      background-color: #fff;
-      padding: 25px;
-      margin-bottom: 30px;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: #fff; padding: 30px; margin-bottom: 30px;
+      border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.08);
     }
-
-    .input-group-text {
-      min-width: 40px;
-      justify-content: center;
-    }
-
+    .input-group-text { min-width: 40px; justify-content: center; }
     .filter-section h5 {
-      font-size: 18px;
-      color: #002855;
+      font-size: 20px; color: #002855; font-weight: 600;
+      margin-bottom: 20px;
     }
+    .form-select:focus, .form-control:focus {
+      border-color: #002855;
+      box-shadow: 0 0 0 0.1rem rgba(0,40,85,.25);
+    }
+    .btn-outline-secondary:hover {
+      background-color: #002855; color: white;
+    }
+    .btn-outline-danger:hover {
+      background-color: #dc3545; color: white;
+    }
+    a.text-decoration-none:hover { text-decoration: none; }
+    .card-footer-link { text-align: right; margin-top: 10px; }
+    .card-footer-link small { font-weight: 500; }
+    .filter-section label.form-label {
+  font-weight: 600;
+  color: #002855;
+}
+
   </style>
 </head>
 <body>
-
-<!-- Top Navbar -->
 <nav class="navbar navbar-expand-lg">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="#">{{districts.name}} District Collector Portal</a>
-    <ul class="navbar-nav ms-auto">
-      <li class="nav-item">
-        <a class="nav-link" href="">Report</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'collector:collector_profile' %}">Profile</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'collector:officer_details' %}">Officers</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
-      </li>
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <a class="navbar-brand fw-bold" href="#">{{ districts.name }} District Collector Portal</a>
+    <ul class="navbar-nav d-flex flex-row gap-3">
+      <li class="nav-item"><a class="nav-link" href="#">Report</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}">Profile</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}">Officers</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
     </ul>
   </div>
 </nav>
 
-<!-- Main Container -->
 <div class="container mt-4">
 
-  <!-- Grievance Statistics -->
+  <!-- Grievance Stats -->
   <div class="row mb-4 text-center">
     <div class="col-md-4">
       <div class="stat-box">
         <h5>Total Grievances</h5>
-        <div class="count text-primary">{{ counts.total_grievances }}</div>
+        <div class="count text-primary" data-target="{{ counts.total_grievances }}">0</div>
       </div>
     </div>
     <div class="col-md-4">
       <div class="stat-box">
         <h5>Pending</h5>
-        <div class="count text-danger">{{ counts.pending_grievances }}</div>
+        <div class="count text-danger" data-target="{{ counts.pending_grievances }}">0</div>
       </div>
     </div>
     <div class="col-md-4">
       <div class="stat-box">
         <h5>Resolved</h5>
-        <div class="count text-success">{{ counts.resolved_grievances }}</div>
+        <div class="count text-success" data-target="{{ counts.resolved_grievances }}">0</div>
       </div>
     </div>
   </div>
+<!-- Filter / Search Section -->
+<div class="filter-section">
+  <h5><i class="fas fa-search me-2"></i>Search & Filter Grievances</h5>
+  <form method="get" class="row g-3 align-items-center">
 
-  <!-- Enhanced Search & Filter -->
-  <div class="filter-section">
-
-    <form method="get" class="row g-3 align-items-center justify-content-center">
-      <!-- Search by Grievance ID -->
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-text bg-light"><i class="fas fa-hashtag"></i></span>
-          <input type="text" name="grievance_id" class="form-control" placeholder="Grievance ID..." />
-        </div>
+    <!-- Grievance ID or Phone -->
+    <div class="col-md-4">
+      <label class="form-label">Grievance ID / Phone</label>
+      <div class="input-group">
+        <span class="input-group-text bg-light">
+          <i class="fas fa-hashtag"></i>
+        </span>
+        <input type="text" id="grievance-search" name="search" class="form-control" placeholder="Enter ID or Phone number">
       </div>
+    </div>
 
-
-      <!-- Filter by Dropdown -->
-      <div class="col-md-4">
-        <div class="input-group">
-          <label class="input-group-text bg-light" for="department-select"><i class="fas fa-filter"></i></label>
-          <select class="form-select" id="department-select" name="filter_dept">
-            <option selected disabled>Filter by Department</option>
-            {% for dept in departments %}
+    <!-- Department Dropdown -->
+    <div class="col-md-4">
+      <label class="form-label">Department</label>
+      <div class="input-group">
+        <span class="input-group-text bg-light">
+          <i class="fas fa-building"></i>
+        </span>
+        <select class="form-select" id="department-select" name="department">
+          <option selected disabled>Select Department</option>
+          {% for dept in departments %}
             <option value="{{ dept.id }}">{{ dept.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+          {% endfor %}
+        </select>
       </div>
+    </div>
 
-      <!-- Sort Buttons -->
-      <div class="col-12 text-center mt-3">
-        <div class="btn-group" role="group" aria-label="Sort options">
-         
-          <button type="submit" name="sort" value="grievances" class="btn btn-outline-secondary">
-            <i class="fas fa-list-ol"></i> Sort by Grievances
-          </button>
-          <button type="submit" name="sort" value="pending" class="btn btn-outline-danger">
-            <i class="fas fa-exclamation-circle"></i> Sort by Pending
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
-  <div class="row">
+    <!-- Sort Button -->
+    <div class="col-md-4 mt-4">
+      <button type="submit" name="sort" value="grievances" class="btn btn-outline-secondary w-100">
+        <i class="fas fa-sort-amount-down-alt"></i> Sort by Grievance Count
+      </button>
+    </div>
+
+  </form>
+</div>
+
+
+  <!-- Department Cards -->
+  <div class="row" id="dept-container">
     {% for dept in departments %}
-      <div class="col-md-4 mb-3">
-        <div class="card-dept border-{{ dept.badge_class }}">
-          <div class="dept-title">
-            {{ dept.name }}
-            <span class="badge bg-{{ dept.badge_class }} badge-percent">
-              {{ dept.percent }}%
-            </span>
+      <div class="col-md-4 dept-card-wrapper">
+        <a href="" class="text-decoration-none text-dark">
+          <div class="card-dept border-{{ dept.badge_class }}"
+               data-name="{{ dept.name }}"
+               data-code="{{ dept.code }}">
+            <div class="dept-title">
+              <i class="fas fa-building me-2 text-{{ dept.badge_class }}"></i>{{ dept.name }}
+              <span class="badge bg-{{ dept.badge_class }} badge-percent">{{ dept.percent }}%</span>
+            </div>
+            <p class="mb-1"><strong>Department ID:</strong> {{ dept.code }}</p>
+            <p class="mb-1"><strong>Total Grievances:</strong> {{ dept.total }}</p>
+            <p><strong>Pending:</strong> {{ dept.pending }}</p>
+            <div class="card-footer-link">
+              <small class="text-{{ dept.badge_class }}">View Details <i class="fas fa-arrow-right"></i></small>
+            </div>
           </div>
-          <p class="mb-1"><strong>Department ID:</strong> {{ dept.code }}</p>
-          <p class="mb-1"><strong>Total Grievances:</strong> {{ dept.total }}</p>
-          <p><strong>Pending:</strong> {{ dept.pending }}</p>
-        </div>
+        </a>
       </div>
     {% endfor %}
   </div>
-  
-
 </div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Counter animation
+    const counters = document.querySelectorAll('.count');
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const el = e.target;
+          const target = +el.dataset.target;
+          const duration = 600;
+          const start = performance.now();
+          const tick = (ts) => {
+            const pct = Math.min((ts - start)/duration, 1);
+            el.textContent = Math.floor(pct * target).toLocaleString('en-IN');
+            if(pct <1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+          io.unobserve(el);
+        }
+      });
+    }, {threshold: .5});
+    counters.forEach(el => { el.textContent = '0'; io.observe(el); });
+
+    // Fuzzy search on department cards
+    const searchInput = document.getElementById('grievance-search');
+    const wrappers = Array.from(document.querySelectorAll('.dept-card-wrapper'));
+    const cardsData = wrappers.map((w, i) => ({
+      name: w.querySelector('.card-dept').dataset.name,
+      code: w.querySelector('.card-dept').dataset.code,
+      index: i
+    }));
+    const fuse = new Fuse(cardsData, { keys: ['name','code'], threshold:0.4 });
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim();
+      if (!q) return wrappers.forEach(w=> w.style.display='block');
+      const hits = fuse.search(q).map(r=>r.item.index);
+      wrappers.forEach((w,i)=> w.style.display = hits.includes(i)? 'block':'none');
+    });
+  });
+</script>
 </body>
 </html>
