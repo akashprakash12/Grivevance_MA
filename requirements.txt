@@ -1,0 +1,17 @@
+asgiref==3.8.1
+defusedxml==0.7.1
+Django==5.2.2
+et_xmlfile==2.0.0
+fonttools==4.58.4
+fpdf2==2.8.3
+mysqlclient==2.2.7
+numpy==2.2.6
+openpyxl==3.1.5
+pandas==2.3.0
+pillow==11.2.1
+python-dateutil==2.9.0.post0
+pytz==2025.2
+six==1.17.0
+sqlparse==0.5.3
+typing_extensions==4.14.0
+tzdata==2025.2
