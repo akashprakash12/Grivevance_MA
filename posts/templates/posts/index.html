@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Page Manager</title>
+    <link rel="stylesheet" href="{% static 'posts/css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Facebook Page Manager</h1>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form id="postForm" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <textarea name="message" placeholder="Enter your post message"></textarea>
+            <input type="file" name="image" accept="image/*">
+            <label>
+                <input type="checkbox" name="read_comments"> Read Comments
+            </label>
+            <input type="number" name="time_limit" placeholder="Time limit (hours, optional)">
+            <button type="submit">Post to Facebook</button>
+        </form>
+
+        <h2>Previous Posts</h2>
+        <ul id="posts">
+            {% for post in posts %}
+                <li>Post ID: {{ post.post_id }} - {{ post.read_comments|yesno:"Reading Comments,Not Reading" }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script src="{% static 'posts/js/script.js' %}"></script>
+</body>
+</html>
