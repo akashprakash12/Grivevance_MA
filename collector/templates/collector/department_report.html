@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Collector – Reports</title>
+
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    :root{
+      --indigo:#002855;--indigo-light:#08438f;--accent:#ffc107;
+      --bg:#f4f6f9;--card-shadow:0 2px 8px rgba(0,0,0,.08);
+    }
+    html,body{height:100%;overflow:auto}body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg)}
+    .container-custom{padding:1rem 1.2rem;max-width:100%;height:calc(100vh-80px);overflow:auto}
+    .navbar-custom{background:var(--indigo);padding:1rem 2rem;border-bottom:4px solid var(--indigo-light);box-shadow:0 3px 6px rgba(0,0,0,.3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    .navbar-custom .nav-link,.navbar-custom .navbar-brand{color:#fff;font-weight:500}
+    .navbar-custom .nav-link:hover{color:var(--accent)!important;text-decoration:underline}
+    .report-container{background:#fff;border-radius:12px;padding:25px;box-shadow:var(--card-shadow);margin-top:20px}
+    .report-heading{font-weight:700;color:var(--indigo);border-bottom:2px solid var(--accent);padding-bottom:10px;margin-bottom:20px}
+    .filter-section{background:#f8f9fa;padding:20px;border-radius:10px;margin-bottom:25px;border-left:4px solid var(--accent)}
+    .table-responsive{border-radius:10px;overflow:auto;max-height:65vh}
+    .table thead{background:var(--indigo);color:#fff;position:sticky;top:0;z-index:10}
+    .btn-export{border-radius:8px;font-weight:500;padding:8px 15px}
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar-custom">
+    <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
+    <ul class="nav gap-3 align-items-center">
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i>Officers</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i>Profile</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="container-custom">
+    <div class="report-container">
+
+      <!-- TOGGLE BUTTONS -->
+      <div class="btn-group mb-3" role="group">
+        <a href="?report=department" class="btn btn-outline-primary {% if active_tab == 'department' %}active{% endif %}">
+          <i class="fas fa-building me-1"></i>Department Report
+        </a>
+        <a href="?report=officer" class="btn btn-outline-primary {% if active_tab == 'officer' %}active{% endif %}">
+          <i class="fas fa-user-tie me-1"></i>Officer Report
+        </a>
+      </div>
+
+      <!-- PAGE HEADING -->
+      {% if active_tab == 'officer' %}
+        <h3 class="report-heading"><i class="fas fa-user-tie me-2"></i> OFFICER DETAILED REPORT</h3>
+      {% else %}
+        <h3 class="report-heading"><i class="fas fa-file-alt me-2"></i> DEPARTMENT DETAILED REPORT</h3>
+      {% endif %}
+
+      <!-- FILTER SECTION (same for both, adjust as needed) -->
+      <div class="filter-section">
+        <form method="get" class="row g-3">
+          <input type="hidden" name="report" value="{{ active_tab }}">  <!-- keep current tab -->
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Search</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" name="search"
+                     placeholder="{% if active_tab == 'officer' %}Officer name / email{% else %}Dept name / ID{% endif %}"
+                     value="{{ request.GET.search }}">
+            </div>
+          </div>
+
+          {% if active_tab == 'department' %}
+            <!-- Sorting only for department example -->
+            <div class="col-md-3">
+              <label class="form-label fw-bold">Sort By</label>
+              <select name="sort_by" class="form-select">
+                <option value="">-- Select --</option>
+                <option value="pending"  {% if request.GET.sort_by == 'pending'  %}selected{% endif %}>Pending</option>
+                <option value="resolved" {% if request.GET.sort_by == 'resolved' %}selected{% endif %}>Resolved</option>
+                <option value="name"     {% if request.GET.sort_by == 'name'     %}selected{% endif %}>Dept Name</option>
+              </select>
+            </div>
+          {% endif %}
+
+          <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+            <!-- example export links -->
+            <button type="submit" class="btn btn-primary btn-export">
+              <i class="fas fa-search me-1"></i> Apply
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ========== TABLE AREA ========== -->
+      <div class="table-responsive">
+
+        {% if active_tab == 'officer' %}
+        <!-- ===== OFFICER TABLE ===== -->
+        <table class="table table-bordered table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>Officer Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Department</th>
+              <th>Total Grievances</th>
+              <th>Pending</th>
+              <th>Resolved</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in officer_report %}
+              <tr>
+                <td>{{ o.name }}</td>
+                <td>{{ o.email }}</td>
+                <td>{{ o.phone }}</td>
+                <td>{{ o.department }}</td>
+                <td>{{ o.total }}</td>
+                <td>{{ o.pending }}</td>
+                <td>{{ o.resolved }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7" class="text-center text-muted py-4">No officer data found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% else %}
+        <!-- ===== DEPARTMENT TABLE ===== -->
+        <table class="table table-bordered table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>Department</th>
+              <th>Total</th>
+              <th>Pending</th>
+              <th>Resolved</th>
+              <th>Rejected</th>
+              <th>Escalated</th>
+              <th>Avg Resolution Time</th>
+              <th>Oldest Pending</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in department_report %}
+              <tr>
+                <td>{{ d.name }}</td>
+                <td>{{ d.total }}</td>
+                <td>{{ d.pending }}</td>
+                <td>{{ d.resolved }}</td>
+                <td>{{ d.rejected }}</td>
+                <td>{{ d.escalated }}</td>
+                <td>{{ d.avg_resolution_time|default:"-" }}</td>
+                <td>{{ d.oldest_pending|date:"Y-m-d"|default:"-" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="8" class="text-center text-muted py-4">No department data found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+
+      </div>
+      <!-- END TABLE -->
+
+    </div>
+  </div>
+
+  <!-- BOOTSTRAP JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

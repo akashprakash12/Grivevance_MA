@@ -31,6 +31,12 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from urllib.parse import quote
+from django.utils.timezone import is_aware
+from django.utils.dateparse import parse_date
+import datetime
+from django.db.models import Count, Avg, Min, F, ExpressionWrapper, DurationField
+from django.utils.timezone import now
+from django.core.paginator import Paginator
 
 # Auto-generate Collector ID based on district code
 def auto_collector_id(district):
@@ -136,49 +142,87 @@ def delete_collector(request, username):
 @login_required
 def collector_dashboard(request):
     try:
-        collector = CollectorProfile.objects.select_related('district').get(user=request.user)
+        collector = (
+            CollectorProfile.objects
+            .select_related('district')
+            .get(user=request.user)
+        )
         district = collector.district
 
-        # Departments and grievance counts
-        departments = Department.objects.filter(district=district)
+        # ---------------------------------------------------------
+        # 1. One DB hit: annotate each department with counts
+        # ---------------------------------------------------------
+        departments_qs = (
+            Department.objects
+            .filter(district=district)
+            .annotate(
+                total    = Count('grievance', filter=Q(grievance__district=district)),
+                pending  = Count('grievance', filter=Q(grievance__district=district,
+                                                      grievance__status='PENDING')),
+                rejected = Count('grievance', filter=Q(grievance__district=district,
+                                                       grievance__status='REJECTED')),
+            )
+            .order_by('-pending')      # highest pending first (main list)
+        )
 
         dept_data = []
-        for dept in departments:
-            grievances = Grievance.objects.filter(district=district, department=dept)
-            total = grievances.count()
-            pending = grievances.filter(status='PENDING').count()
-            resolved = total - pending
-            percent = round((pending / total) * 100, 1) if total > 0 else 0.0
+        for dept in departments_qs:
+            total     = dept.total
+            pending   = dept.pending
+            rejected  = dept.rejected
+            resolved  = total - pending - rejected
+
+            pending_pct  = round((pending  / total) * 100, 1) if total else 0.0
+            rejected_pct = round((rejected / total) * 100, 1) if total else 0.0
+
+            badge_class = (
+                'danger'  if pending_pct >= 75 else
+                'warning' if pending_pct >= 25 else
+                'success'
+            )
+
             dept_data.append({
-                'name': dept.name,
-                'code': dept.code,  # Add this line if `code` exists in your Department model
-                'grievance_id': grievances.first().grievance_id if grievances.exists() else 'N/A',
-                'total': total,
-                'pending': pending,
-                'percent': percent,
-                'badge_class': 'danger' if percent >= 75 else 'warning' if percent >= 25 else 'success',
+                'name'            : dept.name,
+                'code'            : getattr(dept, 'code', ''),
+                'total'           : total,
+                'pending'         : pending,
+                'rejected'        : rejected,
+                'resolved'        : resolved,
+                'pending_percent' : pending_pct,
+                'rejected_percent': rejected_pct,
+                'badge_class'     : badge_class,
             })
 
+        # ---------------------------------------------------------
+        # 2. Pick top‑3 best performers (low pending %, then rejects)
+        # ---------------------------------------------------------
+        candidates = [d for d in dept_data if d['total'] > 0]
+        candidates.sort(key=lambda d: (d['pending_percent'], d['rejected_percent']))
+        top3_departments = candidates[:3]
 
-        # ✅ Sort by highest pending grievances first
-        dept_data.sort(key=lambda x: x['pending'], reverse=True)
-        grievances = Grievance.objects.filter(district=district)
-        total_all = grievances.count()
-        pending_all = grievances.filter(status='PENDING').count()
-        resolved_all = total_all - pending_all
+        # ---------------------------------------------------------
+        # 3. District‑wide totals (one query)
+        # ---------------------------------------------------------
+        all_grievances = Grievance.objects.filter(district=district)
+        total_all     = all_grievances.count()
+        pending_all   = all_grievances.filter(status='PENDING').count()
+        rejected_all  = all_grievances.filter(status='REJECTED').count()
+        resolved_all  = total_all - pending_all - rejected_all
 
         context = {
-            'departments': dept_data,
-            'districts': district,
-            'collectors': collector,
-            'counts': {
-                'total_grievances': total_all,
-                'pending_grievances': pending_all,
-                'resolved_grievances': resolved_all,
-            }
+            'departments'      : dept_data,        # ordered high‑pending → low
+            'top3_departments' : top3_departments, # best performers list/card
+            'district'         : district,
+            'collector'        : collector,
+            'counts' : {
+                'total_grievances'    : total_all,
+                'pending_grievances'  : pending_all,
+                'rejected_grievances' : rejected_all,
+                'resolved_grievances' : resolved_all,
+            },
         }
-
         return render(request, 'collector/collector_dashboard.html', context)
+
     except CollectorProfile.DoesNotExist:
         messages.error(request, "Access denied. Collector profile not found.")
         return redirect('login')
@@ -252,121 +296,6 @@ def officer_details(request):
 
 
 @login_required
-def export_grievance_excel(request):
-    collector = get_object_or_404(CollectorProfile, user=request.user)
-    district  = collector.district
-
-    qs = Grievance.objects.filter(district=district)\
-                          .values('grievance_id', 'subject', 'status', 'department__name')
-
-    df = pd.DataFrame(qs)
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Grievances", index=False)
-
-    buffer.seek(0)
-
-    messages.success(request, "Excel report downloaded.")
-    return FileResponse(
-        buffer,
-        as_attachment=True,
-        filename=f"{district.code.lower()}_grievance_report.xlsx",
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
-
-
-@login_required
-def export_grievance_pdf(request):
-    # ---------- DATA ----------
-    collector = get_object_or_404(CollectorProfile, user=request.user)
-    district = collector.district
-
-    rows = Grievance.objects.filter(district=district).values(
-        "grievance_id", "subject", "status", "department__name"
-    )
-
-    # ---------- PDF SET‑UP ----------
-    pdf = FPDF("L", "mm", "A4")
-    margin = 15
-    pdf.set_auto_page_break(auto=True, margin=margin)
-    pdf.set_left_margin(margin)
-    pdf.set_right_margin(margin)
-    pdf.add_page()
-
-    # ---------- FONTS ----------
-    font_dir = Path(settings.BASE_DIR) / "fonts"
-    pdf.add_font("DV", "", str(font_dir / "DejaVuSans.ttf"), uni=True)
-    pdf.add_font("DV", "B", str(font_dir / "DejaVuSans-Bold.ttf"), uni=True)
-
-    # ---------- TITLE ----------
-    pdf.set_font("DV", "B", 16)
-    pdf.cell(0, 12, "Grievance Report – Kerala Government", ln=True, align="C")
-    pdf.ln(6)
-
-    # ---------- TABLE HEADER ----------
-    printable_w = pdf.w - 2 * margin          # 267 mm in landscape A4
-    col_w = [50, 140, 40, printable_w - 50 - 140 - 40]   # [50, 140, 40, 37]
-    headers = ["ID", "Subject", "Status", "Department"]
-
-    pdf.set_font("DV", "B", 11)
-    pdf.set_fill_color(200, 220, 255)
-    for h, w in zip(headers, col_w):
-        pdf.cell(w, 9, h, border=1, align="C", fill=True)
-    pdf.ln()
-
-    # ---------- TABLE BODY  (wrap + dynamic height) ----------
-    pdf.set_font("DV", "", 10)
-
-    # helper: how many lines a text needs in given width
-    def line_count(text, width):
-        return len(pdf.multi_cell(width, 8, text, split_only=True))
-
-    for r in rows:
-        # Calculate line count for each cell
-        lines_id   = line_count(r["grievance_id"],     col_w[0])
-        lines_sub  = line_count(r["subject"],          col_w[1])
-        lines_stat = line_count(r["status"],           col_w[2])
-        lines_dep  = line_count(r["department__name"], col_w[3])
-
-        max_lines  = max(lines_id, lines_sub, lines_stat, lines_dep)
-        row_h      = 8 * max_lines        # 8 mm per line
-
-        x0, y0 = pdf.get_x(), pdf.get_y()
-
-        # --- ID ---
-        pdf.multi_cell(col_w[0], 8, r["grievance_id"], 1, "C", max_line_height=8)
-        pdf.set_xy(x0 + col_w[0], y0)
-
-        # --- Subject ---
-        pdf.multi_cell(col_w[1], 8, r["subject"], 1, "L", max_line_height=8)
-        pdf.set_xy(x0 + col_w[0] + col_w[1], y0)
-
-        # --- Status ---
-        pdf.multi_cell(col_w[2], 8, r["status"], 1, "C", max_line_height=8)
-        pdf.set_xy(x0 + col_w[0] + col_w[1] + col_w[2], y0)
-
-        # --- Department ---
-        pdf.multi_cell(col_w[3], 8, r["department__name"], 1, "L", max_line_height=8)
-
-        # Move to start of next row
-        pdf.ln(row_h)
-
-    # ---------- SAVE TO media/collector_reports/ ----------
-    report_dir = Path(settings.MEDIA_ROOT) / "collector_reports"
-    report_dir.mkdir(parents=True, exist_ok=True)
-
-    filename = f"{district.code.lower()}_grievance_report.pdf"
-    filepath = report_dir / filename
-    pdf.output(str(filepath), "F")
-
-    # ---------- SESSION + REDIRECT ----------
-    request.session["last_pdf_path"] = f"{settings.MEDIA_URL}collector_reports/{filename}"
-    messages.success(request, "PDF generated! Click the red download button to grab it.")
-    return redirect("collector:collector_dashboard")
-
-
-@login_required
 def send_email_redirect(request, officer_email):
     collector_email = request.user.email  # Dynamic sender (logged-in user)
 
@@ -382,3 +311,436 @@ def send_email_redirect(request, officer_email):
     )
 
     return HttpResponseRedirect(redirect_url)
+
+def _filtered_grievance_qs(request, district):
+    """
+    Return Grievances in the given district filtered by query params
+    """
+    # Get cleaned parameters
+    status = (request.GET.get("status") or "ALL").strip().upper()
+    dept_code = (request.GET.get("department") or "").strip()
+    search = (request.GET.get("search") or "").strip()
+    date_from = parse_date((request.GET.get("date_from") or "").strip())
+    date_to = parse_date((request.GET.get("date_to") or "").strip())
+
+    # Base queryset
+    qs = (
+        Grievance.objects
+        .filter(district=district)
+        .select_related("department", "district")
+        .order_by("-date_filed")
+    )
+
+    # Status filter
+    if status != "ALL":
+        qs = qs.filter(status__iexact=status)
+
+    # Department filter - using code field
+    if dept_code:
+        qs = qs.filter(department__code__iexact=dept_code)  # ✅ Lowercase "department"
+
+    # Search filter
+    if search:
+        search_q = Q()
+        for term in search.split():
+            search_q |= (
+                Q(grievance_id__icontains=term) |
+                Q(contact_number__icontains=term) |
+                Q(email__icontains=term) |
+                Q(applicant_name__icontains=term)
+            )
+        qs = qs.filter(search_q)
+
+    # Date range filter
+    date_filter = Q()
+    if date_from:
+        date_filter &= Q(date_filed__date__gte=date_from)
+    if date_to:
+        date_filter &= Q(date_filed__date__lte=date_to)
+    if date_filter:
+        qs = qs.filter(date_filter)
+
+    return qs
+@login_required
+def grievance_report_view(request):
+    collector = get_object_or_404(CollectorProfile, user=request.user)
+    district = collector.district
+    departments = Department.objects.filter(district=district)
+
+    grievances = _filtered_grievance_qs(request, district)
+
+    return render(request, "collector/grievance_report.html", {
+        "grievances": grievances,
+        "departments": departments,
+        "request": request,
+        "district":district
+    })
+
+def export_grievance_excel(request):
+    collector = get_object_or_404(CollectorProfile, user=request.user)
+    district = collector.district
+
+    # Include all fields in the values() call
+    qs = _filtered_grievance_qs(request, district).values(
+        'grievance_id',
+        'date_filed',
+        'last_updated',
+        'subject',
+        'description',
+        'source',
+        'status',
+        'priority',
+        'due_date',
+        'applicant_name',
+        'applicant_address',
+        'contact_number',
+        'email',
+        'department__name',
+        'district__name'
+    )
+
+    # Convert timezone-aware datetimes to naive and format dates
+    for row in qs:
+        for date_field in ['date_filed', 'last_updated', 'due_date']:
+            field_value = row.get(date_field)
+            if field_value:
+                if isinstance(field_value, datetime.datetime):
+                    # Handle datetime objects
+                    if is_aware(field_value):
+                        row[date_field] = field_value.replace(tzinfo=None)
+                    # Format as string for Excel
+                    row[date_field] = field_value.strftime('%Y-%m-%d %H:%M:%S')
+                elif isinstance(field_value, datetime.date):
+                    # Handle date objects (convert to string)
+                    row[date_field] = field_value.strftime('%Y-%m-%d')
+
+    # Create DataFrame with all fields
+    df = pd.DataFrame(qs)
+    
+    # Rename columns for better Excel headers
+    df.columns = [
+        'Grievance ID',
+        'Date Filed',
+        'Last Updated',
+        'Subject',
+        'Description',
+        'Source',
+        'Status',
+        'Priority',
+        'Due Date',
+        'Applicant Name',
+        'Applicant Address',
+        'Contact Number',
+        'Email',
+        'Department',
+        'District'
+    ]
+
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        # Export data to Excel
+        df.to_excel(writer, sheet_name="Grievances", index=False)
+        
+        # Get workbook and worksheet objects for formatting
+        workbook = writer.book
+        worksheet = writer.sheets['Grievances']
+        
+        # Set column widths (adjust as needed)
+        column_widths = {
+            'A': 15,  # Grievance ID
+            'B': 20,  # Date Filed
+            'C': 20,  # Last Updated
+            'D': 30,  # Subject
+            'E': 50,  # Description
+            'F': 15,  # Source
+            'G': 15,  # Status
+            'H': 10,  # Priority
+            'I': 20,  # Due Date
+            'J': 25,  # Applicant Name
+            'K': 40,  # Applicant Address
+            'L': 15,  # Contact Number
+            'M': 25,  # Email
+            'N': 25,  # Department
+            'O': 20   # District
+        }
+        
+        for col, width in column_widths.items():
+            worksheet.column_dimensions[col].width = width
+        
+        # Freeze header row
+        worksheet.freeze_panes = 'A2'
+        
+        # Add auto-filter
+        worksheet.auto_filter.ref = worksheet.dimensions
+
+    buffer.seek(0)
+
+    return FileResponse(
+        buffer,
+        as_attachment=True,
+        filename=f"{district.code.lower()}_grievance_report.xlsx",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+@login_required
+def export_grievance_pdf(request):
+    try:
+        # ---------- DATA PREPARATION ----------
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        district = collector.district
+        
+        # Get filtered data with all needed columns
+        cols = [
+            "grievance_id", "date_filed", "last_updated", "subject", 
+            "description", "source", "status", "priority", "due_date",
+            "applicant_name", "applicant_address", "contact_number", "email",
+            "department__name", "district__name",
+        ]
+        rows = _filtered_grievance_qs(request, district).values(*cols)
+        
+        # ---------- PDF SETUP ----------
+        pdf = FPDF("L", "mm", "A4")
+        margin = 15
+        pdf.set_auto_page_break(auto=True, margin=margin)
+        pdf.set_margins(left=margin, top=margin, right=margin)
+        pdf.add_page()
+        
+        # ---------- FONTS ----------
+        try:
+            font_dir = Path(settings.BASE_DIR) / "fonts"
+            pdf.add_font("DV", "", str(font_dir / "DejaVuSans.ttf"), uni=True)
+            pdf.add_font("DV", "B", str(font_dir / "DejaVuSans-Bold.ttf"), uni=True)
+            font_family = "DV"
+        except:
+            font_family = "Arial"  # Fallback to built-in font
+        
+        # ---------- TITLE SECTION ----------
+        pdf.set_font(font_family, "B", 16)
+        pdf.cell(0, 12, f"{district.name} - Grievance Report", ln=True, align="C")
+        pdf.ln(6)
+        
+        # ---------- TABLE CONFIG ----------
+        printable_width = pdf.w - 2 * margin
+        col_widths = [
+            22,  # ID
+            20,  # Filed
+            22,  # Updated
+            36,  # Subject
+            40,  # Description
+            18,  # Source
+            18,  # Status
+            15,  # Priority
+            20,  # Due
+            28,  # Name
+            35,  # Address
+            22,  # Contact
+            30,  # Email
+            25,  # Dept
+            25   # Dist
+        ]
+        
+        headers = [
+            "ID", "Filed", "Updated", "Subject", "Description", "Source",
+            "Status", "Pri", "Due", "Name", "Address", "Contact", "Email",
+            "Dept", "Dist"
+        ]
+        
+        # ---------- TABLE HEADER ----------
+        pdf.set_font(font_family, "B", 10)
+        pdf.set_fill_color(200, 220, 255)  # Light blue background
+        for header, width in zip(headers, col_widths):
+            pdf.cell(width, 8, header, border=1, align="C", fill=True)
+        pdf.ln()
+        
+        # ---------- TABLE BODY ----------
+        pdf.set_font(font_family, "", 9)
+        
+        # Helper function to calculate lines needed for text
+        def calculate_lines(text, width):
+            if not text:
+                return 1
+            return len(pdf.multi_cell(width, 6, str(text), split_only=True))
+        
+        for row in rows:
+            # Calculate maximum lines needed for this row
+            line_counts = []
+            for i, (key, width) in enumerate(zip(cols, col_widths)):
+                text = row.get(key, "")
+                if key in ["date_filed", "last_updated", "due_date"] and text:
+                    text = text.strftime("%Y-%m-%d") if hasattr(text, 'strftime') else text
+                line_counts.append(calculate_lines(text, width))
+            
+            max_lines = max(line_counts) if line_counts else 1
+            row_height = 6 * max_lines  # 6mm per line
+            
+            # Check for page break
+            if pdf.get_y() + row_height > pdf.page_break_trigger:
+                pdf.add_page()
+                # Redraw header on new page
+                pdf.set_font(font_family, "B", 10)
+                pdf.set_fill_color(200, 220, 255)
+                for header, width in zip(headers, col_widths):
+                    pdf.cell(width, 8, header, border=1, align="C", fill=True)
+                pdf.ln()
+                pdf.set_font(font_family, "", 9)
+            
+            # Remember starting position
+            x_start = pdf.get_x()
+            y_start = pdf.get_y()
+            
+            # Draw each cell
+            for i, (key, width) in enumerate(zip(cols, col_widths)):
+                text = row.get(key, "")
+                if key in ["date_filed", "last_updated", "due_date"] and text:
+                    text = text.strftime("%Y-%m-%d") if hasattr(text, 'strftime') else text
+                
+                pdf.multi_cell(
+                    width, 6, str(text), 
+                    border=1, align="L", 
+                    max_line_height=6,
+                    new_x="RIGHT", new_y="TOP"
+                )
+                pdf.set_xy(x_start + width, y_start)
+                x_start += width
+            
+            # Move to next row
+            pdf.ln(row_height)
+        
+        # Create buffer and save PDF to it
+        buffer = io.BytesIO()
+        pdf.output(buffer)
+        buffer.seek(0)
+        
+        # Create response without saving to session
+        response = FileResponse(
+            buffer,
+            as_attachment=True,
+            filename=f"{district.code.lower()}_grievance_report.pdf",
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        
+        return response
+    
+    except Exception as e:
+        messages.error(request, f"Failed to generate PDF: {str(e)}")
+        return redirect("collector:grievance_report")
+@login_required 
+def details_download(request, grievance_id):
+    try:
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        district = collector.district
+
+        grievance = get_object_or_404(
+            Grievance.objects.select_related("department", "district"),
+            grievance_id=grievance_id,
+            district=district
+        )
+
+        # PDF Setup
+        pdf = FPDF("P", "mm", "A4")
+        margin = 15
+        pdf.set_auto_page_break(auto=True, margin=margin)
+        pdf.set_margins(left=margin, top=margin, right=margin)
+        pdf.add_page()
+        pdf.set_line_width(0.5)
+        pdf.rect(margin - 5, margin - 5, 210 - (margin - 5)*2, 297 - (margin - 5)*2)
+
+        try:
+            font_dir = Path(settings.BASE_DIR) / "fonts"
+            pdf.add_font("DV", "", str(font_dir / "DejaVuSans.ttf"), uni=True)
+            pdf.add_font("DV", "B", str(font_dir / "DejaVuSans-Bold.ttf"), uni=True)
+            font_family = "DV"
+        except:
+            font_family = "Arial"
+
+        # Title
+        pdf.ln(15)
+        pdf.set_font(font_family, "B", 18)
+        pdf.cell(0, 10, "Grievance Report", ln=True, align="C")
+        pdf.ln(6)
+
+        # Body
+        pdf.set_font(font_family, "B", 13)
+        pdf.cell(0, 8, f"Grievance ID: {grievance.grievance_id}", ln=True)
+
+        pdf.set_font(font_family, "", 12)
+        pdf.cell(0, 6, f"Applicant: {grievance.applicant_name}", ln=True)
+        pdf.cell(0, 6, f"Address: {grievance.applicant_address}", ln=True)
+        pdf.cell(0, 6, f"Contact: {grievance.contact_number}", ln=True)
+        pdf.cell(0, 6, f"Email: {grievance.email}", ln=True)
+        pdf.ln(2)
+
+        pdf.cell(0, 6, f"Subject: {grievance.subject}", ln=True)
+        if grievance.description:
+            pdf.multi_cell(0, 6, f"Description: {grievance.description}")
+
+        pdf.cell(0, 6, f"Source: {grievance.source} | Status: {grievance.status} | Priority: {grievance.priority}", ln=True)
+        pdf.cell(0, 6, f"Department: {grievance.department.name}", ln=True)
+        pdf.cell(0, 6, "-"*50, ln=True)
+        pdf.cell(0, 6, f"Filed: {grievance.date_filed:%Y-%m-%d} | Last Updated: {grievance.last_updated:%Y-%m-%d} | Due: {grievance.due_date:%Y-%m-%d}", ln=True)
+
+        # Return PDF
+        buffer = io.BytesIO()
+        pdf.output(buffer)
+        buffer.seek(0)
+
+        return FileResponse(
+            buffer,
+            as_attachment=True,
+            filename=f"{grievance.grievance_id}_report.pdf",
+            content_type="application/pdf"
+        )
+
+    except Exception as e:
+        messages.error(request, f"Failed to generate PDF: {str(e)}")
+        return redirect("collector:grievance_report")
+    
+@login_required
+def department_report_view(request):
+    collector = get_object_or_404(CollectorProfile, user=request.user)
+    district   = collector.district
+
+    departments = Department.objects.filter(district=district)
+
+    report_data = []
+    for dept in departments:
+        grievances = Grievance.objects.filter(department=dept, district=district)
+        total      = grievances.count()
+        pending    = grievances.filter(status="PENDING").count()
+        resolved   = grievances.filter(status="RESOLVED").count()
+        rejected   = grievances.filter(status="REJECTED").count()
+        escalated  = grievances.filter(status="ESCALATED").count()
+
+        avg_time = grievances.filter(status="RESOLVED").annotate(
+            resolution=ExpressionWrapper(F("last_updated") - F("date_filed"),
+                                         output_field=DurationField())
+        ).aggregate(avg=Avg("resolution"))["avg"]
+
+        oldest = grievances.filter(status="PENDING").aggregate(
+            old=Min("date_filed")
+        )["old"]
+
+        report_data.append({
+            "name": dept.name,
+            "total": total,
+            "pending": pending,
+            "resolved": resolved,
+            "rejected": rejected,
+            "escalated": escalated,
+            "avg_resolution_time": avg_time,
+            "oldest_pending": oldest,
+        })
+
+    # ── optional pagination (10 depts per page) ──────────────────────────
+    paginator  = Paginator(report_data, 10)
+    page_num   = request.GET.get("page")
+    page_obj   = paginator.get_page(page_num)
+
+    context = {
+        "district"         : district,
+        "departments"      : departments,
+        "department_report": page_obj.object_list,   # the current slice
+        "grievances"       : page_obj,               # for pagination links
+    }
+
+    # ✅ pass template‑name **and** context
+    return render(request, "collector/department_report.html", context)
