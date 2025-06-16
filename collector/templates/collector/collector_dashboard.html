@@ -2,239 +2,499 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Collector Dashboard - Grievance Management</title>
+  <meta charset="UTF-8" />
+  <title>Collector Dashboard – Grievance Management</title>
+
+  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
   <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+    }
+
     body {
-      background-color: #f4f6f9;
+      margin: 0;
+      background: var(--bg);
       font-family: 'Segoe UI', sans-serif;
     }
-    .navbar {
-      background-color: #002855;
-      width: 100vw;
-      padding: 1rem 2rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      border-bottom: 4px solid #0056b3;
-    }
-    .navbar-brand, .nav-link { color: white !important; }
-    .stat-box {
-      background: #fff; border-radius: 12px; padding: 25px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.07);
-      transition: transform 0.2s;
-    }
-    .stat-box:hover { transform: translateY(-3px); }
-    .stat-box h5 { font-weight: 600; margin-bottom: 10px; }
-    .stat-box .count {
-      font-size: 48px; font-weight: 800; color: #002855;
-    }
-    .card-dept {
-      border-left: 6px solid; border-radius: 12px;
-      background: #fff; padding: 20px; margin-bottom: 20px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
-      transition: all 0.3s ease; cursor: pointer;
-    }
-    .card-dept:hover {
-      background: #f0f8ff; transform: scale(1.015);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-    .badge-percent {
-      float: right; font-size: 14px;
-      padding: 5px 12px; border-radius: 50px;
-    }
-    .dept-title {
-      font-weight: 600; font-size: 18px; color: #002855;
-      margin-bottom: 8px;
-    }
-    .filter-section {
-      background: #fff; padding: 30px; margin-bottom: 30px;
-      border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    }
-    .input-group-text { min-width: 40px; justify-content: center; }
-    .filter-section h5 {
-      font-size: 20px; color: #002855; font-weight: 600;
-      margin-bottom: 20px;
-    }
-    .form-select:focus, .form-control:focus {
-      border-color: #002855;
-      box-shadow: 0 0 0 0.1rem rgba(0,40,85,.25);
-    }
-    .btn-outline-secondary:hover {
-      background-color: #002855; color: white;
-    }
-    .btn-outline-danger:hover {
-      background-color: #dc3545; color: white;
-    }
-    a.text-decoration-none:hover { text-decoration: none; }
-    .card-footer-link { text-align: right; margin-top: 10px; }
-    .card-footer-link small { font-weight: 500; }
-    .filter-section label.form-label {
-  font-weight: 600;
-  color: #002855;
-}
 
+    .container-custom {
+      padding: 1rem 1.2rem;
+    }
+
+    .navbar-custom {
+      background: var(--indigo);
+      padding: 1rem 2rem;
+      border-bottom: 4px solid var(--indigo-light);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .navbar-custom .navbar-brand {
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+    }
+
+    .navbar-custom .nav-link {
+      color: #ffffff !important;
+      margin-left: 1rem;
+      font-weight: 500;
+      transition: 0.3s ease;
+    }
+
+    .navbar-custom .nav-link:hover {
+      color: var(--accent) !important;
+      text-decoration: underline;
+    }
+
+    .navbar-custom .dropdown-menu {
+      background-color: #0355a8;
+      border-radius: 10px;
+      border: none;
+      margin-top: 10px;
+      min-width: 180px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .navbar-custom .dropdown-item {
+      color: #ffffff;
+      padding: 10px 16px;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    .navbar-custom .dropdown-item:hover {
+      background-color: #e0e0e0;
+      color: #0d1b2a;
+    }
+
+    @media (max-width: 768px) {
+      .navbar-custom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .navbar-custom .nav-link {
+        margin-left: 0;
+        margin-top: 0.5rem;
+      }
+    }
+
+    .rank-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 16px;
+      border-left: 5px solid var(--accent);
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rank-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 5px;
+      width: 100%;
+      background: linear-gradient(to right, var(--accent), transparent 80%);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .notice-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .top-item {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding: 10px;
+      border-radius: 8px;
+      align-items: center;
+      transition: 0.2s ease-in-out;
+    }
+
+    .top-rank {
+      font-size: 1.7rem;
+      line-height: 1;
+      width: 30px;
+      text-align: center;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    .rank-1 {
+      background: #b0bec5;
+      color: #0d1b2a;
+      border-left: 5px solid #ffffff;
+    }
+
+    .rank-2 {
+      background: #cfd8dc;
+      color: #263238;
+      border-left: 5px solid #ffffff;
+    }
+
+    .rank-3 {
+      background: #eceff1;
+      color: #37474f;
+      border-left: 5px solid #ffffff;
+    }
+
+    .stat-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      transition: .2s;
+      height: 100%;
+    }
+
+    .stat-box:hover {
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-3px);
+    }
+
+    .stat-box h5 {
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .stat-box .count {
+      font-size: 3rem;
+      font-weight: 800;
+    }
+
+    .filter-section {
+      background: #fff;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 18px;
+    }
+
+    .filter-section h5 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: var(--indigo);
+    }
+
+    .input-group-text {
+      min-width: 44px;
+      justify-content: center;
+      background: #f1f3f6;
+    }
+
+    .card-dept {
+      background: #fff;
+      border-left: 6px solid;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--card-shadow);
+      transition: .25s;
+    }
+
+    .card-dept:hover {
+      transform: scale(1.016);
+      box-shadow: var(--card-shadow-hover);
+      background: #f7faff;
+    }
+
+    .dept-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      color: var(--indigo);
+    }
+
+    .badge-percent {
+      float: right;
+      font-size: 0.78rem;
+      padding: .35rem .65rem;
+      border-radius: 50px;
+    }
+
+    .carousel-box {
+      width: 100%;
+      margin: 10px auto;
+      max-width: 450px;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    .mySlides {
+      display: none;
+    }
+
+    .mySlides img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+    
+    .carousel-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 16px;
+      border-left: 5px solid var(--accent);
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .carousel-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 5px;
+      width: 100%;
+      background: linear-gradient(to right, var(--accent), transparent 80%);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .carousel-header {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .top-badges {
+      margin-top: 4px;
+    }
+
+    .top-badges .badge {
+      font-size: 0.7rem;
+      margin-right: 0.25rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 50px;
+    }
+
+    .btn-outline-secondary:hover {
+      background: var(--indigo);
+      color: #fff;
+    }
+
+    .btn-outline-danger:hover {
+      background: #dc3545;
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .rank-section {
+        margin-bottom: 24px;
+      }
+    }
   </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid d-flex justify-content-between align-items-center">
-    <a class="navbar-brand fw-bold" href="#">{{ districts.name }} District Collector Portal</a>
-    <ul class="navbar-nav d-flex flex-row gap-3">
-      <li class="nav-item"><a class="nav-link" href="#">Report</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}">Profile</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}">Officers</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
-    </ul>
-  </div>
+ <!-- NAVBAR -->
+
+<!-- NAVBAR -->
+<nav class="navbar-custom d-flex justify-content-between align-items-center">
+  <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
+  
+  <ul class="nav gap-3 align-items-center">
+    <!-- Reports Dropdown (simplified style) -->
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-file-alt me-1"></i> Reports
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{% url 'collector:grievance_report' %}">
+          <i class="fas fa-file-contract me-2"></i> Grievance Report
+        </a></li>
+        <li><a class="dropdown-item" href="{% url 'collector:get_department_report_data' %}">
+          <i class="fas fa-building me-2"></i> Department Report
+        </a></li>
+       
+      </ul>
+    </li>
+
+    <!-- Other Links -->
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i> Profile</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i> Officers</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+  </ul>
 </nav>
-<br><br>
-<a href="{% url 'collector:export_excel' %}" class="btn btn-success">
-  <i class="fas fa-file-excel me-1"></i> Download Excel
-</a>
 
-{% if request.session.last_pdf_path %}
-<a href="{{ request.session.last_pdf_path }}" class="btn btn-danger" download>
-  <i class="fas fa-file-pdf me-1"></i> Download PDF
-</a>
-{% else %}
-<a href="{% url 'collector:export_pdf' %}" class="btn btn-outline-danger">
-  <i class="fas fa-file-pdf me-1"></i> Generate PDF
-</a>
-{% endif %}
 
-<div class="container mt-4">
 
-  <!-- Grievance Stats -->
-  <div class="row mb-4 text-center">
-    <div class="col-md-4">
-      <div class="stat-box">
-        <h5>Total Grievances</h5>
-        <div class="count text-primary" data-target="{{ counts.total_grievances }}">0</div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="stat-box">
-        <h5>Pending</h5>
-        <div class="count text-danger" data-target="{{ counts.pending_grievances }}">0</div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="stat-box">
-        <h5>Resolved</h5>
-        <div class="count text-success" data-target="{{ counts.resolved_grievances }}">0</div>
-      </div>
-    </div>
-  </div>
-<!-- Filter / Search Section -->
-<div class="filter-section">
-  <h5><i class="fas fa-search me-2"></i>Search & Filter Grievances</h5>
-  <form method="get" class="row g-3 align-items-center">
 
-    <!-- Grievance ID or Phone -->
-    <div class="col-md-4">
-      <label class="form-label">Grievance ID / Phone</label>
-      <div class="input-group">
-        <span class="input-group-text bg-light">
-          <i class="fas fa-hashtag"></i>
-        </span>
-        <input type="text" id="grievance-search" name="search" class="form-control" placeholder="Enter ID or Phone number">
+<div class="container-fluid container-custom">
+  <div class="row gx-3 gy-4">
+    <!-- LEFT RANK -->
+    <div class="col-lg-2 col-md-12">
+      <div class="d-flex flex-column gap-3">
+
+        <!-- Combined Rank Section -->
+        <div style="width: 100%;">
+          <div class="rank-section position-relative">
+            <div class="notice-header"><i class="fas fa-bullhorn me-2 text-warning"></i>Top 3 Departments</div>
+            {% for dept in top3_departments %}
+            <div class="top-item rank-{{ forloop.counter }}{% if forloop.last %} mb-0{% endif %}">
+              <div class="top-rank">
+                {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}
+              </div>
+              <div>
+                <strong>{{ dept.name|upper }}</strong><br>
+                <small class="text-muted">ID: {{ dept.code }}</small><br>
+                <div class="top-badges">
+                  <span class="badge bg-primary">Total {{ dept.total }}</span>
+                  <span class="badge bg-success">Resolved {{ dept.resolved}}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- SLIDER -->
+        <div class="carousel-section">
+          <div class="carousel-header"><i class="fas fa-mountain me-2 text-warning"></i>Explore Idukki</div>
+          <div class="carousel-box">
+            <div class="mySlides"><img src="{% static 'images/dam.jpeg' %}" alt="Slide 1"></div>
+            <div class="mySlides"><img src="{% static 'images/raman.jpeg' %}" alt="Slide 2"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Department Dropdown -->
-    <div class="col-md-4">
-      <label class="form-label">Department</label>
-      <div class="input-group">
-        <span class="input-group-text bg-light">
-          <i class="fas fa-building"></i>
-        </span>
-        <select class="form-select" id="department-select" name="department">
-          <option selected disabled>Select Department</option>
-          {% for dept in departments %}
-            <option value="{{ dept.id }}">{{ dept.name }}</option>
-          {% endfor %}
-        </select>
+    <!-- RIGHT CONTENT -->
+    <div class="col-lg-10 col-md-12">
+      <div class="row g-3 text-center mb-3">
+        <div class="col-md-4"><div class="stat-box"><h5>Total Grievances</h5><div class="count text-primary" data-target="{{ counts.total_grievances|default:2 }}">0</div></div></div>
+        <div class="col-md-4"><div class="stat-box"><h5>Pending</h5><div class="count text-danger" data-target="{{ counts.pending_grievances|default:2 }}">0</div></div></div>
+        <div class="col-md-4"><div class="stat-box"><h5>Resolved</h5><div class="count text-success" data-target="{{ counts.resolved_grievances|default:0 }}">0</div></div></div>
       </div>
-    </div>
 
-    <!-- Sort Button -->
-    <div class="col-md-4 mt-4">
-      <button type="submit" name="sort" value="grievances" class="btn btn-outline-secondary w-100">
-        <i class="fas fa-sort-amount-down-alt"></i> Sort by Grievance Count
-      </button>
-    </div>
+      <div class="filter-section">
+        <h5><i class="fas fa-search me-2"></i>Search & Filter Grievances</h5>
+        <form class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Grievance ID / Phone</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+              <input id="grievance-search" name="search" class="form-control" placeholder="Enter ID or Phone number">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Department</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-building"></i></span>
+              <select class="form-select" id="department-select" name="department">
+                <option selected disabled>Select Department</option>
+                {% for d in departments %}
+                <option value="{{ d.id }}">{{ d.name|upper }}</option>
+              {% endfor %}
+                            </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <button type="submit" name="sort" value="grievances" class="btn btn-outline-secondary w-100">
+              <i class="fas fa-sort-amount-down-alt"></i> Sort by Grievance Count
+            </button>
+          </div>
+        </form>
+      </div>
 
-  </form>
-</div>
+     
 
-
-  <!-- Department Cards -->
-  <div class="row" id="dept-container">
-    {% for dept in departments %}
-      <div class="col-md-4 dept-card-wrapper">
-        <a href="" class="text-decoration-none text-dark">
+      <div class="row g-4" id="dept-container">
+        {% for dept in departments %}
+        <div class="col-md-4 dept-card-wrapper">
           <div class="card-dept border-{{ dept.badge_class }}"
                data-name="{{ dept.name }}"
                data-code="{{ dept.code }}">
             <div class="dept-title">
               <i class="fas fa-building me-2 text-{{ dept.badge_class }}"></i>{{ dept.name }}
-              <span class="badge bg-{{ dept.badge_class }} badge-percent">{{ dept.percent }}%</span>
+              <span class="badge bg-{{ dept.badge_class }} badge-percent">
+                {{ dept.pending_percent }}%
+              </span>
             </div>
-            <p class="mb-1"><strong>Department ID:</strong> {{ dept.code }}</p>
-            <p class="mb-1"><strong>Total Grievances:</strong> {{ dept.total }}</p>
-            <p><strong>Pending:</strong> {{ dept.pending }}</p>
-            <div class="card-footer-link">
-              <small class="text-{{ dept.badge_class }}">View Details <i class="fas fa-arrow-right"></i></small>
-            </div>
+      
+            <p class="mb-1"><strong>ID:</strong> {{ dept.code }}</p>
+            <p class="mb-1"><strong>Total Grievance:</strong> {{ dept.total }}</p>
+            <p><strong>Pending Grievance:</strong> {{ dept.pending }}</p>
           </div>
-        </a>
+        </div>
+        {% endfor %}
       </div>
-    {% endfor %}
+      
+    </div>
   </div>
 </div>
 
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Counter animation
-    const counters = document.querySelectorAll('.count');
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          const el = e.target;
-          const target = +el.dataset.target;
-          const duration = 600;
-          const start = performance.now();
-          const tick = (ts) => {
-            const pct = Math.min((ts - start)/duration, 1);
-            el.textContent = Math.floor(pct * target).toLocaleString('en-IN');
-            if(pct <1) requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-          io.unobserve(el);
-        }
-      });
-    }, {threshold: .5});
-    counters.forEach(el => { el.textContent = '0'; io.observe(el); });
-
-    // Fuzzy search on department cards
-    const searchInput = document.getElementById('grievance-search');
-    const wrappers = Array.from(document.querySelectorAll('.dept-card-wrapper'));
-    const cardsData = wrappers.map((w, i) => ({
-      name: w.querySelector('.card-dept').dataset.name,
-      code: w.querySelector('.card-dept').dataset.code,
-      index: i
-    }));
-    const fuse = new Fuse(cardsData, { keys: ['name','code'], threshold:0.4 });
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.trim();
-      if (!q) return wrappers.forEach(w=> w.style.display='block');
-      const hits = fuse.search(q).map(r=>r.item.index);
-      wrappers.forEach((w,i)=> w.style.display = hits.includes(i)? 'block':'none');
-    });
+  document.querySelectorAll('.count').forEach(el => {
+    const t = +el.dataset.target || 0, dur = 800, start = performance.now();
+    const anim = now => {
+      const p = Math.min((now - start) / dur, 1);
+      el.textContent = Math.floor(p * t).toLocaleString('en-IN');
+      if (p < 1) requestAnimationFrame(anim);
+    };
+    requestAnimationFrame(anim);
   });
+
+  // Simple Slider
+  (function () {
+    let slideIndex = 0;
+    const slides = document.querySelectorAll(".mySlides");
+    if (!slides.length) return;
+    slides.forEach((s, i) => { s.style.display = i === 0 ? "block" : "none"; });
+
+    function showNext() {
+      slides[slideIndex].style.display = "none";
+      slideIndex = (slideIndex + 1) % slides.length;
+      slides[slideIndex].style.display = "block";
+    }
+
+    setInterval(showNext, 2000);
+  })();
+
+  const input = document.getElementById('grievance-search');
+  if (input) {
+    const wrappers = [...document.querySelectorAll('.dept-card-wrapper')];
+    const fuse = new Fuse(
+      wrappers.map((w, i) => ({ name: w.dataset.name, code: w.dataset.code, idx: i })),
+      { keys: ['name', 'code'], threshold: 0.35 }
+    );
+    input.addEventListener('input', e => {
+      const q = e.target.value.trim();
+      wrappers.forEach(w => w.style.display = 'block');
+      if (!q) return;
+      const hitIdx = fuse.search(q).map(r => r.item.idx);
+      wrappers.forEach((w, i) => { if (!hitIdx.includes(i)) w.style.display = 'none'; });
+    });
+  }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

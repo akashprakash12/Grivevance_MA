@@ -12,10 +12,16 @@ urlpatterns = [
     path('officer_details/', views.officer_details, name='officer_details'),
     # path('search_grievance_by_id/', views.search_grievance_by_id, name='search_grievance_by_id'),
 
-    path('export/excel/', views.export_grievance_excel, name='export_excel'),
-    path('export/pdf/', views.export_grievance_pdf, name='export_pdf'),
 
        path("send-mail/<str:officer_email>/", views.send_email_redirect, name="send_mail"),
+
+    path("collector/dashboard/grievance-report/", views.grievance_report_view, name="grievance_report"),
+    path("dashboard/grievance-report/export/excel/", views.export_grievance_excel, name="export_excel"),
+    path("dashboard/grievance-report/export/pdf/", views.export_grievance_pdf, name="export_pdf"),
+    path("download/<str:grievance_id>/", views.details_download, name="details_download"),
+
+
+    path("collector/dashboard/department-report/", views.department_report_view, name="get_department_report_data"),
 
 
 ]
