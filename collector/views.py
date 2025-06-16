@@ -13,6 +13,24 @@ from core_app.models import Department, District
 from officer.models import OfficerProfile
 
 from django.contrib.auth.decorators import login_required
+from openpyxl import Workbook
+from django.http import HttpResponse,HttpResponseForbidden,FileResponse,HttpResponseRedirect
+import pandas as pd
+from fpdf import FPDF
+import csv
+import io
+import os
+from django.conf import settings
+from pathlib import Path
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+# views.py
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from urllib.parse import quote
 
 # Auto-generate Collector ID based on district code
 def auto_collector_id(district):
@@ -230,3 +248,137 @@ def officer_details(request):
 #         'grievances': grievances,
 #         'departments': Department.objects.filter(district=district),
 #     })
+
+
+
+@login_required
+def export_grievance_excel(request):
+    collector = get_object_or_404(CollectorProfile, user=request.user)
+    district  = collector.district
+
+    qs = Grievance.objects.filter(district=district)\
+                          .values('grievance_id', 'subject', 'status', 'department__name')
+
+    df = pd.DataFrame(qs)
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        df.to_excel(writer, sheet_name="Grievances", index=False)
+
+    buffer.seek(0)
+
+    messages.success(request, "Excel report downloaded.")
+    return FileResponse(
+        buffer,
+        as_attachment=True,
+        filename=f"{district.code.lower()}_grievance_report.xlsx",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+
+@login_required
+def export_grievance_pdf(request):
+    # ---------- DATA ----------
+    collector = get_object_or_404(CollectorProfile, user=request.user)
+    district = collector.district
+
+    rows = Grievance.objects.filter(district=district).values(
+        "grievance_id", "subject", "status", "department__name"
+    )
+
+    # ---------- PDF SET‑UP ----------
+    pdf = FPDF("L", "mm", "A4")
+    margin = 15
+    pdf.set_auto_page_break(auto=True, margin=margin)
+    pdf.set_left_margin(margin)
+    pdf.set_right_margin(margin)
+    pdf.add_page()
+
+    # ---------- FONTS ----------
+    font_dir = Path(settings.BASE_DIR) / "fonts"
+    pdf.add_font("DV", "", str(font_dir / "DejaVuSans.ttf"), uni=True)
+    pdf.add_font("DV", "B", str(font_dir / "DejaVuSans-Bold.ttf"), uni=True)
+
+    # ---------- TITLE ----------
+    pdf.set_font("DV", "B", 16)
+    pdf.cell(0, 12, "Grievance Report – Kerala Government", ln=True, align="C")
+    pdf.ln(6)
+
+    # ---------- TABLE HEADER ----------
+    printable_w = pdf.w - 2 * margin          # 267 mm in landscape A4
+    col_w = [50, 140, 40, printable_w - 50 - 140 - 40]   # [50, 140, 40, 37]
+    headers = ["ID", "Subject", "Status", "Department"]
+
+    pdf.set_font("DV", "B", 11)
+    pdf.set_fill_color(200, 220, 255)
+    for h, w in zip(headers, col_w):
+        pdf.cell(w, 9, h, border=1, align="C", fill=True)
+    pdf.ln()
+
+    # ---------- TABLE BODY  (wrap + dynamic height) ----------
+    pdf.set_font("DV", "", 10)
+
+    # helper: how many lines a text needs in given width
+    def line_count(text, width):
+        return len(pdf.multi_cell(width, 8, text, split_only=True))
+
+    for r in rows:
+        # Calculate line count for each cell
+        lines_id   = line_count(r["grievance_id"],     col_w[0])
+        lines_sub  = line_count(r["subject"],          col_w[1])
+        lines_stat = line_count(r["status"],           col_w[2])
+        lines_dep  = line_count(r["department__name"], col_w[3])
+
+        max_lines  = max(lines_id, lines_sub, lines_stat, lines_dep)
+        row_h      = 8 * max_lines        # 8 mm per line
+
+        x0, y0 = pdf.get_x(), pdf.get_y()
+
+        # --- ID ---
+        pdf.multi_cell(col_w[0], 8, r["grievance_id"], 1, "C", max_line_height=8)
+        pdf.set_xy(x0 + col_w[0], y0)
+
+        # --- Subject ---
+        pdf.multi_cell(col_w[1], 8, r["subject"], 1, "L", max_line_height=8)
+        pdf.set_xy(x0 + col_w[0] + col_w[1], y0)
+
+        # --- Status ---
+        pdf.multi_cell(col_w[2], 8, r["status"], 1, "C", max_line_height=8)
+        pdf.set_xy(x0 + col_w[0] + col_w[1] + col_w[2], y0)
+
+        # --- Department ---
+        pdf.multi_cell(col_w[3], 8, r["department__name"], 1, "L", max_line_height=8)
+
+        # Move to start of next row
+        pdf.ln(row_h)
+
+    # ---------- SAVE TO media/collector_reports/ ----------
+    report_dir = Path(settings.MEDIA_ROOT) / "collector_reports"
+    report_dir.mkdir(parents=True, exist_ok=True)
+
+    filename = f"{district.code.lower()}_grievance_report.pdf"
+    filepath = report_dir / filename
+    pdf.output(str(filepath), "F")
+
+    # ---------- SESSION + REDIRECT ----------
+    request.session["last_pdf_path"] = f"{settings.MEDIA_URL}collector_reports/{filename}"
+    messages.success(request, "PDF generated! Click the red download button to grab it.")
+    return redirect("collector:collector_dashboard")
+
+
+@login_required
+def send_email_redirect(request, officer_email):
+    collector_email = request.user.email  # Dynamic sender (logged-in user)
+
+    # Gmail Compose URL
+    compose_url = f"https://mail.google.com/mail/?view=cm&fs=1&tf=1&to={quote(officer_email)}"
+
+    # Redirect to Gmail account chooser (if not signed in / wrong account)
+    redirect_url = (
+        "https://accounts.google.com/AccountChooser"
+        f"?continue={quote(compose_url, safe='')}"
+        f"&Email={quote(collector_email)}"
+        "&service=mail"
+    )
+
+    return HttpResponseRedirect(redirect_url)

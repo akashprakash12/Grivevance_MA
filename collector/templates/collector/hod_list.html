@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>HOD Officers</title>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -49,39 +53,75 @@
             color: #2c3e50;
         }
 
-        .no-data {
-            text-align: center;
-            font-style: italic;
-            color: gray;
-            padding: 20px;
+        /* Tooltip styling */
+        .icon {
+            margin-left: 6px;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+        }
+
+        .icon:hover {
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        .icon[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 999;
         }
     </style>
 </head>
 <body>
 
-    <h2>HOD Officers in {{ district }}</h2>
+<h2>HOD Officers in {{ district }}</h2>
 
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Email</th>
-            <th>Phone</th>
-        </tr>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Email</th>
+        <th>Phone</th>
+    </tr>
 
-        {% for officer in hod_officers %}
-        <tr>
-            <td>{{ officer.user.first_name }} {{ officer.user.last_name }}</td>
-            <td>{{ officer.department.name }}</td>
-            <td>{{ officer.user.email }}</td>
-            <td>{{ officer.user.phone }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4" class="no-data">No HODs found in your district.</td>
-        </tr>
-        {% endfor %}
-    </table>
+    {% for officer in hod_officers %}
+    <tr>
+        <td>{{ officer.user.first_name }} {{ officer.user.last_name }}</td>
+        <td>{{ officer.department.name }}</td>
+
+        <!-- Email -->
+        <td>
+            {{ officer.user.email }}
+            <a href="{% url 'collector:send_mail' officer.user.email %}" 
+   target="_blank" class="icon" title="Send Email as Collector">
+    <i class="fas fa-envelope" style="color:#db4437;"></i>
+</a>
+
+          </td>
+          
+
+        <!-- Phone (WhatsApp link, optional) -->
+        <td>
+            {{ officer.user.phone }}
+           
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4" class="no-data">No HODs found in your district.</td>
+    </tr>
+    {% endfor %}
+</table>
 
 </body>
 </html>

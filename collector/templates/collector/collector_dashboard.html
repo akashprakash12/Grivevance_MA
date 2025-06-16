@@ -88,6 +88,20 @@
     </ul>
   </div>
 </nav>
+<br><br>
+<a href="{% url 'collector:export_excel' %}" class="btn btn-success">
+  <i class="fas fa-file-excel me-1"></i> Download Excel
+</a>
+
+{% if request.session.last_pdf_path %}
+<a href="{{ request.session.last_pdf_path }}" class="btn btn-danger" download>
+  <i class="fas fa-file-pdf me-1"></i> Download PDF
+</a>
+{% else %}
+<a href="{% url 'collector:export_pdf' %}" class="btn btn-outline-danger">
+  <i class="fas fa-file-pdf me-1"></i> Generate PDF
+</a>
+{% endif %}
 
 <div class="container mt-4">
 
