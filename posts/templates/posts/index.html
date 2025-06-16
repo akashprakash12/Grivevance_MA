@@ -4,32 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook Page Manager</title>
+    <title>Facebook Complaint Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'posts/css/style.css' %}">
 </head>
-<body>
-    <div class="container">
-        <h1>Facebook Page Manager</h1>
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
-        <form id="postForm" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <textarea name="message" placeholder="Enter your post message"></textarea>
-            <input type="file" name="image" accept="image/*">
-            <label>
-                <input type="checkbox" name="read_comments"> Read Comments
-            </label>
-            <input type="number" name="time_limit" placeholder="Time limit (hours, optional)">
-            <button type="submit">Post to Facebook</button>
-        </form>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-6 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600">Facebook Complaint Manager</h1>
+            <p class="text-gray-600 mt-2">Share your complaints and view responses</p>
+        </header>
 
-        <h2>Previous Posts</h2>
-        <ul id="posts">
-            {% for post in posts %}
-                <li>Post ID: {{ post.post_id }} - {{ post.read_comments|yesno:"Reading Comments,Not Reading" }}</li>
-            {% endfor %}
-        </ul>
+        {% if error %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Post a Complaint</h2>
+            <form id="postForm" method="post" enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
+                <textarea name="message" placeholder="Enter your complaint message (e.g., Issue with service #complaint)" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4"></textarea>
+                <input type="file" name="file" accept="image/*,video/*" class="w-full p-2 border rounded-lg">
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">Post to Facebook</button>
+            </form>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Complaint Posts</h2>
+            {% if posts.exists %}
+                <ul id="posts" class="space-y-4">
+                    {% for post in posts %}
+                        <li class="border-b pb-4">
+                            <div class="flex justify-between items-center">
+                                <a href="{{ post.permalink_url }}" target="_blank" class="text-blue-600 hover:underline">Post ID: {{ post.post_id }}</a>
+                                <span class="text-gray-500 text-sm">{{ post.created_at|date:"F d, Y H:i" }}</span>
+                            </div>
+                            <p class="text-gray-700 mt-2">{{ post.message|truncatechars:100 }}</p>
+                            {% if post.comments.exists %}
+                                <ul class="ml-6 mt-2 space-y-2">
+                                    {% for comment in post.comments.all %}
+                                        <li class="text-gray-600 text-sm">
+                                            <strong>{{ comment.author_name }}:</strong> {{ comment.message|truncatechars:50 }}
+                                            <span class="text-gray-400 text-xs">({{ comment.created_at|date:"F d, Y H:i" }})</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-gray-500 text-sm mt-2">No comments yet.</p>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500">No complaint posts found.</p>
+            {% endif %}
+        </section>
     </div>
     <script src="{% static 'posts/js/script.js' %}"></script>
 </body>
