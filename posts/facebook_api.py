@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 import os
 import pandas as pd
 import logging
+from posts.models import Post
 
 logging.basicConfig(
     level=logging.INFO,
@@ -164,34 +165,39 @@ class FacebookAPI:
             'URL', 'Parent ID', 'Parent Content', 'Likes', 'Comment Count'
         ]
         new_data = []
+        # Get deleted post IDs
+        deleted_post_ids = set(Post.objects.filter(is_deleted=True).values_list('post_id', flat=True))
+        # Only include posts that are not deleted
         for post in posts:
-            new_data.append({
-                'Type': 'Post',
-                'ID': post['id'],
-                'Author': 'Page',
-                'Author ID': self.page_id,
-                'Time': post['created_time'],
-                'Content': post.get('message', '[No text]'),
-                'URL': post.get('permalink_url', ''),
-                'Parent ID': '',
-                'Parent Content': '',
-                'Likes': post.get('likes', {}).get('summary', {}).get('total_count', 0),
-                'Comment Count': post.get('comments', {}).get('summary', {}).get('total_count', 0)
-            })
-            for comment in comments_dict.get(post['id'], []):
+            if post['id'] not in deleted_post_ids:
                 new_data.append({
-                    'Type': 'Comment',
-                    'ID': comment['id'],
-                    'Author': comment.get('from', {}).get('name', 'Unknown'),
-                    'Author ID': comment.get('from', {}).get('id', ''),
-                    'Time': comment['created_time'],
-                    'Content': comment.get('message', '[No text]'),
-                    'URL': f"{post.get('permalink_url', '')}?comment_id={comment['id']}",
-                    'Parent ID': post['id'],
-                    'Parent Content': post.get('message', '')[:50] + '...' if post.get('message') else '',
-                    'Likes': comment.get('like_count', 0),
-                    'Comment Count': comment.get('comment_count', 0)
+                    'Type': 'Post',
+                    'ID': post['id'],
+                    'Author': 'Page',
+                    'Author ID': self.page_id,
+                    'Time': post['created_time'],
+                    'Content': post.get('message', '[No text]'),
+                    'URL': post.get('permalink_url', ''),
+                    'Parent ID': '',
+                    'Parent Content': '',
+                    'Likes': post.get('likes', {}).get('summary', {}).get('total_count', 0),
+                    'Comment Count': post.get('comments', {}).get('summary', {}).get('total_count', 0)
                 })
+                # Only include comments for non-deleted posts
+                for comment in comments_dict.get(post['id'], []):
+                    new_data.append({
+                        'Type': 'Comment',
+                        'ID': comment['id'],
+                        'Author': comment.get('from', {}).get('name', 'Unknown'),
+                        'Author ID': comment.get('from', {}).get('id', ''),
+                        'Time': comment['created_time'],
+                        'Content': comment.get('message', '[No text]'),
+                        'URL': f"{post.get('permalink_url', '')}?comment_id={comment['id']}",
+                        'Parent ID': post['id'],
+                        'Parent Content': post.get('message', '')[:50] + '...' if post.get('message') else '',
+                        'Likes': comment.get('like_count', 0),
+                        'Comment Count': comment.get('comment_count', 0)
+                    })
 
         df_new = pd.DataFrame(new_data, columns=columns)
         df_new['Time'] = pd.to_datetime(df_new['Time'], errors='coerce', utc=True)
@@ -202,6 +208,12 @@ class FacebookAPI:
         if file_exists:
             df_existing = pd.read_excel(self.excel_file)
             df_existing['Time'] = pd.to_datetime(df_existing['Time'], errors='coerce', utc=True)
+            # Filter out deleted posts and their comments
+            df_existing = df_existing[
+                (~df_existing['ID'].isin(deleted_post_ids)) & 
+                (~df_existing['Parent ID'].isin(deleted_post_ids))
+            ]
+            # Update existing data with new likes/comments
             for idx, row in df_new.iterrows():
                 mask = df_existing['ID'] == row['ID']
                 if mask.any():
@@ -211,6 +223,11 @@ class FacebookAPI:
             df_combined = pd.concat([df_new, df_existing], ignore_index=True)
             df_combined = df_combined.drop_duplicates(subset=['ID'], keep='first')
             df_combined = df_combined.sort_values('Time', ascending=False, na_position='last')
+            # Filter again to ensure no deleted posts or comments
+            df_combined = df_combined[
+                (~df_combined['ID'].isin(deleted_post_ids)) & 
+                (~df_combined['Parent ID'].isin(deleted_post_ids))
+            ]
         else:
             df_combined = df_new.sort_values('Time', ascending=False, na_position='last')
 
