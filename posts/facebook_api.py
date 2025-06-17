@@ -9,7 +9,6 @@ import os
 import pandas as pd
 import logging
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -26,9 +25,9 @@ class FacebookAPI:
         self.page_id = settings.FB_PAGE_ID
         self.base_url = 'https://graph.facebook.com/v20.0'
         self.excel_file = os.path.join(settings.BASE_DIR, 'comments', 'comments.xlsx')
-        os.makedirs(os.path.dirname(self.excel_file), exist_ok=True)  # Create comments directory
+        os.makedirs(os.path.dirname(self.excel_file), exist_ok=True)
         self.max_comments_per_post = 100
-        self.max_cell_chars = 32767  # Excel cell character limit
+        self.max_cell_chars = 32767
         self.max_retries = 3
         self.retry_delay = 5
         self.api_timeout = 30
@@ -47,6 +46,8 @@ class FacebookAPI:
             try:
                 if method == 'POST':
                     response = requests.post(url, params=params, data=data, files=files, timeout=self.api_timeout)
+                elif method == 'DELETE':
+                    response = requests.delete(url, params=params, timeout=self.api_timeout)
                 else:
                     response = requests.get(url, params=params, timeout=self.api_timeout)
                 response.raise_for_status()
@@ -90,6 +91,23 @@ class FacebookAPI:
         response = self.make_api_request(url, params=params, method='POST', data=data)
         if response and 'id' in response:
             logger.info(f"Successfully posted: Post ID={response['id']}")
+        return response
+
+    def update_post(self, post_id, message):
+        url = f"{self.base_url}/{post_id}"
+        params = {'access_token': self.access_token}
+        data = {'message': message}
+        response = self.make_api_request(url, params=params, method='POST', data=data)
+        if response and 'success' in response:
+            logger.info(f"Successfully updated post: Post ID={post_id}")
+        return response
+
+    def delete_post(self, post_id):
+        url = f"{self.base_url}/{post_id}"
+        params = {'access_token': self.access_token}
+        response = self.make_api_request(url, params=params, method='DELETE')
+        if response and 'success' in response:
+            logger.info(f"Successfully deleted post: Post ID={post_id}")
         return response
 
     def get_complaint_posts(self, last_post_time=None):

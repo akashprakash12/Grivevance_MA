@@ -78,7 +78,7 @@ def monitor_complaints():
                         'likes': post.get('likes', {}).get('summary', {}).get('total_count', 0),
                         'comment_count': post.get('comments', {}).get('summary', {}).get('total_count', 0),
                         'created_at': datetime.strptime(post['created_time'], '%Y-%m-%dT%H:%M:%S%z'),
-                        'is_deleted': False,  # Ensure active posts are not marked deleted
+                        'is_deleted': False,
                     }
                 )
                 if created:
@@ -109,7 +109,7 @@ def monitor_complaints():
 
         except Exception as e:
             logger.error(f"Error in monitor cycle: {e}")
-        time.sleep(30)  # Poll every 30 seconds
+        time.sleep(30)
 
 def start_monitor():
     global monitor_thread, monitor_running
@@ -126,12 +126,14 @@ def stop_monitor():
     logger.info("Monitor thread stopped")
 
 def index(request):
-    start_monitor()  # Start monitor on first request
+    start_monitor()
+    context = {}
     if request.method == 'POST':
         message = request.POST.get('message', '')
         image = request.FILES.get('file') if 'file' in request.FILES else None
         if not message and not image:
-            return render(request, 'posts/index.html', {'error': 'Message or file is required', 'posts': Post.objects.filter(is_deleted=False)})
+            context['error'] = 'Message or file is required'
+            return render(request, 'posts/index.html', context)
 
         if '#complaint' not in message.lower():
             message += ' #complaint'
@@ -146,7 +148,8 @@ def index(request):
                     for chunk in image.chunks():
                         f.write(chunk)
             else:
-                return render(request, 'posts/index.html', {'error': 'Unsupported file type', 'posts': Post.objects.filter(is_deleted=False)})
+                context['error'] = 'Unsupported file type'
+                return render(request, 'posts/index.html', context)
 
         response = fb_api.post_to_page(message, image_path)
         if response and 'id' in response:
@@ -160,24 +163,50 @@ def index(request):
                 comment_count=0,
                 is_deleted=False
             )
-            return redirect('index')
-        return render(request, 'posts/index.html', {'error': 'Failed to post', 'posts': Post.objects.filter(is_deleted=False)})
+            context['success'] = f"Successfully posted! Post ID: {response['id']}"
+            return render(request, 'posts/index.html', context)
+        context['error'] = 'Failed to post'
+        return render(request, 'posts/index.html', context)
 
-    return render(request, 'posts/index.html', {'posts': Post.objects.filter(is_deleted=False)})
+    return render(request, 'posts/index.html', context)
 
-def get_comments_status(request):
-    posts = Post.objects.filter(read_comments=True, is_deleted=False)
-    status = {
-        post.post_id: {
-            'post_id': post.post_id,
-            'message': post.message,
-            'reading': post.read_comments,
-            'time_limit': post.time_limit,
-            'comments': [
-                {'id': comment.comment_id, 'message': comment.message, 'author': comment.author_name}
-                for comment in post.comments.all()
-            ]
-        }
-        for post in posts
-    }
-    return JsonResponse(status)
+def manage_posts(request):
+    posts = Post.objects.filter(is_deleted=False)
+    return render(request, 'posts/manage_posts.html', {'posts': posts})
+
+def edit_post(request, post_id):
+    try:
+        post = Post.objects.get(post_id=post_id, is_deleted=False)
+    except Post.DoesNotExist:
+        return render(request, 'posts/edit_post.html', {'error': 'Post not found'})
+
+    if request.method == 'POST':
+        message = request.POST.get('message', '')
+        if not message:
+            return render(request, 'posts/edit_post.html', {'post': post, 'error': 'Message is required'})
+
+        if '#complaint' not in message.lower():
+            message += ' #complaint'
+
+        response = fb_api.update_post(post_id, message)
+        if response and 'success' in response:
+            post.message = message
+            post.save()
+            return redirect('manage_posts')
+        return render(request, 'posts/edit_post.html', {'post': post, 'error': 'Failed to update post'})
+
+    return render(request, 'posts/edit_post.html', {'post': post})
+
+def delete_post(request, post_id):
+    try:
+        post = Post.objects.get(post_id=post_id, is_deleted=False)
+    except Post.DoesNotExist:
+        return redirect('manage_posts')
+
+    if request.method == 'POST':
+        response = fb_api.delete_post(post_id)
+        post.is_deleted = True
+        post.save()
+        return redirect('manage_posts')
+
+    return render(request, 'posts/manage_posts.html', {'posts': Post.objects.filter(is_deleted=False)})

@@ -1,3 +1,6 @@
+document.getElementById('postForm').addEventListener('submit', () => {
+    console.log('Form submitted');
+});
 function updatePosts() {
     fetch('/facebook/comments-status/')
         .then(response => response.json())
