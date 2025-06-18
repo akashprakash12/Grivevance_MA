@@ -1,8 +1,0 @@
-# .gitignore
-node_modules/
-.venv/
-build/
-dist/
-*.pyc
-.DS_Store
-.env
