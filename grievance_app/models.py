@@ -116,6 +116,10 @@ class Grievance(models.Model):
         verbose_name=_("Department District"),
         default=1  # Or set dynamically in the form
     )
+
+    remark = models.TextField(verbose_name="Remark", blank=True, null=True)
+
+
         
     class Meta:
         verbose_name = _("Public Grievance")

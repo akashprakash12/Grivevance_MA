@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    'widget_tweaks',
+
     'officer',
     'user',
     'admin_app',
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
     'grievance_app',
     'accounts',
     'core_app',
+    'posts'
 
 
 ]
@@ -142,3 +145,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'user.User'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+FB_ACCESS_TOKEN = config('FB_ACCESS_TOKEN')
+FB_PAGE_ID = config('FB_PAGE_ID')

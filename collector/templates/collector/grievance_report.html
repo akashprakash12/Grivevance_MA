@@ -249,10 +249,10 @@
             
             
             <a href="{% url 'collector:export_excel' %}?{{ request.GET.urlencode }}" class="btn btn-success btn-export">
-              <i class="fas fa-file-excel me-1"></i> Excel
+              <i class="fas fa-file-excel me-1"></i> Export Excel
             </a>
             <a href="{% url 'collector:export_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-danger btn-export">
-              <i class="fas fa-file-pdf me-1"></i> Download PDF
+              <i class="fas fa-file-pdf me-1"></i> Export PDF
             </a>
             <a href="{% url 'collector:grievance_report' %}" class="btn btn-outline-secondary btn-export">
               <i class="fas fa-sync-alt me-1"></i> Reset
