@@ -28,7 +28,10 @@
     .container-custom {
       padding: 1rem 1.2rem;
     }
-
+    .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* optional: align properly */
+  }
     .navbar-custom {
       background: var(--indigo);
       padding: 1rem 2rem;
@@ -321,7 +324,7 @@
   <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
   
   <ul class="nav gap-3 align-items-center">
-    <!-- Reports Dropdown (simplified style) -->
+    <!-- Reports Dropdown -->
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fas fa-file-alt me-1"></i> Reports
@@ -333,8 +336,21 @@
         <li><a class="dropdown-item" href="{% url 'collector:get_department_report_data' %}">
           <i class="fas fa-building me-2"></i> Department Report
         </a></li>
-       
+        <li><a class="dropdown-item" href="#">
+          <i class="fas fa-building me-2"></i> Officer Report
+        </a></li>
       </ul>
+    </li>
+
+    <!-- 🟦 Facebook Post Nav Link -->
+    <li class="nav-item">
+      <a 
+        class="nav-link text-white" 
+        href="https://www.facebook.com/sharer/sharer.php?u=https://yourwebsite.com" 
+        target="_blank"
+      >
+        <i class="fab fa-facebook me-1"></i> FB Post
+      </a>
     </li>
 
     <!-- Other Links -->
@@ -343,6 +359,7 @@
     <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
   </ul>
 </nav>
+
 
 
 
@@ -423,15 +440,13 @@
           </div>
         </form>
       </div>
-
-     
-
       <div class="row g-4" id="dept-container">
         {% for dept in departments %}
         <div class="col-md-4 dept-card-wrapper">
-          <div class="card-dept border-{{ dept.badge_class }}"
+          <div class="card-dept border-{{ dept.badge_class }} clickable-card"
                data-name="{{ dept.name }}"
-               data-code="{{ dept.code }}">
+               data-code="{{ dept.code }}"
+               data-url="{% url 'collector:department_card' dept.code %}">
             <div class="dept-title">
               <i class="fas fa-building me-2 text-{{ dept.badge_class }}"></i>{{ dept.name }}
               <span class="badge bg-{{ dept.badge_class }} badge-percent">
@@ -447,12 +462,16 @@
         {% endfor %}
       </div>
       
+      
+      
     </div>
   </div>
 </div>
-
-<!-- Scripts -->
+<!-- Add this right before the closing </body> tag -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+  // Counter animation
   document.querySelectorAll('.count').forEach(el => {
     const t = +el.dataset.target || 0, dur = 800, start = performance.now();
     const anim = now => {
@@ -463,7 +482,7 @@
     requestAnimationFrame(anim);
   });
 
-  // Simple Slider
+  // Image slider
   (function () {
     let slideIndex = 0;
     const slides = document.querySelectorAll(".mySlides");
@@ -479,22 +498,77 @@
     setInterval(showNext, 2000);
   })();
 
-  const input = document.getElementById('grievance-search');
-  if (input) {
-    const wrappers = [...document.querySelectorAll('.dept-card-wrapper')];
-    const fuse = new Fuse(
-      wrappers.map((w, i) => ({ name: w.dataset.name, code: w.dataset.code, idx: i })),
-      { keys: ['name', 'code'], threshold: 0.35 }
-    );
-    input.addEventListener('input', e => {
-      const q = e.target.value.trim();
-      wrappers.forEach(w => w.style.display = 'block');
-      if (!q) return;
-      const hitIdx = fuse.search(q).map(r => r.item.idx);
-      wrappers.forEach((w, i) => { if (!hitIdx.includes(i)) w.style.display = 'none'; });
+  // Card click functionality - improved version
+  document.addEventListener("DOMContentLoaded", function() {
+    // Make department cards clickable
+    const cards = document.querySelectorAll(".clickable-card");
+    cards.forEach(card => {
+      card.style.cursor = "pointer";
+      
+      // Add click event to the entire card
+      card.addEventListener("click", function(e) {
+        // Don't interfere with other clickable elements inside the card
+        if (e.target.closest('a, button, input, select, textarea')) {
+          return;
+        }
+        
+        const url = card.dataset.url;
+        if (url) {
+          window.location.href = url; // Changed to same window navigation
+          // Or use this if you prefer new tab:
+          // window.open(url, "_blank");
+        }
+      });
     });
-  }
+
+    // Search functionality
+     // SEARCH FUNCTIONALITY - CORRECTED VERSION
+     const searchInput = document.getElementById('grievance-search');
+    if (searchInput) {
+      const departmentCards = document.querySelectorAll('.dept-card-wrapper');
+      const departments = Array.from(departmentCards).map((card, index) => {
+        return {
+          name: card.querySelector('.card-dept').getAttribute('data-name').toLowerCase(),
+          code: card.querySelector('.card-dept').getAttribute('data-code').toLowerCase(),
+          element: card,
+          index: index
+        };
+      });
+
+      // Initialize Fuse.js with the departments data
+      const fuseOptions = {
+        keys: ['name', 'code'],
+        threshold: 0.3,
+        includeScore: true
+      };
+      const fuse = new Fuse(departments, fuseOptions);
+
+      searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim().toLowerCase();
+        
+        if (query.length === 0) {
+          // Show all cards if search is empty
+          departmentCards.forEach(card => {
+            card.style.display = 'block';
+          });
+          return;
+        }
+
+        // Perform search
+        const results = fuse.search(query);
+        
+        // Hide all cards first
+        departmentCards.forEach(card => {
+          card.style.display = 'none';
+        });
+        
+        // Show only matching cards
+        results.forEach(result => {
+          result.item.element.style.display = 'block';
+        });
+      });
+    }
+  });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

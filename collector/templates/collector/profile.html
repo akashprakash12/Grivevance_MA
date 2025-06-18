@@ -2,124 +2,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Collector Profile</title>
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f4f8fb;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Collector Profile</title>
 
-        .profile-container {
-            max-width: 900px;
-            margin: 50px auto;
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px 40px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
+  <style>
+    :root {
+      --primary: #ffc107;
+      --primary-dark: #d39e00;
+      --text-main: #343a40;
+      --light-bg: #f8f9fa;
+    }
 
-        .breadcrumb {
-            font-size: 14px;
-            color: #666;
-        }
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+    }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #154360;
-            text-transform: uppercase;
-            border-bottom: 2px solid #1a5276;
-            padding-bottom: 10px;
-        }
+    .profile-card {
+      max-width: 1100px;
+      margin: auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      padding: 40px;
+      position: relative;
+    }
 
-        .profile-item {
-            margin: 15px 0;
-            font-size: 18px;
-        }
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 6px;
+      width: 100%;
+      background: linear-gradient(to right, var(--primary), transparent);
+    }
 
-        .profile-item strong {
-            display: inline-block;
-            width: 200px;
-            color: #2c3e50;
-        }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
 
-        .profile-picture {
-            text-align: center;
-            margin-top: 30px;
-        }
+    .profile-image {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background-color: #f1f1f1;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
 
-        .profile-picture img {
-            height: 150px;
-            width: 150px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 3px solid #2980b9;
-        }
+    .profile-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-        .no-picture {
-            text-align: center;
-            color: gray;
-            font-style: italic;
-        }
+    .profile-title {
+      flex-grow: 1;
+    }
 
-        .edit-button {
-            display: inline-block;
-            background-color: #117A65;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
+    .profile-title h2 {
+      margin: 0;
+      font-size: 28px;
+      color: var(--text-main);
+    }
 
-        .edit-button:hover {
-            background-color: #0e6655;
-        }
+    .profile-title small {
+      color: #666;
+      font-size: 16px;
+    }
 
-        .edit-container {
-            text-align: right;
-            margin-top: 30px;
-        }
-    </style>
+    .section {
+      margin-top: 40px;
+    }
+
+    .section h5 {
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin-bottom: 20px;
+      font-size: 20px;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 5px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .info-box {
+      background-color: #fffbe6;
+      padding: 18px 24px;
+      border-left: 5px solid var(--primary-dark);
+      border-radius: 8px;
+    }
+
+    .info-box strong {
+      display: block;
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .info-box span {
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .actions {
+      margin-top: 45px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-custom {
+      padding: 12px 28px;
+      font-weight: 500;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+
+    .btn-edit {
+      background-color: var(--primary);
+      color: #212529;
+      border: none;
+    }
+
+    .btn-edit:hover {
+      background-color: var(--primary-dark);
+      color: white;
+    }
+
+    .btn-back {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+    }
+
+    .btn-back:hover {
+      background-color: #565e64;
+    }
+
+    @media (max-width: 768px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .profile-title {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="profile-container">
-        <div class="top-bar">
-            <div class="breadcrumb">Dashboard > Profile</div>
-            <div class="edit-container">
-                <a href="{% url 'collector:update_collector' user.username %}"class="edit-button">Edit Profile</a>
-            </div>
-        </div>
-
-        <h2>Collector Profile</h2>
-
-        <div class="profile-picture">
-            {% if profile_picture %}
-                <img src="{{ profile_picture }}" alt="Profile Picture">
-            {% else %}
-                <p class="no-picture">No profile picture uploaded.</p>
-            {% endif %}
-        </div>
-
-        <div class="profile-item"><strong>Full Name:</strong> {{ full_name }}</div>
-        <div class="profile-item"><strong>Username:</strong> {{ username }}</div>
-        <div class="profile-item"><strong>Email:</strong> {{ email }}</div>
-        <div class="profile-item"><strong>District:</strong> {{ district }}</div>
-        <div class="profile-item"><strong>Collector ID:</strong> {{ collector_id }}</div>
-        <div class="profile-item"><strong>Tenure Start:</strong> {{ tenure_start }}</div>
-        <div class="profile-item"><strong>Office Address:</strong> {{ official_address }}</div>
-
+  <div class="profile-card">
+    <div class="header">
+      <div class="profile-image">
+        {% if profile_picture %}
+          <img src="{{ profile_picture }}" alt="Profile Picture">
+        {% else %}
+          <img src="{% static 'img/default-user.png' %}" alt="No Image">
+        {% endif %}
+      </div>
+      <div class="profile-title">
+        <h2>{{ full_name }}</h2>
+        <small>{{ district }} District Collector</small>
+      </div>
     </div>
+
+    <div class="section">
+      <h5><i class="fas fa-user me-2"></i>Personal Information</h5>
+      <div class="info-grid">
+        <div class="info-box">
+          <strong>Username</strong>
+          <span>{{ username }}</span>
+        </div>
+        <div class="info-box">
+          <strong>Email</strong>
+          <span>{{ email }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h5><i class="fas fa-building me-2"></i>Official Details</h5>
+      <div class="info-grid">
+        <div class="info-box">
+          <strong>District</strong>
+          <span>{{ district }}</span>
+        </div>
+        <div class="info-box">
+          <strong>Tenure Start</strong>
+          <span>{{ tenure_start }}</span>
+        </div>
+        <div class="info-box" style="grid-column: span 2;">
+          <strong>Office Address</strong>
+          <span>{{ official_address }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-back btn-custom">
+        <i class="fas fa-arrow-left"></i> Back
+      </a>
+      <a href="{% url 'collector:update_collector' username %}" class="btn btn-edit btn-custom">
+        <i class="fas fa-edit"></i> Edit Profile
+      </a>
+    </div>
+  </div>
 </body>
 </html>

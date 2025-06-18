@@ -34,15 +34,48 @@ from urllib.parse import quote
 from django.utils.timezone import is_aware
 from django.utils.dateparse import parse_date
 import datetime
-from django.db.models import Count, Avg, Min, F, ExpressionWrapper, DurationField
+from django.db.models import (
+    Count, Avg, Q, F, ExpressionWrapper, DurationField, FloatField, Case, When, Value
+)
 from django.utils.timezone import now
 from django.core.paginator import Paginator
+from django.db.models.functions import Coalesce, Cast, Round
+from django.db.models import Value
+import openpyxl
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password
+import re
 
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 # Auto-generate Collector ID based on district code
+#set this to first as 49
+
 def auto_collector_id(district):
     prefix = 'COLL'
-    return prefix + str(district.code).upper()
+    district_code = district.code.upper()
 
+    # Filter collector IDs for this district
+    collectors = CollectorProfile.objects.filter(district=district).values_list('collector_id', flat=True)
+
+    max_number = 0
+    pattern = re.compile(rf"{prefix}(\d+){district_code}$", re.IGNORECASE)
+
+    for cid in collectors:
+        match = pattern.match(cid)
+        if match:
+            num = int(match.group(1))
+            if num > max_number:
+                max_number = num
+
+    next_number = max_number + 1
+    return f"{prefix}{next_number}{district_code}"
 
 # Create new collector (user + profile)
 def create_collector(request):
@@ -90,42 +123,65 @@ def create_collector(request):
 def view_collector(request):
     collectors = CollectorProfile.objects.all()
     return render(request, 'collector/collector_list.html', {'collectors': collectors})
+# ──────────────────────────────────────────────────────────
 
 
+
+
+
+
+
+
+@login_required
 def update_collector(request, username):
-    # Get the existing user and profile
-    user_instance = get_object_or_404(User, username=username, user_type='COLLECTOR')
-    profile_instance = get_object_or_404(CollectorProfile, user=user_instance)
+    """Handle collector profile updates"""
 
-    # Use update forms (no password fields)
-    user_form = CollectorUpdateUserForm(request.POST or None, instance=user_instance)
-    profile_form = CollectorProfileForm(request.POST or None, request.FILES or None, instance=profile_instance)
+    # Ensure only collectors can access
+    if request.user.user_type != "COLLECTOR":
+        messages.error(request, "Only collectors may access this page")
+        return redirect("home")
 
-    if request.method == 'POST':
+    user_obj = request.user
+    profile_obj = get_object_or_404(CollectorProfile, user=user_obj)
+    district = profile_obj.district
+
+    if request.method == "POST":
+        user_form = CollectorUpdateUserForm(request.POST, instance=user_obj)
+        profile_form = CollectorProfileForm(request.POST, request.FILES, instance=profile_obj)
+
+        # Force the district value if disabled in the form
+        profile_form.data = profile_form.data.copy()
+        profile_form.data["district"] = district.pk
+
         if user_form.is_valid() and profile_form.is_valid():
-            district = profile_form.cleaned_data['district']
-
-            # Save updated user details (without password)
+            # Save user
             user = user_form.save(commit=False)
-            user.username = auto_collector_id(district)  # Regenerate username based on new district (if changed)
+            user.username = auto_collector_id(district)
             user.save()
 
-            # Save updated profile
+            # Save profile
             profile = profile_form.save(commit=False)
             profile.user = user
-            profile.collector_id = user.username  # Keep in sync with new username
+            profile.collector_id = user.username
+            profile.district = district
+
+            # Check if image uploaded
+            if 'profile_picture' in request.FILES:
+                profile.profile_picture = request.FILES['profile_picture']
+
             profile.save()
 
-            messages.success(request, f"Collector '{user.username}' updated successfully.")
-            return redirect('collector:view_collector')
-
+            messages.success(request, "Profile updated successfully!")
+            return redirect("collector:update_collector", username=user.username)
         else:
-            print("User form errors:", user_form.errors)
-            print("Profile form errors:", profile_form.errors)
+            messages.error(request, "Please correct the errors below.")
+    else:
+        user_form = CollectorUpdateUserForm(instance=user_obj)
+        profile_form = CollectorProfileForm(instance=profile_obj)
 
-    return render(request, 'collector/update_collector.html', {
-        'user_form': user_form,
-        'profile_form': profile_form
+    return render(request, "collector/update_collector.html", {
+        "user_form": user_form,
+        "profile_form": profile_form,
     })
 
 # Delete a collector
@@ -260,6 +316,7 @@ def officer_details(request):
     # Get collector and district
     collector_profile = get_object_or_404(CollectorProfile.objects.select_related('district'), user=request.user)
     district = collector_profile.district
+    
 
     # Get HOD officers in the collector's district
     hod_officers = OfficerProfile.objects.select_related('user', 'department') \
@@ -623,6 +680,11 @@ def export_grievance_pdf(request):
     except Exception as e:
         messages.error(request, f"Failed to generate PDF: {str(e)}")
         return redirect("collector:grievance_report")
+    
+
+
+
+
 @login_required 
 def details_download(request, grievance_id):
     try:
@@ -693,54 +755,309 @@ def details_download(request, grievance_id):
     except Exception as e:
         messages.error(request, f"Failed to generate PDF: {str(e)}")
         return redirect("collector:grievance_report")
-    
+   
+
+
+
+
+
+
+
+
 @login_required
 def department_report_view(request):
     collector = get_object_or_404(CollectorProfile, user=request.user)
-    district   = collector.district
+    district = collector.district
 
-    departments = Department.objects.filter(district=district)
+    qs = Department.objects.filter(district=district)
+    search = request.GET.get("search")
+    sort_by = request.GET.get("sort_by")
+
+    if search:
+        qs = qs.filter(name__icontains=search)
 
     report_data = []
-    for dept in departments:
+    for dept in qs:
         grievances = Grievance.objects.filter(department=dept, district=district)
-        total      = grievances.count()
-        pending    = grievances.filter(status="PENDING").count()
-        resolved   = grievances.filter(status="RESOLVED").count()
-        rejected   = grievances.filter(status="REJECTED").count()
-        escalated  = grievances.filter(status="ESCALATED").count()
+        total = grievances.count()
+        pending = grievances.filter(status="PENDING").count()
+        resolved = grievances.filter(status="RESOLVED").count()
+        rejected = grievances.filter(status="REJECTED").count()
+        escalated = grievances.filter(status="ESCALATED").count()
 
-        avg_time = grievances.filter(status="RESOLVED").annotate(
-            resolution=ExpressionWrapper(F("last_updated") - F("date_filed"),
-                                         output_field=DurationField())
-        ).aggregate(avg=Avg("resolution"))["avg"]
-
-        oldest = grievances.filter(status="PENDING").aggregate(
-            old=Min("date_filed")
-        )["old"]
+        resolution_rate = round((resolved / total) * 100, 2) if total else 0
 
         report_data.append({
             "name": dept.name,
+            "code": dept.code,
             "total": total,
             "pending": pending,
             "resolved": resolved,
             "rejected": rejected,
             "escalated": escalated,
-            "avg_resolution_time": avg_time,
-            "oldest_pending": oldest,
+            "resolution_rate": resolution_rate,
         })
 
-    # ── optional pagination (10 depts per page) ──────────────────────────
-    paginator  = Paginator(report_data, 10)
-    page_num   = request.GET.get("page")
-    page_obj   = paginator.get_page(page_num)
+    if sort_by:
+        reverse = sort_by.startswith("-")
+        key = sort_by.lstrip("-")
+        report_data.sort(key=lambda x: x.get(key, 0), reverse=reverse)
+
+    # ✅ Store final filtered and sorted data for export
+    request.session['filtered_department_report'] = report_data
+
+    paginator = Paginator(report_data, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    total_depts = qs.count()
+    avg_resolution_rate = round(sum(d["resolution_rate"] for d in report_data) / total_depts, 2) if total_depts else 0
 
     context = {
-        "district"         : district,
-        "departments"      : departments,
-        "department_report": page_obj.object_list,   # the current slice
-        "grievances"       : page_obj,               # for pagination links
+        "district": district,
+        "department_report": page_obj,
+        "department_count": total_depts,
+        "summary": {
+            "total_depts": total_depts,
+            "avg_resolution_rate": avg_resolution_rate,
+        }
+    }
+    return render(request, "collector/department_report.html", context)
+
+
+@login_required
+def export_department_excel(request):
+    collector = get_object_or_404(CollectorProfile, user=request.user)
+    district = collector.district
+
+    report_data = request.session.get("filtered_department_report")
+
+    # Fallback: if session is missing
+    if not report_data:
+        qs = Department.objects.filter(district=district)
+        report_data = []
+        for dept in qs:
+            grievances = Grievance.objects.filter(department=dept, district=district)
+            total = grievances.count()
+            resolved = grievances.filter(status="RESOLVED").count()
+            report_data.append({
+                "name": dept.name,
+                "code": dept.code,
+                "total": total,
+                "pending": grievances.filter(status="PENDING").count(),
+                "resolved": resolved,
+                "rejected": grievances.filter(status="REJECTED").count(),
+                "escalated": grievances.filter(status="ESCALATED").count(),
+                "resolution_rate": round((resolved / total) * 100, 2) if total else 0,
+            })
+
+    df = (
+        pd.DataFrame(report_data)
+          .rename(columns={
+              "name": "Department",
+              "code": "Code",
+              "total": "Total Grievances",
+              "pending": "Pending",
+              "resolved": "Resolved",
+              "rejected": "Rejected",
+              "escalated": "Escalated",
+              "resolution_rate": "Resolution Rate (%)",
+          })
+    )
+
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        df.to_excel(writer, sheet_name="Department Report", index=False)
+        ws = writer.sheets["Department Report"]
+
+        widths = [25, 15, 18, 12, 12, 12, 12, 20, 25]
+        for idx, width in enumerate(widths, start=1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(idx)].width = width
+
+        ws.freeze_panes = "A2"
+        ws.auto_filter.ref = ws.dimensions
+
+    buffer.seek(0)
+    return FileResponse(
+        buffer,
+        as_attachment=True,
+        filename=f"{district.name.replace(' ', '_')}_department_report.xlsx",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+@login_required
+def export_department_pdf(request):
+    try:
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        district = collector.district
+
+        report_data = request.session.get("filtered_department_report", [])
+
+        if not report_data:
+            messages.error(request, "No filtered data available to export. Please generate a report first.")
+            return redirect('department_report_view')
+
+        # --- PDF Setup ---
+        pdf = FPDF('L', 'mm', 'A4')  # Landscape A4
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+
+        try:
+            font_dir = Path(settings.BASE_DIR) / "fonts"
+            pdf.add_font('DejaVu', '', str(font_dir / 'DejaVuSans.ttf'), uni=True)
+            pdf.add_font('DejaVu', 'B', str(font_dir / 'DejaVuSans-Bold.ttf'), uni=True)
+            font = 'DejaVu'
+        except:
+            font = 'Arial'
+
+        pdf.set_font(font, 'B', 16)
+        pdf.cell(0, 10, f'{district.name} - Department Performance Report', 0, 1, 'C')
+        pdf.ln(5)
+
+        # --- Table Header ---
+        pdf.set_fill_color(79, 129, 189)
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font(font, 'B', 10)
+
+        col_widths = [60, 22, 22, 22, 22, 22, 30, 35]
+        headers = [
+            'Department', 'Code', 'Total', 'Pending',
+            'Resolved', 'Rejected', 'Resolution %',
+        ]
+
+        for header, width in zip(headers, col_widths):
+            pdf.cell(width, 8, header, border=1, align='C', fill=True)
+        pdf.ln()
+
+        # --- Table Body ---
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font(font, '', 9)
+
+        for dept in report_data:
+            pdf.cell(col_widths[0], 8, dept['name'], border=1)
+            pdf.cell(col_widths[1], 8, dept['code'], border=1, align='C')
+            pdf.cell(col_widths[2], 8, str(dept['total']), border=1, align='C')
+            pdf.cell(col_widths[3], 8, str(dept['pending']), border=1, align='C')
+            pdf.cell(col_widths[4], 8, str(dept['resolved']), border=1, align='C')
+            pdf.cell(col_widths[5], 8, str(dept['rejected']), border=1, align='C')
+            pdf.cell(col_widths[6], 8, f"{dept['resolution_rate']}%", border=1, align='C')
+            pdf.ln()
+
+        # --- Output the PDF ---
+        buffer = io.BytesIO()
+        pdf.output(buffer)
+        buffer.seek(0)
+
+        return FileResponse(
+            buffer,
+            as_attachment=True,
+            filename=f"{district.name.replace(' ', '_')}_department_report.pdf",
+            content_type='application/pdf'
+        )
+
+    except Exception as e:
+        messages.error(request, f"Failed to generate PDF: {str(e)}")
+        return redirect('department_report_view')
+
+
+
+
+
+
+
+def department_card_view(request, department_id):
+    # ---------- basic context ----------
+    collector = get_object_or_404(
+        CollectorProfile.objects.select_related('district'),
+        user=request.user
+    )
+    district    = collector.district
+    department  = get_object_or_404(Department, code=department_id)
+
+    # ---------- filters from request ----------
+    status_filter = request.GET.get("status", "ALL")
+    date_from     = request.GET.get("date_from")
+    date_to       = request.GET.get("date_to")
+    search_query  = request.GET.get("search", "").strip()
+
+    # ---------- start with dept + district ----------
+    base_qs = Grievance.objects.filter(
+        district=district,
+        department=department
+    )
+
+    # ----- date range -----
+    if date_from:
+        base_qs = base_qs.filter(date_filed__date__gte=date_from)
+    if date_to:
+        base_qs = base_qs.filter(date_filed__date__lte=date_to)
+
+    # ----- free‑text search (ID or phone) -----
+    if search_query:
+        base_qs = base_qs.filter(
+            Q(grievance_id__icontains=search_query) |
+            Q(contact_number__icontains=search_query)
+        )
+
+    # ---------- counts BEFORE status filter ----------
+    counts = {
+        "total":     base_qs.count(),
+        "pending":   base_qs.filter(status="PENDING").count(),
+        "in_progress": base_qs.filter(status="IN_PROGRESS").count(),
+        "resolved":  base_qs.filter(status="RESOLVED").count(),
+        "rejected":  base_qs.filter(status="REJECTED").count(),
+        "escalated": base_qs.filter(status="ESCALATED").count(),
     }
 
-    # ✅ pass template‑name **and** context
-    return render(request, "collector/department_report.html", context)
+    # ---------- now apply status filter for table ----------
+    if status_filter != "ALL":
+        grievances_qs = base_qs.filter(status=status_filter)
+    else:
+        grievances_qs = base_qs
+
+    grievances_qs = grievances_qs.order_by("-date_filed")
+
+    # ---------- pagination ----------
+    paginator   = Paginator(grievances_qs, 25)
+    page_number = request.GET.get("page")
+    page_obj    = paginator.get_page(page_number)
+
+    # ---------- render ----------
+    context = {
+        "district":       district,
+        "department":     department,
+        "grievances":     page_obj,
+        "counts":         counts,
+        "status_filter":  status_filter,
+        "date_from":      date_from,
+        "date_to":        date_to,
+        "search_query":   search_query,
+    }
+    return render(request, "collector/each_dept.html", context)
+
+@login_required
+def collector_change_password(request):
+    """Handle password changes"""
+    if request.method == "POST":
+        user = request.user
+        current_password = request.POST.get("old_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if not check_password(current_password, user.password):
+            messages.error(request, "Current password is incorrect")
+        elif new_password != confirm_password:
+            messages.error(request, "New passwords do not match")
+        else:
+            try:
+                validate_password(new_password, user=user)
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Password changed successfully!")
+                return redirect("collector:update_collector", username=user.username)
+            except ValidationError as e:
+                for error in e.messages:
+                    messages.error(request, error)
+
+    return render(request, "collector/password_change.html")
+

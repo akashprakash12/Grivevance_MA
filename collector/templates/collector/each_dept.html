@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ department.name }} – Collector Portal</title>
+
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --indigo:#002855;
+      --indigo-light:#08438f;
+      --accent:#ffc107;
+      --bg:#f4f6f9;
+      --card-shadow:0 2px 8px rgba(0,0,0,.08);
+      --card-shadow-hover:0 6px 16px rgba(0,0,0,.12);
+    }
+    html,body{height:100%;overflow:auto}
+    body{margin:0;background:var(--bg);font-family:'Segoe UI',sans-serif}
+
+    /* Layout */
+    .container-custom{padding:1rem 1.2rem;height:calc(100vh - 80px);overflow:auto}
+
+    /* Navbar */
+    .navbar-custom{background:var(--indigo);padding:1rem 2rem;border-bottom:4px solid var(--indigo-light);box-shadow:0 3px 6px rgba(0,0,0,.3)}
+    .navbar-custom .nav-link{color:#fff!important;font-weight:500;margin-left:1rem}
+    .navbar-custom .nav-link:hover{color:var(--accent)!important;text-decoration:underline}
+
+    /* Cards */
+    .report-container{background:#fff;border-radius:12px;padding:25px;box-shadow:var(--card-shadow);margin-top:20px}
+    .report-heading{font-weight:700;color:var(--indigo);border-bottom:2px solid var(--accent);padding-bottom:10px;margin-bottom:20px}
+
+    .stat-card{background:#fff;border-radius:12px;padding:15px;text-align:center;box-shadow:var(--card-shadow);transition:.2s;height:100%}
+    .stat-card:hover{box-shadow:var(--card-shadow-hover);transform:translateY(-3px)}
+    .stat-card h5{font-weight:600;margin-bottom:8px;color:var(--indigo)}
+    .stat-card .count{font-size:2.4rem;font-weight:800}
+
+    /* Filter */
+    .filter-section{background:#f8f9fa;border-left:4px solid var(--accent);padding:20px;border-radius:10px;margin-bottom:25px}
+
+    /* Table */
+    .table-responsive{max-height:65vh;overflow:auto;border-radius:10px}
+    .table thead{background:var(--indigo);color:#fff;position:sticky;top:0;z-index:10}
+    .text-truncate-2{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
+
+    .status-badge{padding:5px 10px;border-radius:50px;font-size:.85rem;font-weight:500}
+    .status-pending{background:#fff3cd;color:#856404}
+    .status-in_progress{background:#cce5ff;color:#004085}
+    .status-resolved{background:#d4edda;color:#155724}
+    .status-rejected{background:#f8d7da;color:#721c24}
+    .status-escalated{background:#e2e3e5;color:#383d41}
+
+    .empty-state{padding:40px;text-align:center;color:#6c757d}
+    .empty-state i{font-size:3rem;margin-bottom:15px;color:#dee2e6}
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar-custom d-flex justify-content-between align-items-center flex-wrap">
+    <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
+    <ul class="nav gap-3 align-items-center">
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i>Officers</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i>Profile</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container-custom">
+    <div class="report-container">
+
+      <h3 class="report-heading">
+        <i class="fas fa-building me-2"></i>{{ department.name|upper }} – GRIEVANCE DETAILS
+      </h3>
+
+      <!-- STATS -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-2"><div class="stat-card"><h5>Total</h5><div class="count text-primary">{{ counts.total }}</div></div></div>
+        <div class="col-md-2"><div class="stat-card"><h5>Pending</h5><div class="count text-danger">{{ counts.pending }}</div></div></div>
+        <div class="col-md-2"><div class="stat-card"><h5>In Progress</h5><div class="count text-warning">{{ counts.in_progress }}</div></div></div>
+        <div class="col-md-2"><div class="stat-card"><h5>Resolved</h5><div class="count text-success">{{ counts.resolved }}</div></div></div>
+        <div class="col-md-2"><div class="stat-card"><h5>Rejected</h5><div class="count text-secondary">{{ counts.rejected }}</div></div></div>
+        <div class="col-md-2"><div class="stat-card"><h5>Escalated</h5><div class="count text-info">{{ counts.escalated }}</div></div></div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="filter-section">
+        <form method="get" class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Status</label>
+            <select class="form-select" name="status">
+              <option value="ALL" {% if status_filter == "ALL" %}selected{% endif %}>All Status</option>
+              <option value="PENDING" {% if status_filter == "PENDING" %}selected{% endif %}>Pending</option>
+              <option value="IN_PROGRESS" {% if status_filter == "IN_PROGRESS" %}selected{% endif %}>In Progress</option>
+              <option value="RESOLVED" {% if status_filter == "RESOLVED" %}selected{% endif %}>Resolved</option>
+              <option value="REJECTED" {% if status_filter == "REJECTED" %}selected{% endif %}>Rejected</option>
+              <option value="ESCALATED" {% if status_filter == "ESCALATED" %}selected{% endif %}>Escalated</option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Date From</label>
+            <input type="date" class="form-control" name="date_from" value="{{ date_filed }}">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Date To</label>
+            <input type="date" class="form-control" name="date_to" value="{{ last_updated }}">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Search</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" name="search" placeholder="GRV.ID or PH.NO" value="{{ search_query }}">
+            </div>
+          </div>
+
+          <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+            <!-- Reset: link to same view without params -->
+            <a href="{% url 'collector:department_card' department.code %}" class="btn btn-outline-secondary btn-export">
+              <i class="fas fa-sync-alt me-1"></i>Reset
+            </a>
+            <button type="submit" class="btn btn-primary btn-export">
+              <i class="fas fa-search me-1"></i>Search
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead>
+            <tr>
+              <th>GRV ID</th><th>Status</th><th>Applicant</th>
+              <th>Contact</th><th>Description</th><th>Priority</th><th>Due Date</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for grievance in grievances %}
+            <tr>
+              <td class="fw-bold">{{ grievance.grievance_id }}</td>
+              <td><span class="status-badge status-{{ grievance.status|lower }}">{{ grievance.get_status_display }}</span></td>
+              <td>{{ grievance.applicant_name }}</td>
+              <td>{{ grievance.contact_number }}</td>
+              <td class="text-truncate-2">{{ grievance.description }}</td>
+              <td>{{ grievance.priority }}</td>
+              <td>{{ grievance.due_date|date:"Y-m-d"|default:"-" }}</td>
+              <td>
+                <a href="#" class="btn btn-sm btn-primary">
+                  <i class="fas fa-eye me-1"></i>Remark
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h5>No grievances found</h5>
+                <p>Try adjusting your filters or check back later.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINATION -->
+      {% if grievances.has_other_pages %}
+      {% with query=request.GET.urlencode %}
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if grievances.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ grievances.previous_page_number }}{% if query %}&{{ query }}{% endif %}">Previous</a>
+          </li>
+          {% endif %}
+
+          {% for i in grievances.paginator.page_range %}
+            {% if grievances.number == i %}
+              <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+            {% else %}
+              <li class="page-item"><a class="page-link" href="?page={{ i }}{% if query %}&{{ query }}{% endif %}">{{ i }}</a></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if grievances.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ grievances.next_page_number }}{% if query %}&{{ query }}{% endif %}">Next</a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endwith %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Highlight active filters visually
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      document.querySelectorAll('.filter-section input, .filter-section select').forEach(el => {
+        if(params.get(el.name)) el.classList.add('is-valid');
+      });
+    });
+  </script>
+</body>
+</html>
