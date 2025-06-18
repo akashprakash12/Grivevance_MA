@@ -1,8 +1,5 @@
-# .gitignore
-node_modules/
-.venv/
-build/
-dist/
+__pycache__/
 *.pyc
-.DS_Store
 .env
+facebook_realtime.log
+*.log
