@@ -1061,3 +1061,144 @@ def collector_change_password(request):
 
     return render(request, "collector/password_change.html")
 
+
+def update_remark(request):
+    grievance_id = request.POST.get('grievance_id')
+    remark = request.POST.get('remark')
+    priority = request.POST.get('priority')
+
+    grievance = get_object_or_404(Grievance, id=grievance_id)
+    grievance.remark = remark
+    grievance.priority = priority
+    grievance.save()
+
+    messages.success(request, f"Remark and priority updated for GRV ID: {grievance.grievance_id}")
+    return redirect('collector:department_card', grievance.department.code)
+
+
+@login_required
+def department_grievances_download(request, department_id):
+    try:
+        # 1. Security/ownership checks
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        district = collector.district
+        department = get_object_or_404(Department, code=department_id, district=district)
+
+        # 2. Apply filters from request
+        qs = (
+            Grievance.objects
+            .filter(district=district, department=department)
+            .select_related("department")
+            .order_by("-date_filed")
+        )
+
+        status = request.GET.get("status", "ALL")
+        if status != "ALL":
+            qs = qs.filter(status=status)
+
+        date_from = request.GET.get("date_from")
+        date_to = request.GET.get("date_to")
+        if date_from:
+            qs = qs.filter(date_filed__gte=date_from)
+        if date_to:
+            qs = qs.filter(date_filed__lte=date_to)
+
+        search = request.GET.get("search")
+        if search:
+            qs = qs.filter(
+                Q(grievance_id__icontains=search) |
+                Q(contact_number__icontains=search)
+            )
+
+        # 3. PDF setup with simplified font handling
+        pdf = FPDF("P", "mm", "A4")
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+
+        # Use built-in fonts to avoid font registration issues
+        font_family = 'Arial'  # Default built-in font
+        
+        # Alternatively, if you really need DejaVu, register all variants properly:
+        try:
+            font_dir = Path(settings.BASE_DIR) / "fonts"
+            if font_dir.exists():
+                # Register all required variants
+                pdf.add_font('DejaVu', '', str(font_dir / 'DejaVuSans.ttf'), uni=True)
+                pdf.add_font('DejaVu', 'B', str(font_dir / 'DejaVuSans-Bold.ttf'), uni=True)
+                pdf.add_font('DejaVu', 'I', str(font_dir / 'DejaVuSans-Oblique.ttf'), uni=True)
+                pdf.add_font('DejaVu', 'BI', str(font_dir / 'DejaVuSans-BoldOblique.ttf'), uni=True)
+                font_family = 'DejaVu'
+        except Exception as font_error:
+            print(f"Font loading error, falling back to Arial: {font_error}")
+            font_family = 'Arial'
+
+        # Header
+        pdf.set_font(font_family, "B", 16)
+        pdf.cell(0, 10, f"{district.name} District", ln=True, align="C")
+        pdf.cell(0, 10, f"{department.name} - Grievance Report", ln=True, align="C")
+        
+        # Filters info
+        pdf.set_font(font_family, "", 10)  # Note: Using regular style, not italic
+        filter_text = []
+        if status != "ALL":
+            filter_text.append(f"Status: {status}")
+        if date_from:
+            filter_text.append(f"From: {date_from}")
+        if date_to:
+            filter_text.append(f"To: {date_to}")
+        if search:
+            filter_text.append(f"Search: {search}")
+        
+        if filter_text:
+            pdf.ln(5)
+            pdf.cell(0, 6, "Filters: " + " | ".join(filter_text), ln=True)
+        
+        pdf.ln(10)
+
+        # Grievance list
+        if qs.exists():
+            pdf.set_font(font_family, "B", 11)
+            for grievance in qs:
+                pdf.cell(0, 8, f"GRV {grievance.grievance_id}  -  {grievance.applicant_name}", ln=True)
+                
+                pdf.set_font(font_family, "", 9)  # Regular style for details
+                filed_date = grievance.date_filed.strftime('%Y-%m-%d %H:%M')
+                due_date = grievance.due_date.strftime('%Y-%m-%d') if grievance.due_date else 'Not set'
+                
+                pdf.multi_cell(
+                    0,
+                    5,
+                    (
+                        f"Contact: {grievance.contact_number} | Priority: {grievance.priority} | Status: {grievance.get_status_display()}\n"
+                        f"Subject: {grievance.subject or '-'}\n"
+                        f"Description: {grievance.description}\n"
+                        f"Filed: {filed_date} | Due: {due_date}"
+                    ),
+                )
+                
+                pdf.set_draw_color(200, 200, 200)
+                pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+                pdf.ln(5)
+                pdf.set_font(font_family, "B", 11)
+        else:
+            pdf.set_font(font_family, "", 12)
+            pdf.cell(0, 10, "No grievances found matching the selected filters", ln=True, align="C")
+
+        # Footer - using regular font instead of italic to avoid issues
+        pdf.set_y(-15)
+        pdf.set_font(font_family, "", 8)  # Changed from "I" to ""
+        pdf.cell(0, 10, f"Generated on {timezone.now().strftime('%Y-%m-%d %H:%M')}", 0, 0, 'C')
+
+        # 4. Stream PDF to browser
+        buffer = io.BytesIO()
+        pdf.output(buffer)
+        buffer.seek(0)
+
+        file_name = f"{department.code.lower()}_grievances_{timezone.now().strftime('%Y%m%d')}.pdf"
+        return FileResponse(buffer, as_attachment=True,
+                          filename=file_name,
+                          content_type="application/pdf")
+
+    except Exception as e:
+        print(f"Error in PDF generation: {str(e)}")
+        return HttpResponse(f"An error occurred while generating the PDF: {str(e)}", status=500)

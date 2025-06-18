@@ -32,7 +32,13 @@ path('update/<str:username>/', views.update_collector, name='update_collector'),
     # password post endpoint
 path('change-password/', views.collector_change_password, name='collector_change_password'),
 
-
+path('update-remark/', views.update_remark, name='update_remark'),
+    path("download/<str:grievance_id>/", views.details_download, name="details_download"),
+path(
+        "department/<str:department_id>/grievances/pdf/",
+        views.department_grievances_download,
+        name="department_grievances_download",
+    ),
 
 
 ]
