@@ -4,33 +4,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook Page Manager</title>
-    <link rel="stylesheet" href="{% static 'posts/css/style.css' %}">
+    <title>Post to Facebook</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'posts/style.css' %}">
 </head>
-<body>
-    <div class="container">
-        <h1>Facebook Page Manager</h1>
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
-        <form id="postForm" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <textarea name="message" placeholder="Enter your post message"></textarea>
-            <input type="file" name="image" accept="image/*">
-            <label>
-                <input type="checkbox" name="read_comments"> Read Comments
-            </label>
-            <input type="number" name="time_limit" placeholder="Time limit (hours, optional)">
-            <button type="submit">Post to Facebook</button>
-        </form>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Post a Complaint</h1>
+        <p class="text-center text-muted mb-4">Share your complaint on the district's Facebook page</p>
 
-        <h2>Previous Posts</h2>
-        <ul id="posts">
-            {% for post in posts %}
-                <li>Post ID: {{ post.post_id }} - {{ post.read_comments|yesno:"Reading Comments,Not Reading" }}</li>
-            {% endfor %}
-        </ul>
+        {% if error %}
+        <div class="alert alert-danger text-center" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div class="alert alert-success text-center" role="alert">
+            {{ success }}
+        </div>
+        {% endif %}
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form id="post-form" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Your Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" maxlength="500" required></textarea>
+                        <div class="invalid-feedback">Please enter a message.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Upload Image/Video (Optional)</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".png,.jpg,.jpeg,.gif,.mp4,.mov,.avi">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="read_comments" name="read_comments">
+                        <label class="form-check-label" for="read_comments">Read Comments</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="time_limit" class="form-label">Comment Reading Duration (Hours)</label>
+                        <input type="number" class="form-control" id="time_limit" name="time_limit" value="60" min="1">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Post to Facebook</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="post-result" class="mt-4"></div>
+        <div id="comments-section" class="mt-4"></div>
     </div>
-    <script src="{% static 'posts/js/script.js' %}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'posts/script.js' %}"></script>
 </body>
 </html>

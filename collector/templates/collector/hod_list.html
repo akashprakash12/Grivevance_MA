@@ -192,17 +192,16 @@
         <td>
           {{ officer.user.email }}
           <a href="{% url 'collector:send_mail' officer.user.email %}" 
-            target="_blank" class="icon" title="Send Email as Collector">
+             target="_blank" class="icon" title="Send Email as Collector">
             <i class="fas fa-envelope" style="color:#db4437;"></i>
           </a>
         </td>
         <td>{{ officer.user.phone }}</td>
       </tr>
       {% empty %}
-      <tr>
-        <td colspan="4" class="no-data">No HODs found in your district.</td>
-      </tr>
+      <tr><td colspan="4">No HOD officers found in this district.</td></tr>
       {% endfor %}
+      
     </table>
   </div>
 
