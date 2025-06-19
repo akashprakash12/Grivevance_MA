@@ -3,3 +3,4 @@ __pycache__/
 .env
 facebook_realtime.log
 *.log
+-e "*.pyc\n__pycache__/" 

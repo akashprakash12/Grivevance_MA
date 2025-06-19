@@ -95,6 +95,9 @@
         margin-top: 0.5rem;
       }
     }
+    .clickable-card {
+  cursor: pointer;
+}
 
     .rank-section {
       background: #fff;
@@ -324,6 +327,11 @@
   <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
   
   <ul class="nav gap-3 align-items-center">
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'collector:collector_department_create' %}">
+        <i class="fas fa-plus-circle me-1"></i> Create Dept
+      </a>
+    </li>
     <!-- Reports Dropdown -->
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -440,6 +448,7 @@
           </div>
         </form>
       </div>
+      
       <div class="row g-4" id="dept-container">
         {% for dept in departments %}
         <div class="col-md-4 dept-card-wrapper">
@@ -461,114 +470,172 @@
         </div>
         {% endfor %}
       </div>
+      <!-- Grievance Search Result Container -->
+      <div class="row g-4" id="grievance-container" style="display:none;">
+        {% for gr in all_grievances %}
+          <div class="col-md-4 gr-card-wrapper clickable-card"
+               data-grv-id="{{ gr.grievance_id|lower }}"
+               data-contact="{{ gr.contact_number|default:''|lower }}"
+               data-url="{% url 'grievance_detail' gr.grievance_id %}">
+            <div class="card-dept border-warning">
+              <div class="dept-title">
+                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                Grievance {{ gr.grievance_id }}
+              </div>
+      
+              <p class="mb-1"><strong>Status:</strong> {{ gr.status }}</p>
+              <p class="mb-1"><strong>Contact:</strong> {{ gr.contact_number }}</p>
+              <p class="mb-1"><strong>Subject:</strong> {{ gr.subject }}</p>
+              <p class="mb-1"><strong>Due Date:</strong> {{ gr.due_date|date:"M d, Y" }}</p>
+              <p class="mb-1"><strong>Address:</strong> {{ gr.address|default:"—" }}</p>
+              <p class="mb-1"><strong>Description:</strong> {{ gr.description|truncatechars:100 }}</p>
+      
+              <!-- Buttons for actions -->
+              <div class="mt-3 d-flex justify-content-between">
+                <a href="#" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-comment-dots me-1"></i> Remark
+                </a>
+                <a href="#" target="_blank" class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-file-pdf me-1"></i> PDF
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
       
       
       
     </div>
   </div>
 </div>
+
+<!-- Modal for Remark -->
+<div class="modal fade" id="remarkModal" tabindex="-1" aria-labelledby="remarkModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="post" id="remarkForm" action="{% url 'collector:update_remark' %}">
+      {% csrf_token %}
+      <input type="hidden" name="grievance_id" id="remarkGrievanceId">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="remarkModalLabel">Add Remark & Set Priority</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Remark</label>
+            <textarea class="form-control" name="remark" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Priority</label>
+            <select class="form-select" name="priority" required>
+              <option value="">-- Select Priority --</option>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="CRITICAL">Critical</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Add this right before the closing </body> tag -->
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-  // Counter animation
-  document.querySelectorAll('.count').forEach(el => {
-    const t = +el.dataset.target || 0, dur = 800, start = performance.now();
-    const anim = now => {
-      const p = Math.min((now - start) / dur, 1);
-      el.textContent = Math.floor(p * t).toLocaleString('en-IN');
-      if (p < 1) requestAnimationFrame(anim);
-    };
-    requestAnimationFrame(anim);
-  });
-
-  // Image slider
-  (function () {
-    let slideIndex = 0;
-    const slides = document.querySelectorAll(".mySlides");
-    if (!slides.length) return;
-    slides.forEach((s, i) => { s.style.display = i === 0 ? "block" : "none"; });
-
-    function showNext() {
-      slides[slideIndex].style.display = "none";
-      slideIndex = (slideIndex + 1) % slides.length;
-      slides[slideIndex].style.display = "block";
-    }
-
-    setInterval(showNext, 2000);
-  })();
-
-  // Card click functionality - improved version
-  document.addEventListener("DOMContentLoaded", function() {
-    // Make department cards clickable
-    const cards = document.querySelectorAll(".clickable-card");
-    cards.forEach(card => {
-      card.style.cursor = "pointer";
-      
-      // Add click event to the entire card
-      card.addEventListener("click", function(e) {
-        // Don't interfere with other clickable elements inside the card
-        if (e.target.closest('a, button, input, select, textarea')) {
-          return;
-        }
-        
-        const url = card.dataset.url;
-        if (url) {
-          window.location.href = url; // Changed to same window navigation
-          // Or use this if you prefer new tab:
-          // window.open(url, "_blank");
-        }
+  document.addEventListener("DOMContentLoaded", () => {
+  
+    /* make department cards clickable (unchanged) */
+    document.querySelectorAll(".clickable-card").forEach(card => {
+      card.addEventListener("click", e => {
+        if (e.target.closest("a,button,input,select,textarea")) return;
+        window.location.href = card.dataset.url;
       });
     });
-
-    // Search functionality
-     // SEARCH FUNCTIONALITY - CORRECTED VERSION
-     const searchInput = document.getElementById('grievance-search');
-    if (searchInput) {
-      const departmentCards = document.querySelectorAll('.dept-card-wrapper');
-      const departments = Array.from(departmentCards).map((card, index) => {
-        return {
-          name: card.querySelector('.card-dept').getAttribute('data-name').toLowerCase(),
-          code: card.querySelector('.card-dept').getAttribute('data-code').toLowerCase(),
-          element: card,
-          index: index
-        };
+  
+    /* updated toggle logic */
+    const searchInput = document.getElementById("grievance-search");
+    const deptDiv     = document.getElementById("dept-container");
+    const grvDiv      = document.getElementById("grievance-container");
+    const grCards     = [...document.querySelectorAll(".gr-card-wrapper")];
+  
+    searchInput.addEventListener("input", e => {
+      const q = e.target.value.trim().toLowerCase();   // case‑insensitive
+  
+      if (!q) {
+        deptDiv.style.display = "";
+        grvDiv.style.display  = "none";
+        return;
+      }
+  
+      let anyMatch = false;
+      grCards.forEach(card => {
+        const id    = card.dataset.grvId   || ""; // already lowercase in template
+        const phone = card.dataset.contact || "";
+        const show  = id.includes(q) || phone.includes(q);  // ← key change
+        card.style.display = show ? "" : "none";
+        if (show) anyMatch = true;
       });
-
-      // Initialize Fuse.js with the departments data
-      const fuseOptions = {
-        keys: ['name', 'code'],
-        threshold: 0.3,
-        includeScore: true
+  
+      deptDiv.style.display = "none";
+      grvDiv.style.display  = "";  // show container even if no match (optional)
+    });
+  
+    /* counters + slider (unchanged) */
+    document.querySelectorAll(".count").forEach(el => {
+      const t = +el.dataset.target || 0, d = 800, s = performance.now();
+      const f = n => {
+        const p = Math.min((n - s) / d, 1);
+        el.textContent = Math.floor(p * t).toLocaleString("en-IN");
+        if (p < 1) requestAnimationFrame(f);
       };
-      const fuse = new Fuse(departments, fuseOptions);
+      requestAnimationFrame(f);
+    });
+  
+    (function () {
+      const slides = document.querySelectorAll(".mySlides");
+      if (!slides.length) return;
+      let i = 0;
+      slides.forEach((s, k) => (s.style.display = k ? "none" : "block"));
+      setInterval(() => {
+        slides[i].style.display = "none";
+        i = (i + 1) % slides.length;
+        slides[i].style.display = "block";
+      }, 2000);
+    })();
+  });
 
-      searchInput.addEventListener('input', function(e) {
-        const query = e.target.value.trim().toLowerCase();
-        
-        if (query.length === 0) {
-          // Show all cards if search is empty
-          departmentCards.forEach(card => {
-            card.style.display = 'block';
-          });
-          return;
-        }
+  // Make grievance card clickable
+document.querySelectorAll(".gr-card-wrapper").forEach(card => {
+  card.addEventListener("click", () => {
+    const url = card.dataset.url;
+    if (url) window.location.href = url;
+  });
+});
 
-        // Perform search
-        const results = fuse.search(query);
-        
-        // Hide all cards first
-        departmentCards.forEach(card => {
-          card.style.display = 'none';
-        });
-        
-        // Show only matching cards
-        results.forEach(result => {
-          result.item.element.style.display = 'block';
-        });
+
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".open-remark-modal").forEach(button => {
+      button.addEventListener("click", () => {
+        const grievanceId = button.dataset.grievanceId;
+        document.getElementById("remarkGrievanceId").value = grievanceId;
       });
-    }
+    });
   });
 </script>
+
+  </script>
+  
+
+  
 </body>
 </html>
+<!-- all okay -->
