@@ -54,9 +54,11 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+
+from core_app.views import auto_dept_id
 # Auto-generate Collector ID based on district code
 #set this to first as 49
-
+from core_app.forms import DeptForm
 def auto_collector_id(district):
     prefix = 'COLL'
     district_code = district.code.upper()
@@ -195,93 +197,95 @@ def delete_collector(request, username):
 # collector dashboard view
 
 
+
 @login_required
 def collector_dashboard(request):
     try:
         collector = (
             CollectorProfile.objects
-            .select_related('district')
+            .select_related("district")
             .get(user=request.user)
         )
-        district = collector.district
-
-        # ---------------------------------------------------------
-        # 1. One DB hit: annotate each department with counts
-        # ---------------------------------------------------------
-        departments_qs = (
-            Department.objects
-            .filter(district=district)
-            .annotate(
-                total    = Count('grievance', filter=Q(grievance__district=district)),
-                pending  = Count('grievance', filter=Q(grievance__district=district,
-                                                      grievance__status='PENDING')),
-                rejected = Count('grievance', filter=Q(grievance__district=district,
-                                                       grievance__status='REJECTED')),
-            )
-            .order_by('-pending')      # highest pending first (main list)
-        )
-
-        dept_data = []
-        for dept in departments_qs:
-            total     = dept.total
-            pending   = dept.pending
-            rejected  = dept.rejected
-            resolved  = total - pending - rejected
-
-            pending_pct  = round((pending  / total) * 100, 1) if total else 0.0
-            rejected_pct = round((rejected / total) * 100, 1) if total else 0.0
-
-            badge_class = (
-                'danger'  if pending_pct >= 75 else
-                'warning' if pending_pct >= 25 else
-                'success'
-            )
-
-            dept_data.append({
-                'name'            : dept.name,
-                'code'            : getattr(dept, 'code', ''),
-                'total'           : total,
-                'pending'         : pending,
-                'rejected'        : rejected,
-                'resolved'        : resolved,
-                'pending_percent' : pending_pct,
-                'rejected_percent': rejected_pct,
-                'badge_class'     : badge_class,
-            })
-
-        # ---------------------------------------------------------
-        # 2. Pick top‑3 best performers (low pending %, then rejects)
-        # ---------------------------------------------------------
-        candidates = [d for d in dept_data if d['total'] > 0]
-        candidates.sort(key=lambda d: (d['pending_percent'], d['rejected_percent']))
-        top3_departments = candidates[:3]
-
-        # ---------------------------------------------------------
-        # 3. District‑wide totals (one query)
-        # ---------------------------------------------------------
-        all_grievances = Grievance.objects.filter(district=district)
-        total_all     = all_grievances.count()
-        pending_all   = all_grievances.filter(status='PENDING').count()
-        rejected_all  = all_grievances.filter(status='REJECTED').count()
-        resolved_all  = total_all - pending_all - rejected_all
-
-        context = {
-            'departments'      : dept_data,        # ordered high‑pending → low
-            'top3_departments' : top3_departments, # best performers list/card
-            'district'         : district,
-            'collector'        : collector,
-            'counts' : {
-                'total_grievances'    : total_all,
-                'pending_grievances'  : pending_all,
-                'rejected_grievances' : rejected_all,
-                'resolved_grievances' : resolved_all,
-            },
-        }
-        return render(request, 'collector/collector_dashboard.html', context)
-
     except CollectorProfile.DoesNotExist:
         messages.error(request, "Access denied. Collector profile not found.")
-        return redirect('login')
+        return redirect("login")
+
+    district = collector.district
+
+    # ---------- department stats (unchanged) ----------
+    departments_qs = (
+        Department.objects
+        .filter(district=district)
+        .annotate(
+            total=Count("grievance",
+                        filter=Q(grievance__district=district)),
+            pending=Count("grievance",
+                          filter=Q(grievance__district=district,
+                                   grievance__status="PENDING")),
+            rejected=Count("grievance",
+                           filter=Q(grievance__district=district,
+                                    grievance__status="REJECTED")),
+        )
+        .order_by("-pending")        # default order
+    )
+
+    dept_data = []
+    for d in departments_qs:
+        total, pending, rejected = d.total, d.pending, d.rejected
+        resolved      = total - pending - rejected
+        pending_pct   = round((pending / total) * 100, 1) if total else 0
+        rejected_pct  = round((rejected / total) * 100, 1) if total else 0
+        badge_class   = ("danger" if pending_pct >= 75 else
+                         "warning" if pending_pct >= 25 else
+                         "success")
+        dept_data.append({
+            "name": d.name,
+            "code": d.code,
+            "total": total,
+            "pending": pending,
+            "rejected": rejected,
+            "resolved": resolved,
+            "pending_percent": pending_pct,
+            "rejected_percent": rejected_pct,
+            "badge_class": badge_class,
+        })
+
+    # top‑3 performers
+    top3 = sorted(
+        (d for d in dept_data if d["total"] > 0),
+        key=lambda x: (x["pending_percent"], x["rejected_percent"])
+    )[:3]
+
+    # ---------- district‑wide totals ----------
+    all_grievances = (
+        Grievance.objects
+        .filter(district=district)
+        .only("grievance_id", "contact_number", "status", "subject")
+    )
+    total_all    = all_grievances.count()
+    pending_all  = all_grievances.filter(status="PENDING").count()
+    rejected_all = all_grievances.filter(status="REJECTED").count()
+    resolved_all = total_all - pending_all - rejected_all
+
+    context = {
+        "collector"        : collector,
+        "district"         : district,
+        "departments"      : dept_data,
+        "top3_departments" : top3,
+        "counts" : {
+            "total_grievances"    : total_all,
+            "pending_grievances"  : pending_all,
+            "rejected_grievances" : rejected_all,
+            "resolved_grievances" : resolved_all,
+        },
+        "all_grievances"   : all_grievances,   # 👈 NEW (flat, easier template)
+    }
+    return render(request, "collector/collector_dashboard.html", context)
+
+
+
+
+
 
 #profile details
 
@@ -321,7 +325,7 @@ def officer_details(request):
     # Get HOD officers in the collector's district
     hod_officers = OfficerProfile.objects.select_related('user', 'department') \
         .filter(is_hod=True, department__district=district) \
-        .only('user__first_name', 'user__last_name', 'user__email', 'user__phone', 'department__name')
+        .only('user_first_name', 'userlast_name', 'useremail', 'userphone', 'department_name')
 
     context = {
         'hod_officers': hod_officers,
@@ -394,7 +398,7 @@ def _filtered_grievance_qs(request, district):
 
     # Department filter - using code field
     if dept_code:
-        qs = qs.filter(department__code__iexact=dept_code)  # ✅ Lowercase "department"
+        qs = qs.filter(department_code_iexact=dept_code)  # ✅ Lowercase "department"
 
     # Search filter
     if search:
@@ -411,9 +415,9 @@ def _filtered_grievance_qs(request, district):
     # Date range filter
     date_filter = Q()
     if date_from:
-        date_filter &= Q(date_filed__date__gte=date_from)
+        date_filter &= Q(date_filed_date_gte=date_from)
     if date_to:
-        date_filter &= Q(date_filed__date__lte=date_to)
+        date_filter &= Q(date_filed_date_lte=date_to)
     if date_filter:
         qs = qs.filter(date_filter)
 
@@ -550,7 +554,7 @@ def export_grievance_pdf(request):
             "grievance_id", "date_filed", "last_updated", "subject", 
             "description", "source", "status", "priority", "due_date",
             "applicant_name", "applicant_address", "contact_number", "email",
-            "department__name", "district__name",
+            "department_name", "district_name",
         ]
         rows = _filtered_grievance_qs(request, district).values(*cols)
         
@@ -987,9 +991,9 @@ def department_card_view(request, department_id):
 
     # ----- date range -----
     if date_from:
-        base_qs = base_qs.filter(date_filed__date__gte=date_from)
+        base_qs = base_qs.filter(date_filed_date_gte=date_from)
     if date_to:
-        base_qs = base_qs.filter(date_filed__date__lte=date_to)
+        base_qs = base_qs.filter(date_filed_date_lte=date_to)
 
     # ----- free‑text search (ID or phone) -----
     if search_query:
@@ -1194,7 +1198,7 @@ def department_grievances_download(request, department_id):
         pdf.output(buffer)
         buffer.seek(0)
 
-        file_name = f"{department.code.lower()}_grievances_{timezone.now().strftime('%Y%m%d')}.pdf"
+        file_name = f"{department.code.lower()}grievances{timezone.now().strftime('%Y%m%d')}.pdf"
         return FileResponse(buffer, as_attachment=True,
                           filename=file_name,
                           content_type="application/pdf")
@@ -1202,3 +1206,66 @@ def department_grievances_download(request, department_id):
     except Exception as e:
         print(f"Error in PDF generation: {str(e)}")
         return HttpResponse(f"An error occurred while generating the PDF: {str(e)}", status=500)
+
+
+
+
+@login_required
+def collector_department_create(request):
+    """
+    Create a new Department inside the collector's district.
+    Only collectors may access this view (enforced by login_required + user type).
+    """
+    # ─────────────────────────────────────────────────────────────
+    # 1. Fetch the collector profile for the logged‑in user
+    # ─────────────────────────────────────────────────────────────
+    try:
+        collector = request.user.collector_profile
+    except CollectorProfile.DoesNotExist:
+        messages.error(request, "Collector profile not found. Please contact an administrator.")
+        return redirect("collector:collector_dashboard")
+
+    # ─────────────────────────────────────────────────────────────
+    # 2. Handle POST  ➜  form submission
+    # ─────────────────────────────────────────────────────────────
+    if request.method == "POST":
+        department_name = request.POST.get("department", "").strip()
+
+        if not department_name:
+            messages.error(request, "Department name cannot be empty.")
+            return redirect("collector:collector_department_create")
+
+        # Check uniqueness (case‑insensitive) within the same district
+        if Department.objects.filter(
+            name__iexact=department_name,
+            district=collector.district
+        ).exists():
+            messages.error(
+                request,
+                f"A department named “{department_name}” already exists in your district."
+            )
+            return redirect("collector:collector_department_create")
+
+        # Create the new department
+        new_department = Department.objects.create(
+    name=department_name,
+    code=auto_dept_id(),
+    district=collector.district,
+    created_by=request.user  # ✅ Add this line
+)
+
+        messages.success(
+            request,
+            f"Department “{new_department.name}” created successfully!"
+        )
+        return redirect("collector:collector_dashboard")
+
+    # ─────────────────────────────────────────────────────────────
+    # 3. Handle GET  ➜  show blank form
+    # ─────────────────────────────────────────────────────────────
+    context = {
+        "district": collector.district,
+    }
+    return render(request, "collector/collector_dept_create.html", context)
+
+

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Department | Collector Dashboard</title>
+  <title>Create Department | Collector Dashboard</title>
   
   <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -46,13 +46,13 @@
       color: var(--indigo-light);
     }
 
-    .form-control, .form-select {
+    .form-control {
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       padding: 0.5rem 1rem;
     }
 
-    .form-control:focus, .form-select:focus {
+    .form-control:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
     }
@@ -72,7 +72,7 @@
       transform: translateY(-2px);
     }
 
-    /* Inherit navbar styles from dashboard */
+    /* Navbar styles */
     .navbar-custom {
       background: var(--indigo);
       padding: 1rem 2rem;
@@ -86,7 +86,7 @@
   </style>
 </head>
 <body>
-  <!-- NAVBAR (Same as dashboard) -->
+  <!-- NAVBAR -->
   <nav class="navbar-custom d-flex justify-content-between align-items-center">
     <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
     
@@ -96,19 +96,8 @@
           <i class="fas fa-plus-circle me-1"></i> Create Dept
         </a>
       </li>
-      <!-- Other nav items same as dashboard -->
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="fas fa-file-alt me-1"></i> Reports
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="{% url 'collector:grievance_report' %}">
-            <i class="fas fa-file-contract me-2"></i> Grievance Report
-          </a></li>
-          <!-- Other dropdown items -->
-        </ul>
-      </li>
-      <!-- Other navigation links -->
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
     </ul>
   </nav>
 
@@ -118,41 +107,31 @@
       <div class="col-lg-8">
         <div class="form-container">
           <h2 class="form-header">
-            <i class="fas fa-{% if form.instance.pk %}edit{% else %}plus-circle{% endif %} me-2"></i>
-            {{ form.instance.pk|yesno:"Edit,Create" }} Department
+            <i class="fas fa-plus-circle me-2"></i>
+            Create New Department
           </h2>
           
           <form method="post" class="needs-validation" novalidate>
             {% csrf_token %}
             
-            {% for field in form %}
-              <div class="mb-3">
-                <label for="{{ field.id_for_label }}" class="form-label">
-                  {{ field.label }}
-                  {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                </label>
-                
-                {{ field }}
-                
-                {% if field.help_text %}
-                  <small class="form-text text-muted">{{ field.help_text }}</small>
-                {% endif %}
-                
-                {% for error in field.errors %}
-                  <div class="invalid-feedback d-block">
-                    {{ error }}
-                  </div>
-                {% endfor %}
+            <div class="mb-3">
+              <label for="departmentName" class="form-label">
+                Department Name <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="departmentName" name="department" required>
+              <div class="invalid-feedback">
+                Please provide a department name.
               </div>
-            {% endfor %}
+            </div>
+            
             
             <div class="d-flex justify-content-between mt-4">
               <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                <i class="fas fa-arrow-left me-1"></i> Cancel
               </a>
               <button type="submit" class="btn btn-submit">
-                <i class="fas fa-{% if form.instance.pk %}save{% else %}plus-circle{% endif %} me-1"></i>
-                {{ form.instance.pk|yesno:"Update,Create" }} Department
+                <i class="fas fa-plus-circle me-1"></i>
+                Create Department
               </button>
             </div>
           </form>

@@ -40,5 +40,8 @@ path(
         name="department_grievances_download",
     ),
 
+# urls.py
+path("collector_dept_create/", views.collector_department_create, name="collector_department_create"),
+
 
 ]
