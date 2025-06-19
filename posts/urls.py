@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+app_name = 'posts'  # <--- VERY IMPORTANT
 urlpatterns = [
     path('', views.index, name='index'),
     path('manage/', views.manage_posts, name='manage_posts'),
