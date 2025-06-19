@@ -265,16 +265,17 @@ def collector_dashboard(request):
         rejected_all  = all_grievances.filter(status='REJECTED').count()
         resolved_all  = total_all - pending_all - rejected_all
 
+      
         context = {
-            'departments'      : dept_data,        # ordered high‑pending → low
-            'top3_departments' : top3_departments, # best performers list/card
-            'district'         : district,
-            'collector'        : collector,
-            'counts' : {
-                'total_grievances'    : total_all,
-                'pending_grievances'  : pending_all,
-                'rejected_grievances' : rejected_all,
-                'resolved_grievances' : resolved_all,
+            'departments': dept_data,
+            'top3_departments': top3_departments,
+            'district': district,
+            'collector': collector,
+            'counts': {
+                'total_grievances': total_all,
+                'pending_grievances': pending_all,
+                'rejected_grievances': rejected_all,
+                'resolved_grievances': resolved_all,
             },
         }
         return render(request, 'collector/collector_dashboard.html', context)
