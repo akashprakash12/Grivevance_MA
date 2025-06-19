@@ -242,7 +242,7 @@
            
         </header>
 
-        <a href="{% url 'index' %}" class="back-link">
+        <a href="{% url 'posts:index' %}" class="back-link">
             <i class="fas fa-arrow-left"></i>
             Back to Post Complaint
         </a>
@@ -264,10 +264,10 @@
                                 </p>
                             </div>
                             <div class="post-actions">
-                                <a href="{% url 'edit_post' post.post_id %}" class="action-link edit-link">
+                                <a href="{% url 'posts:edit_post' post.post_id %}" class="action-link edit-link">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                <form action="{% url 'delete_post' post.post_id %}" method="post" class="d-inline">
+                                <form action="{% url 'posts:delete_post' post.post_id %}" method="post" class="d-inline">
                                     {% csrf_token %}
                                     <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this complaint?')">
                                         <i class="fas fa-trash-alt"></i> Delete
