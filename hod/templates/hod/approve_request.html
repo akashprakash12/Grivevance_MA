@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Approve Date Extension - HOD Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #121212;
+    color: #eee;
+    margin: 0; padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header {
+    width: 100%; max-width: 700px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+  }
+  h1 {
+    font-weight: 800;
+    font-size: 2rem;
+  }
+  .requests-list {
+    width: 100%;
+    max-width: 700px;
+  }
+  .request-card {
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  .request-header {
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  form {
+    margin-top: 12px;
+  }
+  button {
+    margin-right: 12px;
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button.deny {
+    background: #c53030;
+  }
+  button:hover {
+    filter: brightness(1.1);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="material-icons" aria-hidden="true">event_available</span>Date Extension Requests</h1>
+</header>
+<section class="requests-list" aria-label="Extension Requests">
+  <!-- Example request card:
+  <article class="request-card" role="region" aria-labelledby="grievance12345">
+    <h2 id="grievance12345" class="request-header">Grievance GRI20250612345 - Water pollution</h2>
+    <p><strong>Current Due Date:</strong> 2025-07-12</p>
+    <p><strong>Requested Extension Date:</strong> 2025-07-25</p>
+    <form method="post" action="">
+      <!-- {% csrf_token %} -->
+      <input type="hidden" name="grievance_id" value="1" />
+      <button type="submit" name="action" value="approve">Approve</button>
+      <button type="submit" name="action" value="deny" class="deny">Deny</button>
+    </form>
+  </article>
+  -->
+</section>
+</body>
+</html>

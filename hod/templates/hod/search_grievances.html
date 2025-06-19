@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Search Grievances - HOD Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #121212;
+    color: #eee;
+    margin: 0; padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header {
+    width: 100%; max-width: 1024px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+  }
+  h1 {
+    font-weight: 800;
+    font-size: 2rem;
+  }
+  form {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 32px;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 1rem;
+    border-radius: 12px;
+    border: none;
+    background: #1e1e1e;
+    color: #eee;
+  }
+  button {
+    margin-top: 12px;
+    width: 100%;
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+  }
+  table {
+    width: 100%;
+    max-width: 1024px;
+    border-collapse: collapse;
+    background: #1e1e1e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  thead tr {
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  }
+  thead th {
+    padding: 14px;
+    text-align: left;
+    color: white;
+  }
+  tbody tr:nth-child(even) {
+    background: #242424;
+  }
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #333;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="material-icons" aria-hidden="true">search</span>Search Grievances</h1>
+</header>
+<form method="GET" action="">
+  <input type="text" name="q" placeholder="Enter grievance ID, subject, status, etc." value="" aria-label="Search grievances" />
+  <button type="submit">Search</button>
+</form>
+
+<table role="grid" aria-label="Search Results">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Subject</th>
+      <th>Status</th>
+      <th>Priority</th>
+      <th>Due Date</th>
+      <th>Last Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Rows here -->
+  </tbody>
+</table>
+</body>
+</html>

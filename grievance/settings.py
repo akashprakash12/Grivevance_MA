@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'grievance_app',
     'accounts',
     'core_app',
-    'posts'
+    'posts',
+    'hod'
 
 
 ]
