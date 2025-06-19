@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Officers & Assigned Grievances - HOD Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .navbar {
+      background-color: #002855;
+    }
+
+    .navbar-brand, .nav-link {
+      color: white !important;
+    }
+
+    .officer-card {
+      background-color: #fff;
+      border-left: 5px solid #0d6efd;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 30px;
+    }
+
+    .officer-name {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 15px;
+    }
+
+    .table thead {
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      color: white;
+    }
+
+    .status-log {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    .badge-status {
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="#">HOD Dashboard</a>
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2 class="mb-4"><span class="material-icons">group</span> Officers & Assigned Grievances</h2>
+
+  {% for officer in officers %}
+    <div class="officer-card">
+      <h3 class="officer-name">
+        <i class="fas fa-user-tie text-primary"></i> {{ officer.user.get_full_name }}
+      </h3>
+
+      {% if officer.assigned_grievances %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Grievance ID</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Due Date</th>
+                <th>Progress Logs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for assign in officer.assigned_grievances %}
+                <tr>
+                  <td>{{ assign.grievance.grievance_id }}</td>
+                  <td>{{ assign.grievance.subject }}</td>
+                  <td>
+                    <span class="badge bg-secondary badge-status">{{ assign.grievance.status|title }}</span>
+                  </td>
+                  <td>{{ assign.grievance.get_priority_display }}</td>
+                  <td>{{ assign.grievance.due_date|default:"N/A" }}</td>
+                  <td>
+                    {% if assign.grievance.status_logs %}
+                      <ul class="mb-0 ps-3">
+                        {% for log in assign.grievance.status_logs %}
+                          <li class="status-log">
+                            {{ log.timestamp|date:"Y-m-d H:i" }}: {{ log.action_taken|truncatechars:80 }}
+                            <br><small class="text-muted">by {{ log.officer.user.get_full_name }}</small>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <span class="text-muted">No actions yet.</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">No grievances assigned.</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+
+</body>
+</html>
