@@ -200,10 +200,11 @@ def officers_assigned_grievances(request):
     hod_department = hod_profile.department
 
     grievance_logs_prefetch = Prefetch(
-        'grievance__officer_status_logs',
-        queryset=GrievanceStatusLog.objects.select_related('officer', 'officer__user').order_by('-timestamp'),
-        to_attr='status_logs'
-    )
+    'grievance__grievancestatuslog_set',
+    queryset=GrievanceStatusLog.objects.select_related('changed_by').order_by('-changed_at'),
+    to_attr='status_logs'
+)
+
 
     assignments_prefetch = Prefetch(
         'grievanceassignment_set',
@@ -221,7 +222,7 @@ def officers_assigned_grievances(request):
     context = {
         'officers': officers,
     }
-    return render(request, 'hod/officers_assigned_grievances.html', context)
+    return render(request, 'hod/officer_assigned_grievance.html', context)
 
 
 @login_required
