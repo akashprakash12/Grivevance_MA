@@ -78,6 +78,7 @@ class CollectorProfile(models.Model):
         auto_now=True,
         verbose_name=_("Updated At"),
     )
+    is_first_login = models.BooleanField(default=True)
 
     # ────────────────────────────────
     # Meta & string

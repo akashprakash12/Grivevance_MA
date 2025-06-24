@@ -29,6 +29,8 @@ urlpatterns = [
     path('public_user/', include('user.urls', namespace='public_user')),  # ✅ correct
     path('grievance/', include('grievance_app.urls')),
     path('facebook/', include('posts.urls')),
+    path('district_officer/', include('district_officer.urls')),
+
 
 
 ]
