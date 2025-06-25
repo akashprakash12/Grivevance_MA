@@ -11,36 +11,12 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.contrib import messages
 from .forms import PublicUserForm, PublicUserProfileForm
+from grievance_app.forms import GrievanceForm
+
+
 
 def create_public_user(request):
-    user_form = PublicUserForm(request.POST or None)
-    profile_form = PublicUserProfileForm(request.POST or None)
-
-    if request.method == 'POST':
-        if user_form.is_valid() and profile_form.is_valid():
-            try:
-                password = user_form.cleaned_data['password']
-                user_instance = user_form.save(commit=False)
-                user_instance.set_password(password)
-                user_instance.user_type = 'PUBLIC'
-                user_instance.is_active = True
-                user_instance.date_joined = timezone.now()
-                user_instance.save()
-
-                profile_instance = profile_form.save(commit=False)
-                profile_instance.user = user_instance
-                profile_instance.save()
-
-                messages.success(request, f"Public user with ID '{user_instance.username}' created successfully.")
-                return redirect('public_user:view_public_users')  # Ensure this URL name exists
-
-            except Exception as e:
-                messages.error(request, f"Error: {str(e)}")
-
-    return render(request, 'user/user_dashbard.html', {
-        'user': user_form,
-        'user_profile': profile_form
-    })
+    return render(request, 'user/user_dashboard.html')
 
 def view_public_users(request):
     public_users = PublicUserProfile.objects.select_related('user')
@@ -84,3 +60,56 @@ def update_public_user(request, username):
         'user': user_form,
         'user_profile': profile_form
     })
+def submit_complaint(request):
+    if request.method == 'POST':
+        form = GrievanceForm(request.POST, request.FILES)
+        if form.is_valid():
+            grievance = form.save(commit=False)
+            grievance.source = 'WEB'  # Website source
+            grievance.status = 'PENDING'
+            grievance.priority = 'MEDIUM'
+            
+            # If user is logged in, associate with user
+            if request.user.is_authenticated:
+                grievance.user = request.user
+                grievance.applicant_name = request.user.get_full_name()
+                grievance.email = request.user.email
+            
+            grievance.save()
+            messages.success(request, "Your complaint has been submitted successfully!")
+            return redirect('public_user:user_dashboard')  # Redirect to dashboard
+            
+    else:
+        # Pre-fill user data if logged in
+        initial_data = {}
+        if request.user.is_authenticated:
+            initial_data = {
+                'applicant_name': request.user.get_full_name(),
+                'email': request.user.email,
+                # Add other fields from user profile if available
+            }
+        form = GrievanceForm(request.POST or None)
+
+
+    
+    return render(request, 'user/complaint_submission.html', {'form': form})
+    
+    # OR if you need public_users data:
+    # public_users = PublicUserProfile.objects.select_related('user')
+    # return render(request, 'user/complaint_submission.html', {'public_users': public_users})
+
+def help(request):
+    # If you don't need public_users data in the template:
+    return render(request, 'user/help_system.html')
+    
+    # OR if you need public_users data:
+    # public_users = PublicUserProfile.objects.select_related('user')
+    # return render(request, 'user/help_system.html', {'public_users': public_users})
+
+def account_settings(request):
+    # For account settings, you probably want the current user's data
+    if request.user.is_authenticated:
+        user_profile = PublicUserProfile.objects.get(user=request.user)
+        return render(request, 'user/account_settings.html', {'user_profile': user_profile})
+    else:
+        return redirect('login')  # or handle unauthenticated users appropriately

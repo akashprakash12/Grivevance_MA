@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,10 +93,12 @@
     .btn-primary-custom {
       background-color: var(--indigo);
       border-color: var(--indigo);
+      color: white;
     }
     .btn-primary-custom:hover {
       background-color: var(--indigo-light);
       border-color: var(--indigo-light);
+      color: white;
     }
     
     .btn-accent {
@@ -132,6 +135,25 @@
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
+
+    .is-invalid {
+      border-color: #dc3545 !important;
+    }
+    .invalid-feedback {
+      color: #dc3545;
+      font-size: 0.875em;
+    }
+    
+    /* Improved required field indicators */
+    .required-field::after {
+      content: " *";
+      color: #dc3545;
+    }
+    
+    /* Better spacing for personal info section */
+    .personal-info-field {
+      margin-bottom: 1.25rem;
+    }
   </style>
 </head>
 <body>
@@ -140,14 +162,32 @@
     <div class="container-fluid">
       <a href="/" class="navbar-brand text-white fw-bold">Grievance Portal</a>
       <div class="d-flex align-items-center">
-        <span class="me-3 d-none d-md-inline">Welcome, Rajesh</span>
-        <img src="https://ui-avatars.com/api/?name=Rajesh+Kumar&background=random" alt="User" class="rounded-circle" width="40" height="40">
+        {% if user.is_authenticated %}
+          <span class="me-3 d-none d-md-inline">Welcome, {{ user.get_full_name|default:user.username }}</span>
+          <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username }}&background=random" alt="User" class="rounded-circle" width="40" height="40">
+        {% else %}
+          <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light me-2">Login</a>
+          <a href="{% url 'register' %}" class="btn btn-sm btn-accent">Register</a>
+        {% endif %}
       </div>
     </div>
   </nav>
 
   <!-- Main Content -->
   <main class="container py-4">
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      <strong>Error!</strong> Please correct the following errors:
+      <ul>
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            <li>{{ field|title }}: {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
     <div class="card-custom">
       <!-- Progress Steps -->
       <div class="p-4 border-bottom">
@@ -172,103 +212,141 @@
       </div>
 
       <!-- Form Sections -->
-      <form id="grievanceForm" method="POST" enctype="multipart/form-data">
+      <form id="grievanceForm" method="POST" enctype="multipart/form-data" action="{% url 'public_user:submit_complaint' %}">
         {% csrf_token %}
         
         <!-- Section 1: Complaint Details -->
-        <div class="form-section active p-4" id="section1">
-          <h2 class="h5 fw-semibold mb-3 text-indigo"><i class="fas fa-info-circle me-2 text-accent"></i>Complaint Information</h2>
-          
-          <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label for="department" class="form-label">Department*</label>
-              <select name="department" id="department" class="form-select" required>
-                <option value="">Select Department</option>
-                <option value="Health">Health Department</option>
-                <option value="Education">Education Department</option>
-                <option value="Transport">Transport Department</option>
-                <option value="Revenue">Revenue Department</option>
-                <option value="Public Works">Public Works Department</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label for="district" class="form-label">District*</label>
-              <select name="district" id="district" class="form-select" required>
-                <option value="">Select District</option>
-                <option value="Thiruvananthapuram">Thiruvananthapuram</option>
-                <option value="Kollam">Kollam</option>
-                <option value="Pathanamthitta">Pathanamthitta</option>
-                <option value="Alappuzha">Alappuzha</option>
-                <option value="Kottayam">Kottayam</option>
-                <option value="Idukki">Idukki</option>
-                <option value="Ernakulam">Ernakulam</option>
-                <option value="Thrissur">Thrissur</option>
-                <option value="Palakkad">Palakkad</option>
-                <option value="Malappuram">Malappuram</option>
-                <option value="Kozhikode">Kozhikode</option>
-                <option value="Wayanad">Wayanad</option>
-                <option value="Kannur">Kannur</option>
-                <option value="Kasaragod">Kasaragod</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label for="subject" class="form-label">Subject*</label>
-            <input type="text" name="subject" id="subject" class="form-control" placeholder="Brief title of your complaint" required>
-          </div>
-          
-          <div class="mb-3">
-            <label for="description" class="form-label">Description*</label>
-            <textarea name="description" id="description" rows="5" class="form-control" placeholder="Please describe your complaint in detail..." required></textarea>
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label">Supporting Documents</label>
-            <div class="file-upload">
-              <input type="file" name="documents" id="documents" class="d-none" multiple>
-              <label for="documents" class="cursor-pointer">
-                <i class="fas fa-cloud-upload-alt text-3xl mb-2" style="color: var(--indigo);"></i>
-                <p class="text-muted mb-1">Click to upload or drag and drop</p>
-                <p class="small text-muted">PDF, JPG, PNG up to 5MB</p>
-              </label>
-            </div>
-            <div id="fileList" class="mt-2"></div>
-          </div>
-          
-          <div class="d-flex justify-content-end">
-            <button type="button" onclick="nextSection(2)" class="btn btn-primary-custom">
-              Next <i class="fas fa-arrow-right ms-2"></i>
-            </button>
-          </div>
+       <!-- Section 1: Complaint Details -->
+<div class="form-section active p-4" id="section1">
+  <h2 class="h5 fw-semibold mb-3 text-indigo"><i class="fas fa-info-circle me-2 text-accent"></i>Complaint Information</h2>
+  
+  <div class="row g-3 mb-3">
+    <!-- District field first -->
+    <div class="col-md-6">
+      <label for="{{ form.district.id_for_label }}" class="form-label required-field">District*</label>
+      {{ form.district }}
+      {% if form.district.errors %}
+        <div class="invalid-feedback d-block">
+          {{ form.district.errors }}
         </div>
+      {% endif %}
+    </div>
+    
+    <!-- Department field second (will be populated via AJAX) -->
+    <div class="col-md-6">
+      <label for="{{ form.department.id_for_label }}" class="form-label required-field">Department*</label>
+      {{ form.department }}
+      {% if form.department.errors %}
+        <div class="invalid-feedback d-block">
+          {{ form.department.errors }}
+        </div>
+      {% endif %}
+      <div id="departmentLoading" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mb-3">
+    <label for="{{ form.subject.id_for_label }}" class="form-label required-field">Subject*</label>
+    {{ form.subject }}
+    {% if form.subject.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.subject.errors }}
+      </div>
+    {% endif %}
+  </div>
+  
+  <div class="mb-3">
+    <label for="{{ form.description.id_for_label }}" class="form-label required-field">Description*</label>
+    {{ form.description }}
+    {% if form.description.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.description.errors }}
+      </div>
+    {% endif %}
+  </div>
+  
+ <!-- Update your file upload section in complaint_submission.html -->
+<div class="mb-3">
+  <label class="form-label">Supporting Documents</label>
+  <div class="file-upload">
+    <input type="file" name="documents" id="documents" class="d-none" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx">
+    <label for="documents" class="cursor-pointer">
+      <i class="fas fa-cloud-upload-alt text-3xl mb-2" style="color: var(--indigo);"></i>
+      <p class="text-muted mb-1">Click to upload or drag and drop</p>
+      <p class="small text-muted">Images, Videos, Audio, PDF, DOC (Max 10MB each)</p>
+    </label>
+  </div>
+  
+  <div id="fileList" class="mt-2"></div>
+   {% if form.documents.errors %}
+    <div class="invalid-feedback d-block">
+      {% for error in form.documents.errors %}
+        {{ error }}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+  
+  <div class="d-flex justify-content-end">
+    <button type="button" onclick="nextSection(2)" class="btn btn-primary-custom">
+      Next <i class="fas fa-arrow-right ms-2"></i>
+    </button>
+  </div>
+</div>
         
-        <!-- Section 2: Personal Information -->
+        <!-- Section 2: Personal Information - Enhanced Section -->
         <div class="form-section p-4" id="section2">
-          <h2 class="h5 fw-semibold mb-3 text-indigo"><i class="fas fa-user-circle me-2 text-accent"></i>Personal Information</h2>
+          <h2 class="h5 fw-semibold mb-4 text-indigo"><i class="fas fa-user-circle me-2 text-accent"></i>Personal Information</h2>
+          
+          <div class="personal-info-field">
+            <label for="{{ form.applicant_name.id_for_label }}" class="form-label required-field">Full Name</label>
+            {{ form.applicant_name }}
+            {% if form.applicant_name.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.applicant_name.errors }}
+              </div>
+            {% endif %}
+            <div class="form-text">Please enter your full legal name as per official documents</div>
+          </div>
           
           <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label for="applicant_name" class="form-label">Full Name*</label>
-              <input type="text" name="applicant_name" id="applicant_name" class="form-control" required>
+            <div class="col-md-6 personal-info-field">
+              <label for="{{ form.contact_number.id_for_label }}" class="form-label required-field">Contact Number</label>
+              {{ form.contact_number }}
+              {% if form.contact_number.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.contact_number.errors }}
+                </div>
+              {% endif %}
+             
             </div>
-            <div class="col-md-6">
-              <label for="contact_number" class="form-label">Contact Number*</label>
-              <input type="tel" name="contact_number" id="contact_number" class="form-control" required>
+            
+            <div class="col-md-6 personal-info-field">
+              <label for="{{ form.email.id_for_label }}" class="form-label required-field">Email Address</label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.email.errors }}
+                </div>
+              {% endif %}
+              <div class="form-text">We'll send updates to this email</div>
             </div>
           </div>
           
-          <div class="mb-3">
-            <label for="email" class="form-label">Email Address*</label>
-            <input type="email" name="email" id="email" class="form-control" required>
+          <div class="personal-info-field">
+            <label for="{{ form.applicant_address.id_for_label }}" class="form-label required-field">Full Address</label>
+            {{ form.applicant_address }}
+            {% if form.applicant_address.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.applicant_address.errors }}
+              </div>
+            {% endif %}
+            <div class="form-text">Include street, city, state, and postal code</div>
           </div>
           
-          <div class="mb-3">
-            <label for="applicant_address" class="form-label">Full Address*</label>
-            <textarea name="applicant_address" id="applicant_address" rows="3" class="form-control" required></textarea>
-          </div>
-          
-          <div class="d-flex justify-content-between">
+          <div class="d-flex justify-content-between mt-4">
             <button type="button" onclick="prevSection(1)" class="btn btn-outline-secondary">
               <i class="fas fa-arrow-left me-2"></i> Back
             </button>
@@ -370,9 +448,9 @@
           <p class="text-muted mb-4">Your complaint has been registered. You will receive a confirmation email shortly.</p>
           <div class="bg-blue-50 p-3 rounded mb-4">
             <p class="small text-muted">Your Complaint ID:</p>
-            <p class="fw-bold text-indigo">GRV-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}</p>
+            <p class="fw-bold text-indigo" id="grievance-id-display"></p>
           </div>
-          <button onclick="window.location.href='/dashboard'" class="btn btn-primary-custom w-100">
+          <button onclick="window.location.href='{% url 'public_user:user_dashboard' %}'" class="btn btn-primary-custom w-100">
             Return to Dashboard
           </button>
         </div>
@@ -381,6 +459,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     // Form navigation
     function nextSection(next) {
@@ -485,85 +564,280 @@
     
     // Populate review section
     function populateReviewSection() {
-      document.getElementById('review-dept').textContent = document.getElementById('department').value;
-      document.getElementById('review-district').textContent = document.getElementById('district').value;
-      document.getElementById('review-subject').textContent = document.getElementById('subject').value;
-      document.getElementById('review-description').textContent = document.getElementById('description').value;
-      document.getElementById('review-name').textContent = document.getElementById('applicant_name').value;
-      document.getElementById('review-phone').textContent = document.getElementById('contact_number').value;
-      document.getElementById('review-email').textContent = document.getElementById('email').value;
-      document.getElementById('review-address').textContent = document.getElementById('applicant_address').value;
+      document.getElementById('review-dept').textContent = document.getElementById('id_department').options[document.getElementById('id_department').selectedIndex].text;
+      document.getElementById('review-district').textContent = document.getElementById('id_district').options[document.getElementById('id_district').selectedIndex].text;
+      document.getElementById('review-subject').textContent = document.getElementById('id_subject').value;
+      document.getElementById('review-description').textContent = document.getElementById('id_description').value;
+      document.getElementById('review-name').textContent = document.getElementById('id_applicant_name').value;
+      document.getElementById('review-phone').textContent = document.getElementById('id_contact_number').value;
+      document.getElementById('review-email').textContent = document.getElementById('id_email').value;
+      document.getElementById('review-address').textContent = document.getElementById('id_applicant_address').value;
       
       // Show attached files
       const fileInput = document.getElementById('documents');
-      if (fileInput.files.length > 0) {
-        const fileList = Array.from(fileInput.files).map(file => file.name).join(', ');
-        document.getElementById('review-attachments').textContent = fileList;
-      }
+    if (fileInput.files.length > 0) {
+      const fileList = Array.from(fileInput.files).map(file => 
+        `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+      ).join('<br>');
+      document.getElementById('review-attachments').innerHTML = fileList;
+    } else {
+      document.getElementById('review-attachments').textContent = 'No files attached';
+    }
     }
     
     // File upload handling
-    document.getElementById('documents').addEventListener('change', function(e) {
-      const fileList = document.getElementById('fileList');
-      fileList.innerHTML = '';
-      
-      if (this.files.length > 0) {
-        Array.from(this.files).forEach(file => {
-          const div = document.createElement('div');
-          div.className = 'd-flex justify-content-between align-items-center bg-light p-2 rounded mb-2';
-          div.innerHTML = `
-            <div class="d-flex align-items-center">
-              <i class="fas fa-file-alt text-indigo me-2"></i>
-              <span class="small">${file.name}</span>
-            </div>
-            <button type="button" class="btn btn-link text-danger p-0" onclick="removeFile(this, '${file.name}')">
-              <i class="fas fa-times"></i>
-            </button>
-          `;
-          fileList.appendChild(div);
-        });
-      }
-    });
+  document.getElementById('documents').addEventListener('change', function(e) {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = '';
     
-    function removeFile(button, fileName) {
-      const fileInput = document.getElementById('documents');
-      const files = Array.from(fileInput.files);
-      const updatedFiles = files.filter(file => file.name !== fileName);
-      
-      // Create new DataTransfer to update files
-      const dataTransfer = new DataTransfer();
-      updatedFiles.forEach(file => dataTransfer.items.add(file));
-      fileInput.files = dataTransfer.files;
-      
-      // Update UI
-      button.parentElement.remove();
-      
-      // If no files left, show default message
-      if (updatedFiles.length === 0) {
-        document.getElementById('fileList').innerHTML = '';
-      }
+    if (this.files.length > 0) {
+      Array.from(this.files).forEach(file => {
+        const div = document.createElement('div');
+        div.className = 'd-flex justify-content-between align-items-center bg-light p-2 rounded mb-2';
+        div.innerHTML = `
+          <div class="d-flex align-items-center">
+            <i class="fas fa-file-alt text-indigo me-2"></i>
+            <span class="small">${file.name}</span>
+            <span class="small text-muted ms-2">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+          </div>
+          <button type="button" class="btn btn-link text-danger p-0" onclick="removeFile(this, '${file.name}')">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        fileList.appendChild(div);
+      });
     }
+  });
+
     
-    // Form submission
-    document.getElementById('grievanceForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      if (!document.getElementById('declaration').checked) {
+  function removeFile(button, fileName) {
+    const fileInput = document.getElementById('documents');
+    const files = Array.from(fileInput.files);
+    const updatedFiles = files.filter(file => file.name !== fileName);
+    
+    // Create new DataTransfer to update files
+    const dataTransfer = new DataTransfer();
+    updatedFiles.forEach(file => dataTransfer.items.add(file));
+    fileInput.files = dataTransfer.files;
+    
+    // Update UI
+    button.parentElement.remove();
+    
+    // If no files left, show default message
+    if (updatedFiles.length === 0) {
+      document.getElementById('fileList').innerHTML = '';
+    }
+  }
+    
+document.getElementById('grievanceForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Validate declaration checkbox
+    if (!document.getElementById('declaration').checked) {
         alert('Please confirm the declaration before submitting.');
         return;
-      }
-      
-      // Show loading state
-      const submitBtn = this.querySelector('[type="submit"]');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
-      
-      // Simulate form submission (replace with actual fetch/AJAX call)
-      setTimeout(() => {
-        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-        successModal.show();
-      }, 1500);
+    }
+    
+    // Set loading state
+    const submitBtn = this.querySelector('[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+    
+    try {
+        const formData = new FormData(this);
+        const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Show success modal
+            document.getElementById('grievance-id-display').textContent = data.grievance_id;
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+            
+            // Redirect after modal closes
+            document.getElementById('successModal').addEventListener('hidden.bs.modal', () => {
+                window.location.href = data.redirect_url;
+            });
+        } else {
+            // Show detailed errors
+            let errorMessage = "Please correct the following errors:\n";
+            for (const field in data.errors) {
+                errorMessage += `• ${field}: ${data.errors[field].join(', ')}\n`;
+            }
+            alert(errorMessage);
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        alert('An error occurred while submitting. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Submit Complaint';
+    }
+});
+$(document).ready(function() {
+    $('#id_district').change(function() {
+        var district_code = $(this).val();
+        if (district_code) {
+            $('#departmentLoading').removeClass('d-none');
+            
+            $.ajax({
+                url: '{% url "public_user:ajax_load_departments" %}',
+                data: {
+                    'district': district_code
+                },
+                success: function(data) {
+                    var $department = $('#id_department');
+                    $department.empty();
+                    $department.append('<option value="">Select Department</option>');
+                    
+                    $.each(data, function(index, dept) {
+                        $department.append(
+                            $('<option></option>').val(dept.code).text(dept.name)
+                        );
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                },
+                complete: function() {
+                    $('#departmentLoading').addClass('d-none');
+                }
+            });
+        } else {
+            $('#id_department').empty();
+            $('#id_department').append('<option value="">Select Department</option>');
+        }
     });
+});
+
+
+    // Save form data to session storage
+function saveFormData() {
+  const formData = {
+    district: $('#id_district').val(),
+    department: $('#id_department').val(),
+    subject: $('#id_subject').val(),
+    description: $('#id_description').val(),
+    // Note: File inputs can't be stored directly
+    applicant_name: $('#id_applicant_name').val(),
+    contact_number: $('#id_contact_number').val(),
+    email: $('#id_email').val(),
+    applicant_address: $('#id_applicant_address').val(),
+    currentSection: document.querySelector('.form-section.active').id
+  };
+  sessionStorage.setItem('grievanceFormData', JSON.stringify(formData));
+}
+
+// Load form data from session storage
+function loadFormData() {
+  const savedData = sessionStorage.getItem('grievanceFormData');
+  if (savedData) {
+    const formData = JSON.parse(savedData);
+    
+    // Restore field values
+    $('#id_district').val(formData.district).trigger('change');
+    // Department will be loaded via the district change event
+    
+    // Small delay to ensure department AJAX completes
+    setTimeout(() => {
+      $('#id_department').val(formData.department);
+      $('#id_subject').val(formData.subject);
+      $('#id_description').val(formData.description);
+      $('#id_applicant_name').val(formData.applicant_name);
+      $('#id_contact_number').val(formData.contact_number);
+      $('#id_email').val(formData.email);
+      $('#id_applicant_address').val(formData.applicant_address);
+      
+      // Restore current section if not section 1
+      if (formData.currentSection && formData.currentSection !== 'section1') {
+        const sectionNum = parseInt(formData.currentSection.replace('section', ''));
+        showSection(sectionNum);
+      }
+    }, 300);
+  }
+}
+
+// Helper function to show a section and update progress indicators
+function showSection(sectionNum) {
+  // Hide all sections
+  document.querySelectorAll('.form-section').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  // Show requested section
+  document.getElementById(`section${sectionNum}`).classList.add('active');
+  
+  // Update step indicators
+  document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+    indicator.classList.remove('active', 'completed');
+    if (index < sectionNum - 1) {
+      indicator.classList.add('completed');
+    } else if (index === sectionNum - 1) {
+      indicator.classList.add('active');
+    }
+  });
+  
+  // Update step connectors
+  document.querySelectorAll('.step-connector').forEach((connector, index) => {
+    connector.classList.remove('active', 'completed');
+    if (index < sectionNum - 2) {
+      connector.classList.add('completed');
+    } else if (index === sectionNum - 2) {
+      connector.classList.add('active');
+    }
+  });
+  
+  // Update step labels
+  document.querySelectorAll('.step-label').forEach((label, index) => {
+    label.classList.remove('active', 'completed');
+    if (index < sectionNum - 1) {
+      label.classList.add('completed');
+    } else if (index === sectionNum - 1) {
+      label.classList.add('active');
+    }
+  });
+}
+
+// Initialize when document is ready
+$(document).ready(function() {
+  // Load saved data
+  loadFormData();
+  
+  // Save data on any form change
+  $('#grievanceForm').on('change input', 'input, textarea, select', saveFormData);
+  
+  // Clear storage on successful submission
+  $('#grievanceForm').on('submit', function() {
+    sessionStorage.removeItem('grievanceFormData');
+  });
+  
+  // Warn user before leaving page with unsaved changes
+  let formModified = false;
+  $('#grievanceForm').on('change input', 'input, textarea, select', function() {
+    formModified = true;
+  });
+  
+  window.addEventListener('beforeunload', function(e) {
+    if (formModified && !$('#grievanceForm').data('submitted')) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      return e.returnValue;
+    }
+  });
+  
+  // Mark form as submitted when submit button is clicked
+  $('button[type="submit"]').on('click', function() {
+    $('#grievanceForm').data('submitted', true);
+  });
+});
   </script>
 </body>
 </html>
