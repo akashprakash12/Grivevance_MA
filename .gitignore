@@ -1,8 +1,9 @@
-# .gitignore
-node_modules/
-.venv/
-build/
-dist/
-*.pyc
-.DS_Store
-.env
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Django media and log files
+media/
+*.log
+*.json
+env.txt
