@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Complaints | Grievance Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+    }
+    
+    body {
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .navbar-custom {
+      background: var(--indigo);
+      padding: 1rem 2rem;
+      border-bottom: 4px solid var(--indigo-light);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .navbar-custom .navbar-brand {
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .status-in-progress {
+      background-color: #dbeafe;
+      color: var(--indigo-light);
+    }
+    .status-resolved {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .status-rejected {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .table-custom {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .table-custom thead {
+      background-color: var(--indigo);
+      color: white;
+    }
+    
+    .table-custom th {
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+    
+    .table-custom tbody tr:hover {
+      background-color: rgba(0, 40, 85, 0.05);
+    }
+    
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      transition: .2s;
+      height: 100%;
+      border-left: 4px solid var(--indigo);
+    }
+    
+    .stat-card:hover {
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-3px);
+    }
+    
+    .stat-card .count {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--indigo);
+    }
+    
+    .modal-custom {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    .footer-custom {
+      background: var(--indigo);
+      color: #fff;
+    }
+    
+    .animate-pulse {
+      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .btn-primary {
+      background-color: var(--indigo);
+      border-color: var(--indigo);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--indigo-light);
+      border-color: var(--indigo-light);
+    }
+    
+    .btn-outline-primary {
+      color: var(--indigo);
+      border-color: var(--indigo);
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--indigo);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Navigation -->
+  <nav class="navbar-custom navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-balance-scale me-2 text-accent"></i>
+        Grievance Portal
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="text-white me-3 d-none d-md-inline">Welcome, {{ user.first_name|default:user.username }}</span>
+        <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username }}&background=random" alt="User" class="rounded-circle" width="40" height="40">
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+      <h1 class="h2 fw-bold text-indigo mb-3 mb-md-0">
+        <i class="fas fa-list me-2 text-accent"></i> My Complaints
+      </h1>
+      
+      <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+        <div class="position-relative flex-grow-1">
+          <select id="statusFilter" class="form-select">
+            <option value="all">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+          <div class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">
+            <i class="fas fa-chevron-down text-muted"></i>
+          </div>
+        </div>
+        
+        <div class="position-relative flex-grow-1">
+          <select id="timeFilter" class="form-select">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+          <div class="position-absolute end-0 top-0 h-100 d-flex align-items-center pe-3">
+            <i class="fas fa-chevron-down text-muted"></i>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary">
+          <i class="fas fa-filter me-2"></i> Apply
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+   <div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card">
+      <p class="text-muted mb-1">Total Complaints</p>
+      <div class="count">{{ status_counts.total }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <p class="text-muted mb-1">Pending</p>
+      <div class="count">{{ status_counts.pending }}</div>
+      <small class="text-warning">
+        {% if status_counts.total > 0 %}
+          {{ status_counts.pending|floatformat:0 }}% of total
+        {% else %}
+          0% of total
+        {% endif %}
+      </small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <p class="text-muted mb-1">In Progress</p>
+      <div class="count">{{ status_counts.in_progress }}</div>
+      <small class="text-primary">
+        {% if status_counts.total > 0 %}
+          {{ status_counts.in_progress|floatformat:0 }}% of total
+        {% else %}
+          0% of total
+        {% endif %}
+      </small>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card">
+      <p class="text-muted mb-1">Resolved</p>
+      <div class="count">{{ status_counts.resolved }}</div>
+      <small class="text-success">
+        {% if status_counts.total > 0 %}
+          {{ status_counts.resolved|floatformat:0 }}% of total
+        {% else %}
+          0% of total
+        {% endif %}
+      </small>
+    </div>
+  </div>
+</div>
+
+    <!-- Complaints Table -->
+    <div class="table-custom">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Subject</th>
+              <th scope="col">Department</th>
+              <th scope="col">Date Filed</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+        <tbody id="complaintsTableBody">
+  {% for grievance in grievances %}
+  <tr>
+    <td class="fw-bold">{{ grievance.grievance_id }}</td>
+    <td>{{ grievance.subject }}</td>
+    <td>{{ grievance.department.name }}</td>
+    <td>{{ grievance.date_filed|date:"d M Y" }}</td>
+    <td>
+      <span class="status-badge status-{{ grievance.status|lower|cut:' ' }}">{{ grievance.get_status_display }}</span>
+    </td>
+ <td>
+  <button onclick="viewComplaintDetails('{{ grievance.grievance_id }}')" class="btn btn-sm btn-outline-primary">View</button>
+</td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="6" class="text-center py-4">No grievances found</td>
+  </tr>
+  {% endfor %}
+  
+  <!-- Loading Skeleton -->
+  <tr id="loadingSkeleton" class="d-none">
+    <!-- ... keep the existing skeleton code ... -->
+  </tr>
+</tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center p-3 border-top">
+        <div class="d-none d-md-block">
+          <p class="small text-muted mb-0">
+            Showing <span class="fw-bold">1</span> to <span class="fw-bold">3</span> of <span class="fw-bold">12</span> complaints
+          </p>
+        </div>
+        <nav aria-label="Page navigation">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Complaint Details Modal -->
+  <div class="modal fade" id="complaintDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content modal-custom">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title fw-bold text-indigo">
+          <i class="fas fa-file-alt me-2 text-accent"></i> Complaint Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+  <div class="modal-body" id="complaintDetailsBody">
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <p class="small text-muted mb-1">Complaint ID</p>
+            <p class="fw-bold" data-field="grievance_id">{{ grievance.grievance_id }}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+            <p class="small text-muted mb-1">Status</p>
+            <p data-field="status">
+                <span class="status-badge status-{{ grievance.status|lower|cut:' ' }}">{{ grievance.get_status_display }}</span>
+            </p>
+        </div>
+        <!-- Add data-field attributes to all elements you want to print -->
+    </div>
+    <!-- Rest of your modal content -->
+</div>
+      <div class="modal-footer border-top-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+       <button type="button" class="btn btn-primary" onclick="printGrievance()">
+    <i class="fas fa-print me-2"></i> Print
+</button>
+      </div>
+    </div>
+  </div>
+</div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-custom py-5 mt-5">
+    <div class="container text-center">
+      <p class="mb-0">© 2025 Government Grievance Portal. All rights reserved.</p>
+      <p class="small text-white-50 mt-2">For assistance, contact support@grievance.gov.in or call 1800-123-4567</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // View complaint details
+// View complaint details - updated to fetch real data
+async function viewComplaintDetails(id) {
+  const loadingRow = document.getElementById('loadingSkeleton');
+  const modal = new bootstrap.Modal(document.getElementById('complaintDetailsModal'));
+  
+  try {
+    // Show loading state
+    loadingRow.classList.remove('d-none');
+    
+    // Fetch complaint details from backend
+    const response = await fetch(`/public_user/grievance/${id}/`);
+    const data = await response.json();
+    
+    // Populate modal with data
+    document.getElementById('complaintDetailsBody').innerHTML = `
+      <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Complaint ID</p>
+          <p class="fw-bold" data-field="grievance_id">${data.grievance_id}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Status</p>
+          <p data-field="status">
+            <span class="status-badge status-${data.status.toLowerCase().replace(' ', '-')}">${data.status}</span>
+          </p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Date Filed</p>
+          <p class="fw-bold" data-field="date_filed" >${data.date_filed}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Last Updated</p>
+          <p class="fw-bold" data-field="last_updated">${data.last_updated}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Department</p>
+          <p class="fw-bold" data-field="department">${data.department}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">District</p>
+          <p class="fw-bold" data-field="district">${data.district}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Applicant Name</p>
+          <p class="fw-bold" data-field="applicant_name">${data.applicant_name}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Contact Number</p>
+          <p class="fw-bold" data-field="contact_number">${data.contact_number}</p>
+        </div>
+        <div class="col-md-6 mb-3">
+          <p class="small text-muted mb-1">Email</p>
+          <p class="fw-bold" data-field="email">${data.email}</p>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <p class="small text-muted mb-2">Subject</p>
+        <p class="fw-bold" data-field="subject">${data.subject}</p>
+      </div>
+      
+      <div class="mb-4">
+        <p class="small text-muted mb-2">Description</p>
+        <div class="bg-light p-3 rounded border">
+          <p class="mb-0" data-field="description">${data.description}</p>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <p class="small text-muted mb-2">Applicant Address</p>
+        <div class="bg-light p-3 rounded border">
+          <p class="mb-0" data-field="applicant_address">${data.applicant_address}</p>
+        </div>
+      </div>
+      
+  
+  ${data.documents.length > 0 ? `
+  <div class="mb-4" data-section="attachments">
+    <p class="small text-muted mb-2">Attachments</p>
+    <div class="d-flex flex-wrap gap-3">
+      ${data.documents.map(doc => `
+        <div class="document-item" data-field="document" data-doc-name="${doc.name}" data-doc-type="${doc.type}" data-doc-url="${doc.url}">
+          <a href="${doc.url}" target="_blank" class="d-flex align-items-center px-3 py-2 border border-gray-200 rounded-lg hover-bg-gray-50">
+            <i class="fas ${doc.type === 'pdf' ? 'fa-file-pdf text-danger' : 
+              ['jpg', 'jpeg', 'png', 'gif'].includes(doc.type) ? 'fa-file-image text-primary' : 
+              'fa-file-alt text-secondary'} me-2"></i>
+            <span>${doc.name}</span>
+          </a>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+      
+      <div>
+        <h5 class="fw-bold text-indigo mb-3 d-flex align-items-center">
+          <i class="fas fa-history me-2 text-accent"></i> Status History
+        </h5>
+        <div class="position-relative ps-4">
+          <div class="position-absolute start-0 top-0 h-100 border-start border-2 border-primary"></div>
+          <div class="position-relative">
+            <div class="position-absolute start-0 translate-middle-x bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 16px; height: 16px;">
+              <i class="fas fa-file-alt text-white" style="font-size: 8px;"></i>
+            </div>
+            <div class="ps-4">
+              <p class="small text-muted mb-1 data-field="date_filed"">${data.date_filed}</p>
+              <p class="fw-bold">Complaint submitted</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Show modal
+    modal.show();
+  } catch (error) {
+    console.error('Error fetching complaint details:', error);
+    alert('Failed to load complaint details. Please try again.');
+  } finally {
+    loadingRow.classList.add('d-none');
+  }
+}
+    
+    // Filter complaints
+    document.getElementById('statusFilter').addEventListener('change', function() {
+      // In a real app, you would fetch filtered data from your backend
+      // Here we're just simulating filtering
+      const status = this.value;
+      const rows = document.querySelectorAll('#complaintsTableBody tr:not(#loadingSkeleton)');
+      
+      if (status === 'all') {
+        rows.forEach(row => row.classList.remove('d-none'));
+      } else {
+        rows.forEach(row => {
+          const rowStatus = row.querySelector('.status-badge').textContent.trim();
+          if (rowStatus === status) {
+            row.classList.remove('d-none');
+          } else {
+            row.classList.add('d-none');
+          }
+        });
+      }
+    });
+    
+    // Simulate loading data
+    function loadComplaints() {
+      const loadingRow = document.getElementById('loadingSkeleton');
+      const tableBody = document.getElementById('complaintsTableBody');
+      
+      // Show loading state
+      loadingRow.classList.remove('d-none');
+      
+      // Simulate API call
+      setTimeout(() => {
+        loadingRow.classList.add('d-none');
+        // In a real app, you would populate the table with data from your backend
+      }, 1200);
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load initial data
+      loadComplaints();
+    });
+
+
+  function printGrievance() {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    // Get all data from the modal (including elements that might not have data-field attributes)
+    const grievanceData = {
+        id: document.querySelector('#complaintDetailsBody [data-field="grievance_id"]')?.textContent || '',
+        subject: document.querySelector('#complaintDetailsBody [data-field="subject"]')?.textContent || '',
+        status: document.querySelector('#complaintDetailsBody [data-field="status"]')?.textContent || '',
+        dateFiled: document.querySelector('#complaintDetailsBody [data-field="date_filed"]')?.textContent || '',
+        lastUpdated: document.querySelector('#complaintDetailsBody [data-field="last_updated"]')?.textContent || '',
+        department: document.querySelector('#complaintDetailsBody [data-field="department"]')?.textContent || '',
+        district: document.querySelector('#complaintDetailsBody [data-field="district"]')?.textContent || '',
+        applicantName: document.querySelector('#complaintDetailsBody [data-field="applicant_name"]')?.textContent || '',
+        contactNumber: document.querySelector('#complaintDetailsBody [data-field="contact_number"]')?.textContent || '',
+        email: document.querySelector('#complaintDetailsBody [data-field="email"]')?.textContent || '',
+        description: document.querySelector('#complaintDetailsBody [data-field="description"]')?.textContent || '',
+        applicantAddress: document.querySelector('#complaintDetailsBody [data-field="applicant_address"]')?.textContent || '',
+        // Get documents from data attributes
+        documents: Array.from(document.querySelectorAll('#complaintDetailsBody [data-field="document"]')).map(doc => ({
+            name: doc.getAttribute('data-doc-name'),
+            type: doc.getAttribute('data-doc-type'),
+            url: doc.getAttribute('data-doc-url')
+        }))
+    };
+
+    // Create document list HTML if documents exist
+    const documentsHtml = grievanceData.documents.length > 0 ? `
+        <div class="section">
+            <div class="section-title">Attachments</div>
+            <ul style="list-style-type: none; padding-left: 0;">
+                ${grievanceData.documents.map(doc => `
+                    <li style="margin-bottom: 5px;">
+                        <span class="fa ${doc.type === 'pdf' ? 'fa-file-pdf' : 
+                          ['jpg', 'jpeg', 'png', 'gif'].includes(doc.type) ? 'fa-file-image' : 
+                          'fa-file-alt'}" style="margin-right: 5px;"></span>
+                        ${doc.name}
+                    </li>
+                `).join('')}
+            </ul>
+        </div>
+    ` : '';
+
+    // Create the print content HTML
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Grievance Details - ${grievanceData.id}</title>
+            <style>
+                body { 
+                    font-family: Arial, sans-serif; 
+                    line-height: 1.6; 
+                    color: #333;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .print-container { 
+                    max-width: 800px; 
+                    margin: 0 auto; 
+                    padding: 20px;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                }
+                .header { 
+                    text-align: center; 
+                    margin-bottom: 30px; 
+                    border-bottom: 2px solid #002855; 
+                    padding-bottom: 10px; 
+                }
+                .header h1 { 
+                    color: #002855; 
+                    margin-bottom: 5px;
+                    font-size: 24px;
+                }
+                .print-date { 
+                    font-size: 14px; 
+                    color: #666; 
+                }
+                .section { 
+                    margin-bottom: 20px; 
+                }
+                .section-title { 
+                    font-weight: bold; 
+                    color: #002855; 
+                    border-bottom: 1px solid #eee; 
+                    padding-bottom: 5px; 
+                    margin-bottom: 10px;
+                    font-size: 16px;
+                }
+                .two-column { 
+                    display: flex; 
+                    justify-content: space-between; 
+                    flex-wrap: wrap;
+                    margin-bottom: 15px;
+                }
+                .column { 
+                    width: 48%; 
+                    margin-bottom: 15px; 
+                }
+                .field-label { 
+                    font-weight: bold; 
+                    margin-bottom: 3px;
+                    font-size: 14px;
+                }
+                .field-value { 
+                    margin-bottom: 10px;
+                    font-size: 14px;
+                }
+                .attachments { 
+                    margin-top: 20px; 
+                }
+                .footer { 
+                    margin-top: 30px; 
+                    text-align: center; 
+                    font-size: 12px; 
+                    color: #666;
+                    border-top: 1px solid #eee;
+                    padding-top: 10px;
+                }
+                @page { 
+                    size: auto;  
+                    margin: 10mm;
+                }
+                .text-block {
+                    background-color: #f9f9f9;
+                    padding: 10px;
+                    border-radius: 4px;
+                    border-left: 3px solid #002855;
+                    margin-bottom: 15px;
+                }
+                .fa {
+                    display: inline-block;
+                    font-style: normal;
+                    font-variant: normal;
+                    text-rendering: auto;
+                    line-height: 1;
+                    font-family: "Font Awesome 5 Free";
+                    font-weight: 900;
+                }
+                .fa-file-pdf { color: #d23333; }
+                .fa-file-image { color: #2a5caa; }
+                .fa-file-alt { color: #666; }
+            </style>
+        </head>
+        <body>
+            <div class="print-container">
+                <div class="header">
+                    <h1>Grievance Details</h1>
+                    <div class="print-date">Printed on ${new Date().toLocaleString()}</div>
+                </div>
+                
+                <div class="two-column">
+                    <div class="column">
+                        <div class="field-label">Grievance ID</div>
+                        <div class="field-value">${grievanceData.id}</div>
+                        
+                        <div class="field-label">Status</div>
+                        <div class="field-value">${grievanceData.status}</div>
+                        
+                        <div class="field-label">Date Filed</div>
+                        <div class="field-value">${grievanceData.dateFiled}</div>
+                        
+                        <div class="field-label">Last Updated</div>
+                        <div class="field-value">${grievanceData.lastUpdated}</div>
+                    </div>
+                    
+                    <div class="column">
+                        <div class="field-label">Department</div>
+                        <div class="field-value">${grievanceData.department}</div>
+                        
+                        <div class="field-label">District</div>
+                        <div class="field-value">${grievanceData.district}</div>
+                        
+                        <div class="field-label">Applicant Name</div>
+                        <div class="field-value">${grievanceData.applicantName}</div>
+                        
+                        <div class="field-label">Contact Number</div>
+                        <div class="field-value">${grievanceData.contactNumber}</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Subject</div>
+                    <div>${grievanceData.subject}</div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Description</div>
+                    <div class="text-block">${grievanceData.description}</div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Applicant Address</div>
+                    <div class="text-block">${grievanceData.applicantAddress}</div>
+                </div>
+                
+                ${documentsHtml}
+                
+                <div class="footer">
+                    Official Document - ${grievanceData.id}<br>
+                    This is a computer generated document and does not require a signature.
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Write the content to the new window
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+
+    // Trigger print after content loads
+    printWindow.onload = function() {
+        setTimeout(function() {
+            printWindow.print();
+            // Don't close immediately to allow print dialog to appear
+            // printWindow.close();
+        }, 200);
+    };
+}
+  </script>
+</body>
+</html>

@@ -181,7 +181,11 @@
   <nav class="navbar-custom navbar-expand-lg navbar-dark">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Emblem_of_Kerala.svg/1200px-Emblem_of_Kerala.svg.png" alt="Kerala Government Logo" class="kerala-logo me-3">
+        <img src="{% static 'images/kerala_watermark.png' %}" 
+     alt="Kerala Government Logo" 
+     class="kerala-logo me-3" 
+     style="filter: brightness(0) invert(1);">
+
         <span class="fw-bold">Kerala Grievance Portal</span>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -256,27 +260,28 @@
         <div class="flex-grow-1 mb-4 mb-md-0">
         <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
           <p class="mb-4 opacity-90">Track your grievances with Kerala Government departments</p>
-          <div class="d-flex flex-wrap gap-3">
-            <div class="stat-card">
-              <p class="small mb-1">Total Complaints</p>
-              <p class="h4 fw-bold mb-0">12</p>
-            </div>
-            <div class="stat-card">
-              <p class="small mb-1">Pending</p>
-              <p class="h4 fw-bold mb-0">3</p>
-            </div>
-            <div class="stat-card">
-              <p class="small mb-1">In Progress</p>
-              <p class="h4 fw-bold mb-0">5</p>
-            </div>
-            <div class="stat-card">
-              <p class="small mb-1">Resolved</p>
-              <p class="h4 fw-bold mb-0">4</p>
-            </div>
-          </div>
+          <!-- Replace the static stats with dynamic ones -->
+<div class="d-flex flex-wrap gap-3">
+  <div class="stat-card">
+    <p class="small mb-1">Total Complaints</p>
+    <p class="h4 fw-bold mb-0">{{ status_counts.total }}</p>
+  </div>
+  <div class="stat-card">
+    <p class="small mb-1">Pending</p>
+    <p class="h4 fw-bold mb-0">{{ status_counts.pending }}</p>
+  </div>
+  <div class="stat-card">
+    <p class="small mb-1">In Progress</p>
+    <p class="h4 fw-bold mb-0">{{ status_counts.in_progress }}</p>
+  </div>
+  <div class="stat-card">
+    <p class="small mb-1">Resolved</p>
+    <p class="h4 fw-bold mb-0">{{ status_counts.resolved }}</p>
+  </div>
+</div>
         </div>
         <div class="text-center text-md-end">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Kerala_God%27s_Own_Country_Logo.svg/1200px-Kerala_God%27s_Own_Country_Logo.svg.png" alt="Kerala Tourism Logo" class="img-fluid" style="max-height: 150px;">
+          <img src="{% static 'images/grivence.jpg' %}" alt="Kerala Grivence" class="img-fluid" style="max-height: 250px;">
         </div>
       </div>
     </section>
@@ -299,7 +304,7 @@
           </a>
         </div>
         <div class="col-md-6 col-lg-3">
-          <a href="{% url 'public_user:view_public_users' %}" class="quick-action-card text-decoration-none p-4 d-block">
+          <a href="{% url 'public_user:view_grievances' %}" class="quick-action-card text-decoration-none p-4 d-block">
             <div class="d-flex align-items-center">
               <div class="action-icon me-3">
                 <i class="fas fa-list"></i>
@@ -349,47 +354,45 @@
           <a href="#" class="small text-primary">View All</a>
         </div>
         <div class="card-body p-0">
-          <div class="list-group list-group-flush">
-            <div class="list-group-item border-0 py-3">
-              <div class="activity-item">
-                <div class="d-flex">
-                  <div class="flex-shrink-0 text-primary me-3">
-                    <i class="fas fa-road"></i>
-                  </div>
-                  <div>
-                    <p class="mb-1">Your complaint <strong>"Road Issue"</strong> has been assigned to the maintenance team.</p>
-                    <small class="text-muted">Yesterday at 2:45 PM</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="list-group-item border-0 py-3">
-              <div class="activity-item">
-                <div class="d-flex">
-                  <div class="flex-shrink-0 text-success me-3">
-                    <i class="fas fa-check"></i>
-                  </div>
-                  <div>
-                    <p class="mb-1">Complaint <strong>"Garbage Collection"</strong> has been resolved.</p>
-                    <small class="text-muted">2 days ago at 10:30 AM</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="list-group-item border-0 py-3">
-              <div class="activity-item">
-                <div class="d-flex">
-                  <div class="flex-shrink-0 text-warning me-3">
-                    <i class="fas fa-exclamation"></i>
-                  </div>
-                  <div>
-                    <p class="mb-1">Your complaint <strong>"Water Supply"</strong> is awaiting department response.</p>
-                    <small class="text-muted">3 days ago at 4:15 PM</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+         <div class="list-group list-group-flush">
+  {% for grievance in grievances|slice:":3" %}
+  <div class="list-group-item border-0 py-3">
+    <div class="activity-item">
+      <div class="d-flex">
+        <div class="flex-shrink-0 
+          {% if grievance.status == 'RESOLVED' %}text-success
+          {% elif grievance.status == 'IN_PROGRESS' %}text-primary
+          {% else %}text-warning{% endif %} me-3">
+          <i class="fas 
+            {% if grievance.status == 'RESOLVED' %}fa-check
+            {% elif grievance.status == 'IN_PROGRESS' %}fa-road
+            {% else %}fa-exclamation{% endif %}"></i>
+        </div>
+        <div>
+          <p class="mb-1">Your complaint <strong>"{{ grievance.subject }}"</strong> 
+            {% if grievance.status == 'RESOLVED' %}has been resolved
+            {% elif grievance.status == 'IN_PROGRESS' %}is now in progress
+            {% else %}is pending review{% endif %}.</p>
+          <small class="text-muted">{{ grievance.last_updated|date:"F j, Y" }} at {{ grievance.last_updated|time:"g:i A" }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="list-group-item border-0 py-3">
+    <div class="activity-item">
+      <div class="d-flex">
+        <div class="flex-shrink-0 text-muted me-3">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <div>
+          <p class="mb-1">No recent activity found</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
         </div>
       </div>
     </section>
@@ -422,65 +425,38 @@
                 <th class="pe-4">Actions</th>
               </tr>
             </thead>
-            <tbody id="complaintsTableBody">
-              <tr>
-                <td class="ps-4">1</td>
-                <td>Road Issue</td>
-                <td>Public Works</td>
-                <td><span class="badge status-badge-progress">In Progress</span></td>
-                <td class="pe-4">
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="ps-4">2</td>
-                <td>Water Supply</td>
-                <td>Revenue</td>
-                <td><span class="badge status-badge-pending">Pending</span></td>
-                <td class="pe-4">
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="ps-4">3</td>
-                <td>Garbage Collection</td>
-                <td>Municipal Corporation</td>
-                <td><span class="badge status-badge-resolved">Resolved</span></td>
-                <td class="pe-4">
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+          <tbody id="complaintsTableBody">
+  {% for grievance in grievances %}
+  <tr>
+    <td class="ps-4">{{ grievance.grievance_id }}</td>
+    <td>{{ grievance.subject }}</td>
+    <td>{{ grievance.department.name }}</td>
+    <td>
+      <span class="badge 
+        {% if grievance.status == 'PENDING' %}status-badge-pending
+        {% elif grievance.status == 'IN_PROGRESS' %}status-badge-progress
+        {% elif grievance.status == 'RESOLVED' %}status-badge-resolved
+        {% else %}bg-secondary{% endif %}">
+        {{ grievance.get_status_display }}
+      </span>
+    </td>
+    <td class="pe-4">
+      <div class="d-flex gap-2">
+        <a href="{% url 'public_user:view_grievances' %}" class="btn btn-sm btn-outline-primary">
+          <i class="fas fa-eye"></i>
+        </a>
+        <button class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-edit"></i>
+        </button>
+      </div>
+    </td>
+  </tr>
+  {% empty %}
+  <tr>
+    <td colspan="5" class="text-center py-4">No complaints found</td>
+  </tr>
+  {% endfor %}
+</tbody>
           </table>
         </div>
         <div class="card-footer bg-light d-flex flex-column flex-md-row justify-content-between  align-items-center">
@@ -599,5 +575,29 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Show/hide complaints section
+  document.getElementById('viewAllComplaints').addEventListener('click', function() {
+    const section = document.getElementById('complaintsSection');
+    section.classList.toggle('d-none');
+  });
+  
+  // Status filter functionality
+  document.getElementById('statusFilter').addEventListener('change', function() {
+    const status = this.value;
+    const rows = document.querySelectorAll('#complaintsTableBody tr');
+    
+    rows.forEach(row => {
+      if (status === 'all') {
+        row.style.display = '';
+      } else {
+        const rowStatus = row.querySelector('.badge').textContent.trim();
+        row.style.display = rowStatus === status ? '' : 'none';
+      }
+    });
+  });
+});
+</script>
 </body>
 </html>

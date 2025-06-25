@@ -4,6 +4,9 @@ from datetime import timedelta
 from django.utils.translation import gettext_lazy as _
 from core_app.models import Department, District
 
+from django.contrib.auth import get_user_model  # Add this import at the top
+
+User = get_user_model()  # Add this line
 
 
 class Grievance(models.Model):
@@ -112,6 +115,14 @@ class Grievance(models.Model):
         on_delete=models.CASCADE,
         verbose_name=_("Department District"),
         default=1  # Or set dynamically in the form
+    )
+    
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name=_("Created By"),
+        related_name='grievances',
+       
     )
 
     remark = models.TextField(verbose_name="Remark", blank=True, null=True)

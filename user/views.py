@@ -4,19 +4,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 from django.db.utils import IntegrityError
+
 from user.models import User, PublicUserProfile
 from user.forms import PublicUserForm, PublicUserProfileForm
-# user/views.py
-from django.shortcuts import render, redirect
-from django.utils import timezone
-from django.contrib import messages
-from .forms import PublicUserForm, PublicUserProfileForm
 from grievance_app.forms import GrievanceForm
-
-
+from grievance_app.models import Grievance
 
 def create_public_user(request):
     return render(request, 'user/user_dashboard.html')
+
 
 def view_public_users(request):
     public_users = PublicUserProfile.objects.select_related('user')
@@ -60,56 +56,35 @@ def update_public_user(request, username):
         'user': user_form,
         'user_profile': profile_form
     })
+
+def user_dashboard(request):
+    grievances = Grievance.objects.all().order_by('-last_updated')
+
+    status_counts = {
+        'total': grievances.count(),
+        'pending': grievances.filter(status='PENDING').count(),
+        'in_progress': grievances.filter(status='IN_PROGRESS').count(),
+        'resolved': grievances.filter(status='RESOLVED').count(),
+        'rejected': grievances.filter(status='REJECTED').count(),
+    }
+
+    return render(request, 'user/user_dashboard.html', {
+        'grievances': grievances,
+        'status_counts': status_counts,
+        'user': request.user
+    })
 def submit_complaint(request):
-    if request.method == 'POST':
-        form = GrievanceForm(request.POST, request.FILES)
-        if form.is_valid():
-            grievance = form.save(commit=False)
-            grievance.source = 'WEB'  # Website source
-            grievance.status = 'PENDING'
-            grievance.priority = 'MEDIUM'
-            
-            # If user is logged in, associate with user
-            if request.user.is_authenticated:
-                grievance.user = request.user
-                grievance.applicant_name = request.user.get_full_name()
-                grievance.email = request.user.email
-            
-            grievance.save()
-            messages.success(request, "Your complaint has been submitted successfully!")
-            return redirect('public_user:user_dashboard')  # Redirect to dashboard
-            
-    else:
-        # Pre-fill user data if logged in
-        initial_data = {}
-        if request.user.is_authenticated:
-            initial_data = {
-                'applicant_name': request.user.get_full_name(),
-                'email': request.user.email,
-                # Add other fields from user profile if available
-            }
-        form = GrievanceForm(request.POST or None)
-
-
-    
+    form = GrievanceForm()
     return render(request, 'user/complaint_submission.html', {'form': form})
-    
-    # OR if you need public_users data:
-    # public_users = PublicUserProfile.objects.select_related('user')
-    # return render(request, 'user/complaint_submission.html', {'public_users': public_users})
+
 
 def help(request):
-    # If you don't need public_users data in the template:
     return render(request, 'user/help_system.html')
-    
-    # OR if you need public_users data:
-    # public_users = PublicUserProfile.objects.select_related('user')
-    # return render(request, 'user/help_system.html', {'public_users': public_users})
+
 
 def account_settings(request):
-    # For account settings, you probably want the current user's data
     if request.user.is_authenticated:
         user_profile = PublicUserProfile.objects.get(user=request.user)
         return render(request, 'user/account_settings.html', {'user_profile': user_profile})
     else:
-        return redirect('login')  # or handle unauthenticated users appropriately
+        return redirect('login')

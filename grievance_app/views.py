@@ -25,10 +25,11 @@ def create_grievance(request):
         form = GrievanceForm(request.POST, request.FILES)
         if form.is_valid():
             grievance = form.save(commit=False)
-            grievance.user = request.user
+            grievance.created_by = request.user
             grievance.grievance_id = auto_grievance_id()
             grievance.source = 'WEB'
             grievance.status = 'PENDING'
+            grievance.created_by = request.user
             grievance.save()
 
             # Handle file uploads
@@ -73,17 +74,51 @@ def load_departments(request):
         print(f"Error: {str(e)}")  # Debugging
         return JsonResponse({'error': str(e)}, status=400)
 # ---------- READ (List) ----------
+# views.py (updated view_grievances function)
+@login_required
 def view_grievances(request):
-    grievances = Grievance.objects.all().order_by('-date_filed')
-    return render(request, 'grievance/view_grievances.html', {'grievances': grievances})
+    # Get only grievances submitted by the current user
+    grievances = Grievance.objects.filter(created_by=request.user).order_by('-date_filed')
 
-
+    # Prepare status counts for the stats cards
+    status_counts = {
+        'total': grievances.count(),
+        'pending': grievances.filter(status='PENDING').count(),
+        'in_progress': grievances.filter(status='IN_PROGRESS').count(),
+        'resolved': grievances.filter(status='RESOLVED').count(),
+        'rejected': grievances.filter(status='REJECTED').count(),
+    }
+    
+    return render(request, 'user/view_grievances.html', {
+        'grievances': grievances,
+        'status_counts': status_counts
+    })
 # ---------- READ (Detail) ----------
 def detail_grievance(request, grievance_id):
     grievance = get_object_or_404(Grievance, grievance_id=grievance_id)
-    return render(request, 'grievance/detail_grievance.html', {'grievance': grievance})
-
-
+    documents = grievance.documents.all()
+    
+    return JsonResponse({
+        'grievance_id': grievance.grievance_id,
+        'subject': grievance.subject,
+        'description': grievance.description,
+        'status': grievance.get_status_display(),
+        'date_filed': grievance.date_filed.strftime("%d %b %Y"),
+        'last_updated': grievance.last_updated.strftime("%d %b %Y"),
+        'department': grievance.department.name,
+        'district': grievance.district.name,
+        'documents': [
+            {
+                'name': doc.file.name.split('/')[-1],
+                'url': doc.file.url,
+                'type': doc.file.name.split('.')[-1].lower()
+            } for doc in documents
+        ],
+        'applicant_name': grievance.applicant_name,
+        'contact_number': grievance.contact_number,
+        'email': grievance.email,
+        'applicant_address': grievance.applicant_address
+    })
 # ---------- UPDATE ----------
 def update_grievance(request, grievance_id):
     grievance = get_object_or_404(Grievance, grievance_id=grievance_id)
