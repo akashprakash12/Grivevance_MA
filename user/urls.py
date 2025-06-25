@@ -7,7 +7,7 @@ from django.conf.urls.static import static
 app_name = 'public_user'  # <--- VERY IMPORTANT
 
 urlpatterns = [
-    path('create/', views.user_dashboard, name='user_dashboard'),  # Fixed typo in name
+     path('', views.user_dashboard, name='user_dashboard'),  # Fixed typo in name
     path('view/', view_grievances, name='view_grievances'),
     path('update/<str:username>/', views.update_public_user, name='update_public_user'),
     path('delete/<str:username>/', views.delete_public_user, name='delete_public_user'),

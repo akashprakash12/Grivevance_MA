@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 from django.db.utils import IntegrityError
-
+from django.contrib.auth.decorators import login_required
 from user.models import User, PublicUserProfile
 from user.forms import PublicUserForm, PublicUserProfileForm
 from grievance_app.forms import GrievanceForm
@@ -56,8 +56,9 @@ def update_public_user(request, username):
         'user': user_form,
         'user_profile': profile_form
     })
-
+@login_required
 def user_dashboard(request):
+    # Get all grievances from the database
     grievances = Grievance.objects.all().order_by('-last_updated')
 
     status_counts = {

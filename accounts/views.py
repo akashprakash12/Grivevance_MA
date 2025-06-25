@@ -94,7 +94,7 @@ def dashboard(request):
 
     # === Public User Dashboard ===
     elif 'public' in groups:
-        return render(request, 'user/user_dashboard.html', {'user': user})
+           return redirect('public_user:user_dashboard') 
 
     # === Fallback (Invalid Group or No Group Assigned) ===
     messages.error(request, "Access denied. Invalid role.")
