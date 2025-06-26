@@ -69,6 +69,112 @@ def monitor_complaints():
                     comments_dict[post['id']] = comments
                 time.sleep(0.5)
 
+            # Save posts and comments to database
+            for post in complaint_posts:
+                post_obj, created = Post.objects.update_or_create(
+                    post_id=post['id'],
+                    defaults={
+                        'message': post.get('message', ''),
+                        'permalink_url': post.get('permalink_url', ''),
+                        'likes': post.get('likes', {}).get('summary', {}).get('total_count', 0),
+                        'comment_count': post.get('comments', {}).get('summary', {}).get('total_count', 0),
+                        'created_at': datetime.strptime(post['created_time'], '%Y-%m-%dT%H:%M:%S%z'),
+                        'is_deleted': False,
+                    }
+                )
+                if created:
+                    recent_post_ids.add(post['id'])
+                for comment in comments_dict.get(post['id'], []):
+                    Comment.objects.update_or_create(
+                        comment_id=comment['id'],
+                        post=post_obj,
+                        defaults={
+                            'author_name': comment.get('from', {}).get('name', 'Unknown'),
+                            'author_id': comment.get('from', {}).get('id', ''),
+                            'message': comment.get('message', ''),
+                            'created_at': datetime.strptime(comment['created_time'], '%Y-%m-%dT%H:%M:%S%z'),
+                            'likes': comment.get('like_count', 0),
+                            'comment_count': comment.get('comment_count', 0),
+                        }
+                    )
+
+            # Mark deleted posts
+            Post.objects.exclude(post_id__in=fetched_post_ids).update(is_deleted=True)
+            logger.info(f"Marked {Post.objects.filter(is_deleted=True).count()} posts as deleted")
+
+            # Save to Excel
+            fb_api.write_comments_to_excel(complaint_posts, comments_dict)
+            recent_post_ids.difference_update(set(Post.objects.exclude(post_id__in=fetched_post_ids).values_list('post_id', flat=True)))
+            recent_post_ids = set(list(recent_post_ids)[-50:])
+            save_state()
+
+        except Exception as e:
+            logger.error(f"Error in monitor cycle: {e}")
+        time.sleep(30)
+
+def start_monitor():
+    global monitor_thread, monitor_running
+    if not monitor_running:
+        monitor_running = True
+        monitor_thread = threading.Thread(target=monitor_complaints)
+        monitor_thread.daemon = True
+        monitor_thread.start()
+        logger.info("Monitor thread started")
+
+def stop_monitor():
+    global monitor_running
+    monitor_running = False
+    logger.info("Monitor thread stopped")
+
+def load_state():
+    global last_post_time, recent_post_ids
+    state_file = os.path.join(settings.BASE_DIR, 'last_checked_state.json')
+    try:
+        if os.path.exists(state_file):
+            with open(state_file, 'r') as f:
+                state = json.load(f)
+                last_post_time_value = state.get('last_post_time')
+                if last_post_time_value:
+                    last_post_time = last_post_time_value
+                recent_post_ids.update(state.get('recent_post_ids', []))
+                logger.info(f"Loaded state: last_post_time={last_post_time}, recent_post_ids={recent_post_ids}")
+    except Exception as e:
+        logger.warning(f"Error loading state: {e}")
+
+def save_state():
+    global last_post_time, recent_post_ids
+    state_file = os.path.join(settings.BASE_DIR, 'last_checked_state.json')
+    try:
+        with open(state_file, 'w') as f:
+            json.dump({
+                'last_post_time': last_post_time,
+                'recent_post_ids': list(recent_post_ids)
+            }, f, indent=2, cls=DjangoJSONEncoder)
+        logger.info("State saved successfully")
+    except Exception as e:
+        logger.error(f"Error saving state: {e}")
+
+def monitor_complaints():
+    global last_post_time, recent_post_ids, monitor_running
+    logger.info("Starting complaint monitor")
+    if not fb_api.validate_token():
+        logger.error("Invalid access token")
+        monitor_running = False
+        return
+
+    while monitor_running:
+        try:
+            complaint_posts, fetched_post_ids, new_last_post_time = fb_api.get_complaint_posts(last_post_time)
+            last_post_time = new_last_post_time
+            comments_dict = {}
+            for post in complaint_posts:
+                if not monitor_running:
+                    break
+                comments = fb_api.get_comments(post['id'])
+                if comments:
+                    comments_dict[post['id']] = comments
+                time.sleep(0.5)
+
             for post in complaint_posts:
                 post_obj, created = Post.objects.update_or_create(
                     post_id=post['id'],

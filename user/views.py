@@ -6,6 +6,11 @@ from django.utils import timezone
 from django.db.utils import IntegrityError
 from user.models import User, PublicUserProfile
 from user.forms import PublicUserForm, PublicUserProfileForm
+# user/views.py
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from django.contrib import messages
+from .forms import PublicUserForm, PublicUserProfileForm
 
 def create_public_user(request):
     user_form = PublicUserForm(request.POST or None)
@@ -20,23 +25,22 @@ def create_public_user(request):
                 user_instance.user_type = 'public'
                 user_instance.is_active = True
                 user_instance.date_joined = timezone.now()
-                user_instance.save()  # Username will be set inside model's save()
+                user_instance.save()
 
                 profile_instance = profile_form.save(commit=False)
                 profile_instance.user = user_instance
                 profile_instance.save()
 
                 messages.success(request, f"Public user with ID '{user_instance.username}' created successfully.")
-                return redirect('public_user:view_public_users')
+                return redirect('public_user:view_public_users')  # Ensure this URL name exists
 
             except Exception as e:
                 messages.error(request, f"Error: {str(e)}")
 
-    return render(request, 'user/create_public_user.html', {
+    return render(request, 'user/user_dashbard.html', {
         'user': user_form,
         'user_profile': profile_form
     })
-
 
 def view_public_users(request):
     public_users = PublicUserProfile.objects.select_related('user')

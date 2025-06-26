@@ -99,14 +99,14 @@ def dashboard(request):
             return redirect('accounts:login')
 
     # === Officer Dashboard ===
-    elif 'officer' in groups:
+    elif 'officer' in groups or 'officer_hod' in groups:
         try:
             profile = OfficerProfile.objects.get(user=user)
             context['department'] = profile.department
             context['is_hod'] = profile.is_hod
 
             if profile.is_hod:
-                return render(request, 'officer/hod_dashboard.html', context)
+                return redirect(request, 'hod:hod_dashboard', context)
             else:
                 return render(request, 'officer/officer_dashboard.html', context)
 

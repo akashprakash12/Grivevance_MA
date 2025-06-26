@@ -250,6 +250,7 @@ def rank_departments(department_queryset):
     return [{k: v for k, v in dept.items() if k != 'score'} for dept in top3]
 
 
+
 @login_required
 def collector_dashboard(request):
     try:
@@ -392,6 +393,7 @@ def collector_profile_view(request):
     except CollectorProfile.DoesNotExist:
         messages.error(request, "Collector profile not found.")
         return redirect('dashboard')
+
 
 @login_required
 def collector_change_password(request):

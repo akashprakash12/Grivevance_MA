@@ -1,0 +1,301 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Posts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --indigo: #002855;
+            --indigo-light: #08438f;
+            --accent: #ffc107;
+            --bg: #f4f6f9;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+            --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .manage-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            border-left: 5px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .manage-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 5px;
+            width: 100%;
+            background: linear-gradient(to right, var(--accent), transparent 80%);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--indigo);
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--indigo-light);
+            text-decoration: none;
+            margin-bottom: 25px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            color: var(--indigo);
+            text-decoration: underline;
+        }
+        
+        .post-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .post-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .post-item {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        
+        .post-item:hover {
+            background-color: rgba(0, 40, 85, 0.03);
+        }
+        
+        .post-item:last-child {
+            border-bottom: none;
+        }
+        
+        .post-content {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .post-link {
+            color: var(--indigo-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .post-link:hover {
+            color: var(--indigo);
+            text-decoration: underline;
+        }
+        
+        .post-message {
+            color: #495057;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        
+        .post-date {
+            color: #6c757d;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .edit-link {
+            background-color: var(--indigo-light);
+            border: 1px solid var(--indigo-light);
+        }
+        
+        .edit-link:hover {
+            background-color: var(--indigo);
+            border-color: var(--indigo);
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+            border: 1px solid #dc3545;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            border: 1px dashed #dee2e6;
+        }
+        
+        .empty-state i {
+            font-size: 2rem;
+            color: var(--indigo-light);
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .post-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .post-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .manage-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="manage-container">
+        <header class="header">
+            <div class="header-icon">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h1>Manage Your Complaints</h1>
+           
+        </header>
+
+        <a href="{% url 'posts:index' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Post Complaint
+        </a>
+
+        {% if posts.exists %}
+            <section class="post-card">
+                <ul class="post-list">
+                    {% for post in posts %}
+                        <li class="post-item">
+                            <div class="post-content">
+                                <a href="{{ post.permalink_url }}" target="_blank" class="post-link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    Complaint ID: {{ post.post_id }}
+                                </a>
+                                <p class="post-message">{{ post.message|truncatechars:100 }}</p>
+                                <p class="post-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    {{ post.created_at|date:"F d, Y H:i" }}
+                                </p>
+                            </div>
+                            <div class="post-actions">
+                                <a href="{% url 'posts:edit_post' post.post_id %}" class="action-link edit-link">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form action="{% url 'posts:delete_post' post.post_id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this complaint?')">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% else %}
+            <section class="empty-state">
+                <i class="far fa-folder-open"></i>
+                <p>No complaints found</p>
+            </section>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Confirm before deleting
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to delete this complaint?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

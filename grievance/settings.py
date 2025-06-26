@@ -47,8 +47,9 @@ INSTALLED_APPS = [
     'accounts',
     'core_app',
     'posts',
-        'district_officer',
+    'district_officer',
 
+    'hod'
 
 
 ]

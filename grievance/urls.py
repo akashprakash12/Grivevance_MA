@@ -32,6 +32,7 @@ urlpatterns = [
     path('district_officer/', include('district_officer.urls')),
 
 
+    path('hod/', include('hod.urls',namespace='hod'))
 
 ]
 # Serve media files during development
