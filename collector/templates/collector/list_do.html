@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>District Officers</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .form-container, .list-container {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: var(--card-shadow);
+      border-left: 5px solid var(--accent);
+    }
+
+    .form-header {
+      color: var(--indigo);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--indigo-light);
+    }
+
+    .form-control {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    }
+
+    .btn-submit {
+      background-color: var(--indigo);
+      color: white;
+      font-weight: 600;
+      padding: 0.5rem 2rem;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--indigo-light);
+      transform: translateY(-2px);
+    }
+
+    .badge-active {
+      background-color: #2ecc71;
+    }
+
+    .badge-inactive {
+      background-color: #95a5a6;
+    }
+
+    .action-btn {
+      font-size: 0.85rem;
+      padding: 0.3rem 0.6rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="list-container">
+      <h2 class="form-header">
+        <i class="fas fa-users-cog me-2"></i>District Officers
+      </h2>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>District</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for officer in officers %}
+              <tr>
+                <td>{{ officer.officer_id }}</td>
+                <td>{{ officer.user.get_full_name|default:officer.user.username }}</td>
+                <td>
+                  {% if officer.district %}
+                    {{ officer.district.name }}
+                  {% else %}
+                    <span class="text-danger">Not assigned</span>
+                  {% endif %}
+                </td>
+                                <td>{{ officer.user.phone|default:'Not provided' }}</td>
+                                <td>
+                                  {% if officer.is_active %}
+                                    <span class="badge badge-active">Active</span>
+                                  {% else %}
+                                    <span class="badge badge-inactive">Inactive</span>
+                                  {% endif %}
+                                </td>
+                                
+                <td>
+                  <a href="{% url 'district_officer:update_district_officer' officer.user.username %}" class="btn btn-outline-primary btn-sm action-btn">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <a href="{% url 'district_officer:delete_district_officer' officer.user.username %}" class="btn btn-outline-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this officer?')">
+                    <i class="fas fa-trash-alt"></i> Delete
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <i class="fas fa-user-slash fa-2x mb-2 text-muted"></i>
+                  <h5>No district officers found</h5>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-outline-secondary mb-3">
+          <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+        
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

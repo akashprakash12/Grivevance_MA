@@ -1,6 +1,15 @@
+# Ignore Python cache and compiled files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Environment files
 .env
-facebook_realtime.log
+
+# Logs
 *.log
--e "*.pyc\n__pycache__/" 
+facebook_realtime.log
+
+# VS Code settings (optional)
+.vscode/
