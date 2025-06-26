@@ -1,0 +1,79 @@
+1. 🧹 Remove all .pyc and __pycache__ files from Git tracking
+In your project folder:
+
+bash
+Copy
+Edit
+git rm --cached -r *.pyc
+git rm --cached -r __pycache__/
+
+
+
+2. ✍️ Commit the cleanup
+bash
+Copy
+Edit
+git commit -m "Remove .pyc files and __pycache__ from repository"
+
+
+
+3. 🚀 Push the cleaned version
+bash
+Copy
+Edit
+git push origin thomas
+
+
+Got it — since you've already committed and pushed .pyc files, we now need to remove them from the repository history to keep your project clean.
+
+
+
+
+
+
+
+
+You said:
+ akash
+  main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/adithyan
+  remotes/origin/akash
+  remotes/origin/main
+  remotes/origin/sunisha
+  remotes/origin/thomas i want to fix the erroe in sunisha brach how to set up
+
+
+ChatGPT said:
+To fix an error in the sunisha branch, you need to check out that branch locally, make your changes, commit, and then push. Here’s how to do it:
+
+✅ Step-by-Step: Work on sunisha Branch
+1. ✅ Fetch the latest remote branches (just in case)
+bash
+Copy
+Edit
+git fetch origin
+
+
+2. ✅ Create a local tracking branch for sunisha
+Since sunisha only exists remotely, you need to create a local branch that tracks it:
+
+bash
+Copy
+Edit
+git checkout -b sunisha origin/sunisha
+
+
+
+
+. ✅ Add and commit the fix
+bash
+Copy
+Edit
+git add .
+git commit -m "Fix: Resolved issue in sunisha branch"
+5. ✅ Push the fix to remote sunisha
+bash
+Copy
+Edit
+git push origin sunisha

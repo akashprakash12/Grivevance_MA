@@ -148,7 +148,7 @@
   <!-- Top Navigation -->
   <nav class="navbar-custom navbar navbar-expand-lg">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="{% url 'public_user:user_dashboard' %}">
         <i class="fas fa-balance-scale me-2 text-accent"></i>
         Grievance Portal
       </a>
@@ -272,8 +272,12 @@
     <td>
       <span class="status-badge status-{{ grievance.status|lower|cut:' ' }}">{{ grievance.get_status_display }}</span>
     </td>
- <td>
-  <button onclick="viewComplaintDetails('{{ grievance.grievance_id }}')" class="btn btn-sm btn-outline-primary">View</button>
+<td>
+    <button onclick="viewComplaintDetails('{{ grievance.grievance_id }}')" class="btn btn-sm btn-outline-primary">View</button>
+    {% if grievance.status == 'PENDING' %}
+        <a href="{% url 'public_user:update_grievance' grievance.grievance_id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+       <a href="{% url 'public_user:delete_grievance' grievance.grievance_id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    {% endif %}
 </td>
   </tr>
   {% empty %}
@@ -752,6 +756,49 @@ async function viewComplaintDetails(id) {
             // printWindow.close();
         }, 200);
     };
+}
+
+
+function confirmDelete(grievanceId) {
+    if (confirm('Are you sure you want to delete this grievance? This action cannot be undone.')) {
+        fetch(`/public_user/grievance/${grievanceId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Failed to delete grievance: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while deleting the grievance');
+        });
+    }
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
   </script>
 </body>

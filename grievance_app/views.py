@@ -6,8 +6,9 @@ from django.contrib.auth.decorators import login_required
 from .forms import GrievanceForm
 from .models import Grievance, GrievanceDocument
 from django.http import JsonResponse
-from core_app.models import Department
+from core_app.models import Department,District
 from django.urls import reverse
+from django.contrib import messages
 
 # ---------- Generate Unique Grievance ID ----------
 
@@ -120,24 +121,70 @@ def detail_grievance(request, grievance_id):
         'applicant_address': grievance.applicant_address
     })
 # ---------- UPDATE ----------
+@login_required
 def update_grievance(request, grievance_id):
-    grievance = get_object_or_404(Grievance, grievance_id=grievance_id)
-    form = GrievanceForm(request.POST or None, instance=grievance)
-    if request.method == 'POST' and form.is_valid():
-        updated_grievance = form.save(commit=False)
-        updated_grievance.last_update = timezone.now()
-        updated_grievance.save()
-        return redirect('grievance_list')
-    return render(request, 'grievance/update_grievance.html', {'form': form, 'grievance': grievance})
-
-
-# ---------- DELETE ----------
+    grievance = get_object_or_404(Grievance, grievance_id=grievance_id, created_by=request.user)
+    
+    if request.method == 'POST':
+        form = GrievanceForm(request.POST, request.FILES, instance=grievance)
+        if form.is_valid():
+            updated_grievance = form.save(commit=False)
+            updated_grievance.last_updated = timezone.now()
+            updated_grievance.save()
+            
+            # Handle file uploads and deletions
+            for file in request.FILES.getlist('documents'):
+                GrievanceDocument.objects.create(grievance=updated_grievance, file=file)
+            
+            if 'delete_documents' in request.POST:
+                for doc_id in request.POST.getlist('delete_documents'):
+                    doc = get_object_or_404(GrievanceDocument, id=doc_id, grievance=updated_grievance)
+                    doc.delete()
+            
+            # Add success message
+            message_text = 'Grievance updated successfully!'
+            messages.success(request, message_text)
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': message_text,  # Use the message text directly
+                    'redirect_url': reverse('public_user:view_grievances')
+                })
+            return redirect('public_user:view_grievances')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            }, status=400)
+    
+    else:
+        form = GrievanceForm(instance=grievance)
+        form.fields['department'].queryset = Department.objects.filter(district=grievance.district)
+    
+    districts = District.objects.all()
+    documents = grievance.documents.all()
+    return render(request, 'user/edit_grievance.html', {
+        'form': form,
+        'grievance': grievance,
+        'documents': documents,
+        'districts': districts
+    })
+@login_required
 def delete_grievance(request, grievance_id):
-    grievance = get_object_or_404(Grievance, grievance_id=grievance_id)
+    grievance = get_object_or_404(Grievance, grievance_id=grievance_id, created_by=request.user)
+    
     if request.method == 'POST':
         grievance.delete()
-        return redirect('grievance_list')
-    return render(request, 'grievance/delete_grievance.html', {'grievance': grievance})
-
-
-
+        messages.success(request, 'Grievance deleted successfully!')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Grievance deleted successfully',
+                'redirect_url': reverse('public_user:view_grievances')
+            })
+        return redirect('public_user:view_grievances')
+    
+    return render(request, 'user/delete_grievance.html', {'grievance': grievance})

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Grievance | Grievance Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+    }
+    
+    body {
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    
+    .navbar-custom {
+      background: var(--indigo);
+      padding: 1rem 2rem;
+      border-bottom: 4px solid var(--indigo-light);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .navbar-custom .navbar-brand {
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .card-shadow {
+      box-shadow: var(--card-shadow);
+      border-radius: 12px;
+      border: none;
+    }
+    
+    .card-shadow:hover {
+      box-shadow: var(--card-shadow-hover);
+    }
+    
+    .text-indigo {
+      color: var(--indigo);
+    }
+    
+    .bg-indigo {
+      background-color: var(--indigo);
+    }
+    
+    .footer-custom {
+      background: var(--indigo);
+      color: #fff;
+    }
+    
+    .btn-primary {
+      background-color: var(--indigo);
+      border-color: var(--indigo);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--indigo-light);
+      border-color: var(--indigo-light);
+    }
+    
+    .btn-outline-primary {
+      color: var(--indigo);
+      border-color: var(--indigo);
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--indigo);
+      color: #fff;
+    }
+    
+    .file-icon {
+      width: 24px;
+      text-align: center;
+      margin-right: 8px;
+    }
+    #formMessageContainer {
+    min-height: 60px; /* Ensure space for message even when empty */
+    transition: all 0.3s ease;
+}
+
+#formMessageContainer .alert {
+    margin-bottom: 0; /* Remove default margin */
+}
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar-custom navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-balance-scale me-2"></i>
+        Grievance Portal
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="text-white me-3 d-none d-md-inline">Welcome, {{ user.first_name|default:user.username }}</span>
+        <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username }}&background=random" 
+             alt="User" class="rounded-circle" width="40" height="40">
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container py-4">
+    <div class="card card-shadow">
+      <div class="card-header bg-indigo text-white">
+        <h4 class="mb-0">
+          <i class="fas fa-edit me-2"></i>
+          Edit Grievance #{{ grievance.grievance_id }}
+        </h4>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data" id="grievanceForm">
+          {% csrf_token %}
+          
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Grievance ID</label>
+                <input type="text" class="form-control" value="{{ grievance.grievance_id }}" readonly>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Status</label>
+                <input type="text" class="form-control" value="{{ grievance.get_status_display }}" readonly>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="id_subject" class="form-label">Subject</label>
+            <input type="text" class="form-control" id="id_subject" name="subject" 
+                   value="{{ form.subject.value|default:grievance.subject }}" required>
+            {% if form.subject.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.subject.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            <label for="id_description" class="form-label">Description</label>
+            <textarea class="form-control" id="id_description" name="description" rows="5" required>{{ form.description.value|default:grievance.description }}</textarea>
+            {% if form.description.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.description.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+              <!-- District -->
+    <div class="mb-3">
+        <label class="form-label">District</label>
+        <select class="form-select" name="district" required id="id_district">
+            <option value="">Select District</option>
+            {% for district in districts %}
+                <option value="{{ district.code }}" 
+                    {% if district.code == form.district.value|default:grievance.district.code %}selected{% endif %}>
+                    {{ district.name }}
+                </option>
+            {% endfor %}
+        </select>
+        {% if form.district.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.district.errors.0 }}
+            </div>
+        {% endif %}
+    </div>
+        <!-- Department -->
+    <div class="mb-3">
+        <label class="form-label">Department</label>
+        <select class="form-select" name="department" required id="id_department">
+            <option value="">Select Department</option>
+            {% for dept in form.fields.department.queryset %}
+                <option value="{{ dept.code }}"
+                    {% if dept.code == form.department.value|default:grievance.department.code %}selected{% endif %}>
+                    {{ dept.name }}
+                </option>
+            {% endfor %}
+        </select>
+        {% if form.department.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.department.errors.0 }}
+            </div>
+        {% endif %}
+    </div>
+    
+              <div class="mb-3">
+        <label class="form-label">Applicant Name</label>
+        <input type="text" class="form-control" name="applicant_name" 
+               value="{{ form.applicant_name.value|default:grievance.applicant_name }}" required>
+        {% if form.applicant_name.errors %}
+            <div class="invalid-feedback d-block">
+                {{ form.applicant_name.errors.0 }}
+            </div>
+        {% endif %}
+    </div>
+          
+       <!-- Applicant Address -->
+<div class="mb-3">
+    <label class="form-label">Applicant Address</label>
+    <textarea class="form-control" name="applicant_address" rows="3" required>{{ form.applicant_address.value|default:grievance.applicant_address }}</textarea>
+    {% if form.applicant_address.errors %}
+        <div class="invalid-feedback d-block">
+            {{ form.applicant_address.errors.0 }}
+        </div>
+    {% endif %}
+</div>
+
+          <!-- Email -->
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" 
+                   value="{{ form.email.value|default:grievance.email }}" required>
+            {% if form.email.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.email.errors.0 }}
+                </div>
+            {% endif %}
+          </div>
+
+<!-- Contact Number -->
+<div class="mb-3">
+    <label class="form-label">Contact Number</label>
+    <input type="text" class="form-control" name="contact_number" 
+           value="{{ form.contact_number.value|default:grievance.contact_number }}" required>
+    {% if form.contact_number.errors %}
+        <div class="invalid-feedback d-block">
+            {{ form.contact_number.errors.0 }}
+        </div>
+    {% endif %}
+</div>
+          <div class="mb-4">
+            <label class="form-label">Current Attachments</label>
+            {% if grievance.documents.all %}
+              <div class="list-group mb-3">
+                {% for doc in grievance.documents.all %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    {% if doc.file.name|slice:"-3:" == 'pdf' %}
+                      <i class="fas fa-file-pdf file-icon text-danger"></i>
+                    {% elif doc.file.name|slice:"-3:" in 'jpg jpeg png gif' %}
+                      <i class="fas fa-file-image file-icon text-primary"></i>
+                    {% else %}
+                      <i class="fas fa-file-alt file-icon text-secondary"></i>
+                    {% endif %}
+                    <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name|slice:"19:" }}</a>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="delete_documents" 
+                           value="{{ doc.id }}" id="delete_doc_{{ doc.id }}">
+                    <label class="form-check-label text-danger" for="delete_doc_{{ doc.id }}">
+                      Delete
+                    </label>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-muted">No attachments</p>
+            {% endif %}
+            
+            <div class="mb-3">
+              <label class="form-label">Add New Attachments</label>
+              <input type="file" class="form-control" name="documents" multiple>
+              <small class="text-muted">You can upload multiple files (PDF, JPG, PNG, DOCX)</small>
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'public_user:view_grievances' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-arrow-left me-2"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i> Save Changes
+            </button>
+          </div>
+          <!-- Add this message container right after the buttons -->
+<div id="formMessageContainer" class="mt-3"></div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-custom py-5 mt-5">
+    <div class="container text-center">
+      <p class="mb-0">© 2025 Government Grievance Portal. All rights reserved.</p>
+      <p class="small text-white-50 mt-2">For assistance, contact support@grievance.gov.in or call 1800-123-4567</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+document.getElementById('grievanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const messageContainer = document.getElementById('formMessageContainer');
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear previous messages
+            messageContainer.innerHTML = '';
+            
+            // Create success message
+            const successAlert = document.createElement('div');
+            successAlert.className = 'alert alert-success alert-dismissible fade show';
+            successAlert.role = 'alert';
+            successAlert.innerHTML = `
+                <strong>Success!</strong> ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // Add to container
+            messageContainer.appendChild(successAlert);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                const alert = bootstrap.Alert.getOrCreateInstance(successAlert);
+                alert.close();
+            }, 3000);
+            
+            // Redirect after a delay
+            setTimeout(() => {
+                window.location.href = data.redirect_url;
+            }, 1500);
+        } else {
+            // Handle form errors (existing code remains the same)
+            if (data.errors) {
+                // Clear previous error messages
+                document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+                document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                
+                // Show new error messages
+                for (const field in data.errors) {
+                    const input = document.querySelector(`[name="${field}"]`);
+                    if (input) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback d-block';
+                        errorDiv.textContent = data.errors[field][0];
+                        input.parentNode.appendChild(errorDiv);
+                        input.classList.add('is-invalid');
+                    }
+                }
+            } else {
+                // Show error in message container
+                messageContainer.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Error!</strong> Please correct the errors in the form
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        messageContainer.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong> An error occurred while saving the grievance
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+    });
+});
+  </script>
+</body>
+</html>

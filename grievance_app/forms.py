@@ -91,10 +91,16 @@ class GrievanceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Set initial queryset to empty
-        self.fields['department'].queryset = Department.objects.none()
+        instance = kwargs.get('instance')
+        if instance:
+            # If editing an existing instance
+            self.fields['district'].initial = instance.district
+            self.fields['department'].queryset = Department.objects.filter(district=instance.district)
+        else:
+            # For new instances
+            self.fields['department'].queryset = Department.objects.none()
 
-        # If district is in POST data, filter departments
+        # Handle AJAX department loading
         if 'district' in self.data:
             try:
                 district_code = self.data.get('district')
@@ -103,6 +109,3 @@ class GrievanceForm(forms.ModelForm):
                 ).order_by('name')
             except (ValueError, TypeError):
                 pass
-        elif self.instance.pk:
-            # If editing existing instance, show departments for its district
-            self.fields['department'].queryset = self.instance.district.department_set.order_by('name')
