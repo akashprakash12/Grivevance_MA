@@ -4,11 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Grievance Report - Collector Portal</title>
-
-  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-
   <style>
     :root {
       --indigo: #002855;
@@ -16,124 +13,70 @@
       --accent: #ffc107;
       --bg: #f4f6f9;
       --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
-    }
-
-    html, body {
-      height: 100%;
-      overflow: auto;
     }
 
     body {
-      margin: 0;
       background: var(--bg);
       font-family: 'Segoe UI', sans-serif;
+      margin: 0;
     }
 
-    .container-custom {
-      padding: 1rem 1.2rem;
-      max-width: 100%;
-      height: calc(100vh - 80px);
-      overflow: auto;
-    }
-
+    
     .navbar-custom {
-      background: var(--indigo);
-      padding: 1rem 2rem;
-      border-bottom: 4px solid var(--indigo-light);
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .navbar-custom .navbar-brand {
-      color: #ffffff;
-      font-size: 1.4rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-decoration: none;
-    }
-
-    .navbar-custom .nav-link {
-      color: #ffffff !important;
-      margin-left: 1rem;
-      font-weight: 500;
-      transition: 0.3s ease;
-    }
-
-    .navbar-custom .nav-link:hover {
-      color: var(--accent) !important;
-      text-decoration: underline;
-    }
-
+            background: var(--indigo);
+            padding: 1rem 2rem;
+            border-bottom: 4px solid var(--indigo-light);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+          }
+      
+          .navbar-custom .navbar-brand {
+            color: #ffffff;
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+          }
+      
+          .navbar-custom .nav-link {
+            color: #ffffff !important;
+            margin-left: 1rem;
+            font-weight: 500;
+            transition: 0.3s ease;
+          }
+      
+          .navbar-custom .nav-link:hover {
+            color: var(--accent) !important;
+            text-decoration: underline;
+          }
+      
     .report-container {
-      background: #fff;
-      border-radius: 12px;
-      padding: 25px;
+      margin: 20px auto;
+      max-width: 98%;
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
       box-shadow: var(--card-shadow);
-      margin-top: 20px;
     }
 
     .report-heading {
-      font-weight: 700;
+      font-size: 1.5rem;
+      font-weight: 600;
+      border-left: 5px solid var(--accent);
+      padding-left: 15px;
       color: var(--indigo);
-      border-bottom: 2px solid var(--accent);
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     .filter-section {
       background: #f8f9fa;
       padding: 20px;
       border-radius: 10px;
-      margin-bottom: 25px;
       border-left: 4px solid var(--accent);
-    }
-
-    .table-responsive {
-      border-radius: 10px;
-      overflow: hidden;
-      max-height: 65vh;
-      overflow: auto;
-      display: block;
-    }
-
-    .table thead {
-      background: var(--indigo);
-      color: white;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .table th {
-      font-weight: 600;
-      padding: 12px 10px;
-      white-space: nowrap;
-    }
-
-    .table td {
-      padding: 10px;
-      vertical-align: middle;
-      max-width: 200px;
-      overflow: auto;
-      white-space: nowrap;
-    }
-
-    .table td::-webkit-scrollbar {
-      height: 5px;
-      width: 5px;
-    }
-
-    .table td::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 5px;
-    }
-
-    .table td::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      margin-bottom: 25px;
     }
 
     .btn-export {
@@ -142,39 +85,27 @@
       padding: 8px 15px;
     }
 
+    .table-responsive {
+      max-height: 70vh;
+      overflow: auto;
+      border-radius: 10px;
+    }
+
+    table th {
+      background-color: var(--indigo);
+      color: white;
+      white-space: nowrap;
+    }
+
     .status-badge {
       padding: 5px 10px;
       border-radius: 50px;
       font-size: 0.85rem;
-      font-weight: 500;
     }
 
-    .status-pending {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-
-    .status-resolved {
-      background-color: #d4edda;
-      color: #155724;
-    }
-
-    .status-rejected {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-
-    .empty-state {
-      padding: 40px;
-      text-align: center;
-      color: #6c757d;
-    }
-
-    .empty-state i {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      color: #dee2e6;
-    }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-resolved { background: #d4edda; color: #155724; }
+    .status-rejected { background: #f8d7da; color: #721c24; }
 
     .text-truncate-2 {
       display: -webkit-box;
@@ -183,193 +114,185 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    .empty-state {
+      text-align: center;
+      color: #6c757d;
+      padding: 40px;
+    }
+
+    .empty-state i {
+      font-size: 2rem;
+      color: #adb5bd;
+    }
   </style>
 </head>
 <body>
-  <!-- NAVBAR -->
-  <nav class="navbar-custom d-flex justify-content-between align-items-center">
-    <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
-    
-    <ul class="nav gap-3 align-items-center">
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i> Officers</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i> Profile</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
-    </ul>
-  </nav>
 
-  <div class="container-custom">
-    <div class="report-container">
-      <h3 class="report-heading"><i class="fas fa-file-alt me-2"></i> GRIEVANCE DETAILED REPORT</h3>
+<nav class="navbar-custom d-flex justify-content-between align-items-center">
+  <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
+  <ul class="nav gap-3 align-items-center">
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i> Officers</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i> Profile</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+  </ul>
+</nav>
 
-      <!-- FILTER SECTION -->
-      <div class="filter-section">
-        <form method="get" class="row g-3">
-          <div class="col-md-2">
-            <label class="form-label fw-bold">Status</label>
-            <select class="form-select" name="status">
-              <option value="ALL">All Status</option>
-              <option value="PENDING" {% if request.GET.status == "PENDING" %}selected{% endif %}>Pending</option>
-              <option value="RESOLVED" {% if request.GET.status == "RESOLVED" %}selected{% endif %}>Resolved</option>
-              <option value="REJECTED" {% if request.GET.status == "REJECTED" %}selected{% endif %}>Rejected</option>
-            </select>
-          </div>
+<div class="report-container">
+  <h3 class="report-heading"><i class="fas fa-file-alt me-2"></i>Grievance Detailed Report</h3>
 
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Department</label>
-            <select class="form-select" name="department">
-              <option value="">All Departments</option>
-              {% for dept in departments %}
-                <option value="{{ dept.code }}" {% if request.GET.department == dept.code|stringformat:"s" %}selected{% endif %}>
-                  {{ dept.name }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <div class="col-md-2">
-            <label class="form-label fw-bold">Date From</label>
-            <input type="date" class="form-control" name="date_from" value="{{ request.GET.date_from }}">
-          </div>
-
-          <div class="col-md-2">
-            <label class="form-label fw-bold">Date To</label>
-            <input type="date" class="form-control" name="date_to" value="{{ request.GET.date_to }}">
-          </div>
-
-          <div class="col-md-3">
-            <label class="form-label fw-bold">Search</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="fas fa-search"></i></span>
-              <input type="text" class="form-control" name="search" placeholder="GRI.ID or PH.NO" value="{{ request.GET.search }}">
-            </div>
-          </div>
-
-          <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
-            
-            
-            <a href="{% url 'collector:export_excel' %}?{{ request.GET.urlencode }}" class="btn btn-success btn-export">
-              <i class="fas fa-file-excel me-1"></i> Excel
-            </a>
-            <a href="{% url 'collector:export_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-danger btn-export">
-              <i class="fas fa-file-pdf me-1"></i> Download PDF
-            </a>
-            <a href="{% url 'collector:grievance_report' %}" class="btn btn-outline-secondary btn-export">
-              <i class="fas fa-sync-alt me-1"></i> Reset
-            </a>
-            <button type="submit" class="btn btn-primary btn-export">
-              <i class="fas fa-search me-1"></i> Search
-            </button>
-          </div>
-        </form>
+  <div class="filter-section">
+    <form method="get" class="row g-3">
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Status</label>
+        <select class="form-select" name="status">
+          <option value="ALL">All Status</option>
+          <option value="PENDING" {% if request.GET.status == "PENDING" %}selected{% endif %}>Pending</option>
+          <option value="RESOLVED" {% if request.GET.status == "RESOLVED" %}selected{% endif %}>Resolved</option>
+          <option value="REJECTED" {% if request.GET.status == "REJECTED" %}selected{% endif %}>Rejected</option>
+        </select>
       </div>
 
-      <!-- DATA TABLE -->
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
-          <thead>
-            <tr>
-              <th>GRV ID</th>
-              <th>Filed On</th>
-              <th>Last Updated</th>
-              <th>Subject</th>
-              <th>Description</th>
-              <th>Source</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Due Date</th>
-              <th>Applicant</th>
-              <th>Address</th>
-              <th>Contact</th>
-              <th>Department</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for g in grievances %}
-            <tr>
-              <td class="fw-bold">{{ g.grievance_id }}</td>
-              <td>{{ g.date_filed|date:"Y-m-d" }}</td>
-              <td>{{ g.last_updated|date:"Y-m-d" }}</td>
-              <td>{{ g.subject }}</td>
-              <td class="text-truncate-2">{{ g.description }}</td>
-              <td>{{ g.source }}</td>
-              <td>
-                <span class="status-badge status-{{ g.status|lower }}">
-                  {{ g.status }}
-                </span>
-              </td>
-              <td>{{ g.priority }}</td>
-              <td>{{ g.due_date|date:"Y-m-d"|default:"-" }}</td>
-              <td>{{ g.applicant_name }}</td>
-              <td class="text-truncate-2">{{ g.applicant_address }}</td>
-              <td>{{ g.contact_number }}</td>
-              <td>{{ g.department.name }}</td>
-              <td>
-                <a href="{% url 'collector:details_download' g.grievance_id %}" class="btn btn-primary">
-                  Download
-              </a>
-              
-              
-              </td>            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="15" class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <h5>No grievances found</h5>
-                <p>Try adjusting your filters or check back later</p>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- PAGINATION -->
-      {% if grievances.has_other_pages %}
-      <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-          {% if grievances.has_previous %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ grievances.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Previous</a>
-            </li>
-          {% endif %}
-          
-          {% for i in grievances.paginator.page_range %}
-            {% if grievances.number == i %}
-              <li class="page-item active"><span class="page-link">{{ i }}</span></li>
-            {% else %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ i }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ i }}</a>
-              </li>
-            {% endif %}
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Department</label>
+        <select class="form-select" name="department">
+          <option value="">All Departments</option>
+          {% for dept in departments %}
+            <option value="{{ dept.code }}" {% if request.GET.department == dept.code|stringformat:"s" %}selected{% endif %}>
+              {{ dept.name }}
+            </option>
           {% endfor %}
-          
-          {% if grievances.has_next %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ grievances.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Next</a>
-            </li>
-          {% endif %}
-        </ul>
-      </nav>
-      {% endif %}
-    </div>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Date From</label>
+        <input type="date" class="form-control" name="date_from" value="{{ request.GET.date_from }}">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label fw-bold">Date To</label>
+        <input type="date" class="form-control" name="date_to" value="{{ request.GET.date_to }}">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Search</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" class="form-control" name="search" placeholder="GRI.ID or PH.NO" value="{{ request.GET.search }}">
+        </div>
+      </div>
+
+      <div class="col-12 d-flex flex-wrap gap-2 justify-content-end mt-3">
+        <a href="{% url 'collector:export_excel' %}?{{ request.GET.urlencode }}" class="btn btn-success btn-export">
+          <i class="fas fa-file-excel me-1"></i> Export Excel
+        </a>
+        <a href="{% url 'collector:export_pdf' %}?{{ request.GET.urlencode }}" class="btn btn-danger btn-export">
+          <i class="fas fa-file-pdf me-1"></i> Export PDF
+        </a>
+        <a href="{% url 'collector:grievance_report' %}" class="btn btn-outline-secondary btn-export">
+          <i class="fas fa-sync-alt me-1"></i> Reset
+        </a>
+        <button type="submit" class="btn btn-primary btn-export">
+          <i class="fas fa-search me-1"></i> Search
+        </button>
+      </div>
+    </form>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Highlight active filters
-    document.addEventListener('DOMContentLoaded', function() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.toString()) {
-        document.querySelectorAll('.filter-section input, .filter-section select').forEach(el => {
-          if (params.get(el.name)) {
-            el.classList.add('is-valid');
-          }
-        });
-      }
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead>
+        <tr>
+          <th>GRV ID</th>
+          <th>Filed On</th>
+          <th>Last Updated</th>
+          <th>Subject</th>
+          <th>Description</th>
+          <th>Source</th>
+          <th>Status</th>
+          <th>Priority</th>
+          <th>Due Date</th>
+          <th>Applicant</th>
+          <th>Address</th>
+          <th>Contact</th>
+          <th>Department</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in grievances %}
+        <tr>
+          <td class="fw-bold">{{ g.grievance_id }}</td>
+          <td>{{ g.date_filed|date:"Y-m-d" }}</td>
+          <td>{{ g.last_updated|date:"Y-m-d" }}</td>
+          <td>{{ g.subject }}</td>
+          <td class="text-truncate-2">{{ g.description }}</td>
+          <td>{{ g.source }}</td>
+          <td><span class="status-badge status-{{ g.status|lower }}">{{ g.status }}</span></td>
+          <td>{{ g.priority }}</td>
+          <td>{{ g.due_date|date:"Y-m-d"|default:"-" }}</td>
+          <td>{{ g.applicant_name }}</td>
+          <td class="text-truncate-2">{{ g.applicant_address }}</td>
+          <td>{{ g.contact_number }}</td>
+          <td>{{ g.department.name }}</td>
+          <td>
+            <a href="{% url 'collector:details_download' g.grievance_id %}" class="btn btn-sm btn-primary">
+              <i class="fas fa-download"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="14" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h5>No grievances found</h5>
+            <p>Try adjusting your filters or check back later.</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if grievances.has_other_pages %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if grievances.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ grievances.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Previous</a>
+      </li>
+      {% endif %}
+
+      {% for i in grievances.paginator.page_range %}
+        {% if grievances.number == i %}
+          <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+        {% else %}
+          <li class="page-item"><a class="page-link" href="?page={{ i }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ i }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if grievances.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ grievances.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Next</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    document.querySelectorAll('.filter-section input, .filter-section select').forEach(el => {
+      if (params.get(el.name)) el.classList.add('is-valid');
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>

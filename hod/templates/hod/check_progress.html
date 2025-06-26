@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grievance Progress - HOD Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #121212;
+    color: #eee;
+    margin: 0; padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header {
+    width: 100%; max-width: 1200px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+  }
+  h1 {
+    font-weight: 800;
+    font-size: 2rem;
+  }
+  table {
+    width: 100%;
+    max-width: 1200px;
+    border-collapse: collapse;
+    background: #1e1e1e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  thead tr {
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+  }
+  thead th {
+    padding: 14px;
+    text-align: left;
+    color: white;
+  }
+  tbody tr:nth-child(even) {
+    background: #242424;
+  }
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #333;
+  }
+  tbody tr:hover {
+    background: #4338ca;
+    color: white;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="material-icons" aria-hidden="true">timeline</span>Grievance Progress</h1>
+</header>
+<table role="grid" aria-label="Grievance Progress Table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Subject</th>
+      <th>Status</th>
+      <th>Priority</th>
+      <th>Due Date</th>
+      <th>Last Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Example row: 
+    <tr>
+      <td>GRI20250612345</td>
+      <td>Water Pollution</td>
+      <td>In Progress</td>
+      <td>Medium</td>
+      <td>2025-07-12</td>
+      <td>2025-06-20</td>
+    </tr>
+    -->
+  </tbody>
+</table>
+</body>
+</html>

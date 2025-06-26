@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create Department | Collector Dashboard</title>
+  
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: var(--card-shadow);
+      border-left: 5px solid var(--accent);
+    }
+
+    .form-header {
+      color: var(--indigo);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--indigo-light);
+    }
+
+    .form-control {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    }
+
+    .btn-submit {
+      background-color: var(--indigo);
+      color: white;
+      font-weight: 600;
+      padding: 0.5rem 2rem;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--indigo-light);
+      transform: translateY(-2px);
+    }
+
+    /* Navbar styles */
+    .navbar-custom {
+      background: var(--indigo);
+      padding: 1rem 2rem;
+      border-bottom: 4px solid var(--indigo-light);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .nav-link {
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar-custom d-flex justify-content-between align-items-center">
+    <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
+    
+    <ul class="nav gap-3 align-items-center">
+      <li class="nav-item">
+        <a class="nav-link text-white" href="{% url 'core:create_department' %}">
+          <i class="fas fa-plus-circle me-1"></i> Create Dept
+        </a>
+      </li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- MAIN FORM CONTENT -->
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="form-container">
+          <h2 class="form-header">
+            <i class="fas fa-plus-circle me-2"></i>
+            Create New Department
+          </h2>
+          
+          <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label for="departmentName" class="form-label">
+                Department Name <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="departmentName" name="department" required>
+              <div class="invalid-feedback">
+                Please provide a department name.
+              </div>
+            </div>
+            
+            
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-submit">
+                <i class="fas fa-plus-circle me-1"></i>
+                Create Department
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Form validation
+    (function () {
+      'use strict'
+      
+      const forms = document.querySelectorAll('.needs-validation')
+      
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          
+          form.classList.add('was-validated')
+        }, false)
+      })
+    })()
+  </script>
+</body>
+</html>
