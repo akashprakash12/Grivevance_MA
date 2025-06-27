@@ -46,7 +46,12 @@ INSTALLED_APPS = [
     'accounts',
     'core_app',
     'posts',
-    'hod'
+    'hod',
+    
+    
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
 
 
 ]
@@ -60,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_otp.middleware.OTPMiddleware', 
+    'user.middleware.TwoFactorAuthMiddleware',
 ]
 
 ROOT_URLCONF = 'grievance.urls'
