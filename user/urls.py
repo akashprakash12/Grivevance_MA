@@ -10,10 +10,13 @@ from grievance_app.views import (
 )
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.contrib.auth.views import LogoutView
 app_name = 'public_user'  # Important for namespacing
 
 urlpatterns = [
+   
+
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('', views.user_dashboard, name='user_dashboard'),
     path('view/', view_grievances, name='view_grievances'),
     path('update/<str:username>/', views.update_public_user, name='update_public_user'),

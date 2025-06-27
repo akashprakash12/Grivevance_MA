@@ -5,26 +5,49 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.utils import IntegrityError
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, update_session_auth_hash
 from user.models import User, PublicUserProfile
 from user.forms import PublicUserForm, PublicUserProfileForm
 from grievance_app.forms import GrievanceForm
 from grievance_app.models import Grievance
 
-def create_public_user(request):
-    return render(request, 'user/user_dashboard.html')
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
+def create_public_user(request):
+    if request.method == 'POST':
+        user_form = PublicUserForm(request.POST)
+        profile_form = PublicUserProfileForm(request.POST)
+        if user_form.is_valid() and profile_form.is_valid():
+            try:
+                user = user_form.save(commit=False)
+                user.user_type = 'PUBLIC'
+                user.save()
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.save()
+                messages.success(request, f"Public user '{user.username}' created successfully.")
+                return redirect('public_user:user_dashboard')
+            except IntegrityError as e:
+                messages.error(request, f"Error: {str(e)}")
+    else:
+        user_form = PublicUserForm()
+        profile_form = PublicUserProfileForm()
+    
+    return render(request, 'user/create_public_user.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
 
 def view_public_users(request):
     public_users = PublicUserProfile.objects.select_related('user')
     return render(request, 'user/view_public_user.html', {'public_users': public_users})
-
 
 def delete_public_user(request, username):
     user = get_object_or_404(User, username=username, user_type='PUBLIC')
     user.delete()
     messages.success(request, "Public user deleted successfully.")
     return redirect('public_user:view_public_users')
-
 
 def update_public_user(request, username):
     user_instance = get_object_or_404(User, username=username, user_type='PUBLIC')
@@ -56,11 +79,10 @@ def update_public_user(request, username):
         'user': user_form,
         'user_profile': profile_form
     })
+
 @login_required
 def user_dashboard(request):
-    # Get all grievances from the database
     grievances = Grievance.objects.all().order_by('-last_updated')
-
     status_counts = {
         'total': grievances.count(),
         'pending': grievances.filter(status='PENDING').count(),
@@ -68,24 +90,98 @@ def user_dashboard(request):
         'resolved': grievances.filter(status='RESOLVED').count(),
         'rejected': grievances.filter(status='REJECTED').count(),
     }
-
     return render(request, 'user/user_dashboard.html', {
         'grievances': grievances,
         'status_counts': status_counts,
         'user': request.user
     })
+
 def submit_complaint(request):
     form = GrievanceForm()
     return render(request, 'user/complaint_submission.html', {'form': form})
 
-
 def help(request):
     return render(request, 'user/help_system.html')
-
-
+@login_required
 def account_settings(request):
-    if request.user.is_authenticated:
-        user_profile = PublicUserProfile.objects.get(user=request.user)
-        return render(request, 'user/account_settings.html', {'user_profile': user_profile})
-    else:
-        return redirect('login')
+    user_instance = request.user
+    profile_instance = get_object_or_404(PublicUserProfile, user=user_instance)
+    
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            user_form = PublicUserForm(request.POST, instance=user_instance)
+            profile_form = PublicUserProfileForm(request.POST, instance=profile_instance)
+            
+            if user_form.is_valid() and profile_form.is_valid():
+                try:
+                    user = user_form.save()
+                    profile_form.save()
+                    messages.success(request, "Profile updated successfully!")
+                    return redirect('public_user:account_settings')
+                except IntegrityError as e:
+                    messages.error(request, f"Error saving profile: {str(e)}")
+        
+        elif 'change_password' in request.POST:
+            current_password = request.POST.get('current_password')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_new_password')
+            
+            # Validate password change
+            if not current_password:
+                messages.error(request, "Current password is required.")
+            elif not user_instance.check_password(current_password):
+                messages.error(request, "Your current password is incorrect.")
+            elif not new_password or not confirm_password:
+                messages.error(request, "Both new password fields are required.")
+            elif new_password != confirm_password:
+                messages.error(request, "New passwords do not match.")
+            elif len(new_password) < 8:
+                messages.error(request, "Password must be at least 8 characters long.")
+            else:
+                try:
+                    # Validate password complexity
+                    try:
+                        validate_password(new_password, user_instance)
+                    except ValidationError as e:
+                        for error in e.messages:
+                            messages.error(request, error)
+                        response = redirect('public_user:account_settings')
+                        response['Location'] += '#security'
+                        return response
+                    
+                    # Update password
+                    user_instance.set_password(new_password)
+                    user_instance.save()
+                    
+                    # Keep the user logged in
+                    update_session_auth_hash(request, user_instance)
+                    
+                    messages.success(request, "Password updated successfully!")
+                    response = redirect('public_user:account_settings')
+                    response['Location'] += '#security'
+                    return response
+                
+                except Exception as e:
+                    messages.error(request, f"Error changing password: {str(e)}")
+                    response = redirect('public_user:account_settings')
+                    response['Location'] += '#security'
+                    return response
+    
+    # Initialize forms
+    user_form = PublicUserForm(instance=user_instance)
+    profile_form = PublicUserProfileForm(instance=profile_instance)
+    
+    # Remove password fields if they exist
+    if 'password' in user_form.fields:
+        user_form.fields.pop('password')
+    if 'confirm_password' in user_form.fields:
+        user_form.fields.pop('confirm_password')
+    
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'user': user_instance,
+        'user_profile': profile_instance
+    }
+    
+    return render(request, 'user/account_settings.html', context)
