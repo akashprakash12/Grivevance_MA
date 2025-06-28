@@ -52,6 +52,7 @@ path('handover/', views.collector_handover_otp, name='collector_handover_otp'),
 path("forgot-password/", views.collector_forgot_password, name="collector_forgot_password"),
     path("forgot-password/verify/", views.collector_verify_two_otps, name="collector_verify_two_otps"),
     path("forgot-password/reset/", views.collector_reset_password, name="collector_reset_password"),
-
+# path('create-order/', views.create_collector_order, name='create_collector_order'),
+#     path('get-officers/', views.get_officers_by_department, name='get_officers_by_department'),
 
 ]

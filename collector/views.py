@@ -18,6 +18,10 @@ import pandas as pd
 import openpyxl  # Required for Excel export
 from fpdf import FPDF
 from pathlib import Path
+from django.http import JsonResponse
+from .forms import AdministrativeOrderForm
+from .models import CollectorOrder, CollectorOrderAssignment
+
 
 # Django imports
 from django.shortcuts import render, redirect, get_object_or_404
@@ -491,7 +495,7 @@ def department_card_view(request, department_id):
     )
     district    = collector.district
     department  = get_object_or_404(Department, code=department_id)
-
+    
     # ---------- filters from request ----------
     status_filter = request.GET.get("status", "ALL")
     date_from     = request.GET.get("date_from")
@@ -1746,3 +1750,153 @@ def collector_reset_password(request):
             return redirect("accounts:login")
 
     return render(request, "collector/reset_password.html")    
+
+
+
+
+# @login_required
+# def create_collector_order(request):
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         district = collector.district
+#     except CollectorProfile.DoesNotExist:
+#         return redirect("collector:collector_dashboard")
+
+#     departments = Department.objects.filter(district=district).order_by('name')
+
+#     if request.method == "POST":
+#         form = AdministrativeOrderForm(request.POST, request.FILES, user=request.user)
+#         if form.is_valid():
+#             order = form.save(commit=False)
+#             order.assigned_by = request.user
+#             order.created_at = timezone.now()
+
+#             if not order.assigned_officer:
+#                 selected_depts = form.cleaned_data['departments']
+#                 hods = OfficerProfile.objects.filter(department__in=selected_depts, is_hod=True)
+#                 if hods.exists():
+#                     order.assigned_officer = hods.first()
+
+#             order.save()
+#             form.save_m2m()
+#             return redirect("collector:collector_dashboard")
+#     else:
+#         form = AdministrativeOrderForm(user=request.user)
+
+#     return render(request, "collector/create_order.html", {"form": form, "departments": departments})
+
+
+# @login_required
+# def get_officers_by_department(request):
+#     dept_ids = request.GET.getlist('dept_ids[]')
+#     officers = OfficerProfile.objects.filter(
+#         department_id__in=dept_ids, is_hod=True
+#     ).select_related('user', 'department')
+
+#     officer_list = [
+#         {
+#             "id": officer.id,
+#             "name": f"{officer.user.first_name} {officer.user.last_name} ({officer.department.name})"
+#         }
+#         for officer in officers
+#     ]
+#     return JsonResponse({"officers": officer_list})
+
+
+
+
+
+
+
+#for collector ordering
+
+
+# @login_required
+# def create_collector_order(request):
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         district = collector.district
+#     except CollectorProfile.DoesNotExist:
+#         return redirect("collector:collector_dashboard")
+
+#     departments = Department.objects.filter(district=district).order_by("name")
+
+#     if request.method == "POST":
+#         title = request.POST.get("title")
+#         remark = request.POST.get("remark")
+#         due_date = request.POST.get("due_date")
+#         attachment = request.FILES.get("attachment")
+
+#         # Validate required fields
+#         if not (title and remark and due_date and request.POST.getlist("departments[]")):
+#             return render(
+#                 request,
+#                 "collector/create_order.html",
+#                 {
+#                     "departments": departments,
+#                     "error": "All required fields must be filled, and at least one department must be selected."
+#                 }
+#             )
+
+#         # Create the order
+#         order = CollectorOrder.objects.create(
+#             title=title,
+#             remark=remark,
+#             due_date=due_date,
+#             attachment=attachment,
+#             assigned_by=request.user,
+#             created_at=timezone.now()
+#         )
+
+#         # Process departments and officers
+#         dept_ids = request.POST.getlist("departments[]")
+#         officer_ids = request.POST.getlist("officers[]")
+
+#         for dept_id in dept_ids:
+#             try:
+#                 department = Department.objects.get(code=dept_id, district=district)
+#                 order.departments.add(department)
+
+#                 # If no officers selected, assign to HOD
+#                 if not officer_ids:
+#                     try:
+#                         hod = OfficerProfile.objects.get(department=department, is_hod=True)
+#                         CollectorOrderAssignment.objects.create(order=order, officer=hod)
+#                     except OfficerProfile.DoesNotExist:
+#                         # Skip if no HOD exists for the department
+#                         continue
+#                 else:
+#                     # Assign to selected officers
+#                     for officer_id in officer_ids:
+#                         try:
+#                             officer = OfficerProfile.objects.get(id=officer_id, department__district=district)
+#                             CollectorOrderAssignment.objects.create(order=order, officer=officer)
+#                         except OfficerProfile.DoesNotExist:
+#                             continue  # Skip invalid officer IDs
+#             except Department.DoesNotExist:
+#                 continue  # Skip invalid department IDs
+
+#         return redirect("collector:collector_dashboard")
+
+#     return render(request, "collector/create_order.html", {"departments": departments})
+
+# @login_required
+# def get_officers_by_department(request):
+#     dept_ids = request.GET.getlist('dept_ids[]')
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         officers = OfficerProfile.objects.filter(
+#             department__code__in=dept_ids,
+#             department__district=collector.district
+#         ).select_related('user', 'department')
+
+#         officer_list = [
+#             {
+#                 "id": officer.id,
+#                 "name": f"{officer.user.first_name} {officer.user.last_name} ({officer.department.name})"
+#             }
+#             for officer in officers
+#         ]
+#         return JsonResponse({"officers": officer_list})
+#     except CollectorProfile.DoesNotExist:
+#         return JsonResponse({"officers": []}, status=403)
