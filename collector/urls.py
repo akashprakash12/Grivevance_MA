@@ -39,6 +39,10 @@ path(
         views.department_grievances_download,
         name="department_grievances_download",
     ),
+# Department Grievance Export URLs
+ path('department/<str:department_id>/export/excel/', 
+         views.export_department_grievances_excel, 
+         name='export_department_grievances_excel'),
 
 # urls.py
 path("collector_dept_create/", views.collector_department_create, name="collector_department_create"),

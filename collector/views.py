@@ -9,6 +9,7 @@ import string
 import smtplib
 import secrets
 import csv
+from io import BytesIO  #
 from pathlib import Path
 from urllib.parse import quote
 from email.mime.text import MIMEText
@@ -21,8 +22,10 @@ from pathlib import Path
 from django.http import JsonResponse
 from .forms import AdministrativeOrderForm
 from .models import CollectorOrder, CollectorOrderAssignment
+from openpyxl.utils import get_column_letter  # Add this import at the top
 
-
+from openpyxl import Workbook
+from openpyxl.styles import Font
 # Django imports
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden, FileResponse, HttpResponseRedirect
@@ -1237,6 +1240,94 @@ def department_grievances_download(request, department_id):
         print(f"Error in PDF generation: {str(e)}")
         return HttpResponse(f"An error occurred while generating the PDF: {str(e)}", status=500)
 
+@login_required
+def export_department_grievances_excel(request, department_id):
+    """
+    Export department grievances to Excel with filters preserved
+    """
+    try:
+        # 1. Get collector and validate department ownership
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        department = get_object_or_404(Department, code=department_id, district=collector.district)
+        
+        # 2. Apply filters (same as department_card_view)
+        grievances = Grievance.objects.filter(
+            district=collector.district,
+            department=department
+        ).select_related('department')
+        
+        status_filter = request.GET.get("status", "ALL")
+        if status_filter != "ALL":
+            grievances = grievances.filter(status=status_filter)
+            
+        date_from = request.GET.get("date_from")
+        date_to = request.GET.get("date_to")
+        if date_from:
+            grievances = grievances.filter(date_filed__gte=date_from)
+        if date_to:
+            grievances = grievances.filter(date_filed__lte=date_to)
+            
+        search_query = request.GET.get("search", "").strip()
+        if search_query:
+            grievances = grievances.filter(
+                Q(grievance_id__icontains=search_query) |
+                Q(contact_number__icontains=search_query)
+            )
+            
+        # 3. Create Excel workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Grievances"
+        
+        # Headers
+        headers = [
+            "Grievance ID", "Date Filed", "Status", "Priority",
+            "Applicant Name", "Contact", "Address", "Subject", 
+            "Description", "Due Date", "Last Updated"
+        ]
+        ws.append(headers)
+        
+        # Data rows
+        for grievance in grievances:
+            ws.append([
+                grievance.grievance_id,
+                grievance.date_filed.strftime('%Y-%m-%d %H:%M') if grievance.date_filed else "",
+                grievance.get_status_display(),
+                grievance.get_priority_display(),
+                grievance.applicant_name,
+                grievance.contact_number,
+                grievance.applicant_address,
+                grievance.subject,
+                grievance.description,
+                grievance.due_date.strftime('%Y-%m-%d') if grievance.due_date else "",
+                grievance.last_updated.strftime('%Y-%m-%d %H:%M') if grievance.last_updated else "",
+            ])
+        
+        # Style headers
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+        
+        # Column widths
+        column_widths = [18, 16, 12, 12, 25, 15, 30, 30, 50, 12, 16]
+        for i, width in enumerate(column_widths, 1):
+            ws.column_dimensions[get_column_letter(i)].width = width
+            
+        # 4. Return the file
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        filename = f"{department.code}_grievances_{timezone.now().strftime('%Y%m%d')}.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Failed to generate Excel: {str(e)}")
+        return redirect('collector:department_card', department_id=department_id)
 ### ------------------------- ###
 ###  Communication Views      ###
 ### ------------------------- ###

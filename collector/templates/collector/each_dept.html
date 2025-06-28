@@ -327,6 +327,10 @@
           </div>
 
           <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+            <a href="{% url 'collector:export_department_grievances_excel' department.code %}?{{ request.GET.urlencode }}" 
+   class="btn btn-success">
+   <i class="fas fa-file-excel"></i> Export Excel
+</a>
             <a href="{% url 'collector:department_grievances_download' department.code %}" class="btn btn-danger">
               <i class="fas fa-file-pdf me-1"></i> Export PDF
             </a>
