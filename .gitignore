@@ -4,3 +4,4 @@ __pycache__/
 facebook_realtime.log
 *.log
 -e "*.pyc\n__pycache__/" 
+locale/*/LC_MESSAGES/*.mo

@@ -1,0 +1,140 @@
+{% load static %}
+{% load i18n %}
+
+<nav class="navbar-custom navbar navbar-expand-lg navbar-dark ">
+  <div class="container-fluid mt-3">
+    <!-- Brand Logo with Kerala Watermark -->
+    <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">
+      <div class="d-flex align-items-center">
+      <img src="{% static 'images/kerala_watermark.png' %}" 
+     alt="Kerala Government Logo" 
+     class="kerala-logo mb-3" 
+     style="filter: brightness(0) invert(1);">
+
+        <div class="d-flex flex-column">
+          <span class="fw-bold">{% trans "Grievance Portal" %}</span>
+          <small class="text-white-50">{% trans "Government of Kerala" %}</small>
+        </div>
+      </div>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <!-- Main Navigation Links -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'accounts:dashboard' %}">
+            {% trans "Home" %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            {% trans "Profile" %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'public_user:help' %}">
+            {% trans "Help" %}
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right-aligned elements -->
+      <div class="d-flex align-items-center ms-auto">
+        {% if user.is_authenticated %}
+          {% include 'partials/language_switcher.html' %}
+          
+          <!-- User Profile Section -->
+          <div class="dropdown ms-3">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" 
+               id="userDropdown" data-bs-toggle="dropdown">
+              <div class="text-end me-2 d-none d-md-block">
+                <div class="small">{% trans "Welcome" %}</div>
+                <div class="fw-bold">{{ user.first_name|default:user.username }}</div>
+              </div>
+              <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username }}&background=random" 
+                   alt="User" class="rounded-circle" width="40" height="40">
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+             
+              <li>
+                <a class="dropdown-item" href="{% url 'public_user:account_settings' %}">
+                  <i class="fas fa-cog me-2"></i> {% trans "Settings" %}
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                  <i class="fas fa-sign-out-alt me-2"></i> {% trans "Logout" %}
+                </a>
+              </li>
+            </ul>
+          </div>
+        {% else %}
+          <div class="d-flex align-items-center">
+            {% include 'partials/language_switcher.html' %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm ms-2">
+              {% trans "Login" %}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+<style>
+  .navbar-custom {
+    background: var(--indigo);
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .navbar-custom .nav-link {
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .navbar-custom .nav-link:hover,
+  .navbar-custom .nav-link.active {
+    color: var(--accent) !important;
+    transform: translateY(-1px);
+  }
+
+  .navbar-custom .dropdown-menu {
+    background-color: var(--indigo-light);
+    border: none;
+  }
+
+  .navbar-custom .dropdown-item {
+    color: white;
+    transition: all 0.2s ease;
+  }
+
+  .navbar-custom .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--accent);
+  }
+
+  .navbar-custom .navbar-collapse {
+    flex-grow: 0;
+  }
+
+  @media (max-width: 991.98px) {
+    .navbar-custom .navbar-nav {
+      margin-top: 1rem;
+    }
+    .navbar-custom .nav-item {
+      margin-bottom: 0.5rem;
+    }
+    .language-switcher {
+      margin: 0.5rem 0;
+      width: 100%;
+    }
+    .language-switcher select {
+      width: 100%;
+    }
+  }
+</style>

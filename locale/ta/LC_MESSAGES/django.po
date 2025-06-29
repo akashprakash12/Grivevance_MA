@@ -1,0 +1,835 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-29 00:12-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\collector\models.py:18 .\user\models.py:77
+msgid "User Account"
+msgstr "பயனர் கணக்கு"
+
+#: .\collector\models.py:24
+msgid "Administered District"
+msgstr "நிர்வகிக்கப்பட்ட மாவட்டம்"
+
+#: .\collector\models.py:33
+msgid "Collector ID"
+msgstr "கலெக்டர் ஐடி"
+
+#: .\collector\models.py:36
+msgid "Tenure Start Date"
+msgstr "பதவிக்கால தொடக்க தேதி"
+
+#: .\collector\models.py:40
+msgid "Tenure End Date"
+msgstr "பதவிக்காலம் இறுதி தேதி"
+
+#: .\collector\models.py:45
+msgid "Is Active Collector"
+msgstr "செயலில் சேகரிப்பான்"
+
+#: .\collector\models.py:46
+msgid "Only one active collector per district."
+msgstr "ஒரு மாவட்டத்திற்கு ஒரு செயலில் சேகரிப்பவர் மட்டுமே."
+
+#: .\collector\models.py:52
+msgid "Office Address"
+msgstr "அலுவலக முகவரி"
+
+#: .\collector\models.py:57
+msgid "Handover Notes"
+msgstr "கையளிக்கும் குறிப்புகள்"
+
+#: .\collector\models.py:58
+msgid "Optional remarks during handover."
+msgstr "கையளிக்கும் போது விருப்பமான கருத்துக்கள்."
+
+#: .\collector\models.py:65
+msgid "Profile Picture"
+msgstr "சுயவிவர படம்"
+
+#: .\collector\models.py:66
+msgid "Upload a profile image for the collector."
+msgstr "சேகரிப்பாளருக்கு சுயவிவரப் படத்தைப் பதிவேற்றவும்."
+
+#: .\collector\models.py:74
+msgid "Created At"
+msgstr "உருவாக்கப்பட்டது"
+
+#: .\collector\models.py:79
+msgid "Updated At"
+msgstr "இல் புதுப்பிக்கப்பட்டது"
+
+#: .\collector\models.py:86
+msgid "Collector Profile"
+msgstr "சேகரிப்பான் சுயவிவரம்"
+
+#: .\collector\models.py:87
+msgid "Collector Profiles"
+msgstr "கலெக்டர் சுயவிவரங்கள்"
+
+#: .\core_app\models.py:10
+msgid "District Code"
+msgstr "மாவட்ட குறியீடு"
+
+#: .\core_app\models.py:11
+msgid "District Name"
+msgstr "மாவட்ட பெயர்"
+
+#: .\core_app\models.py:22
+msgid "District"
+msgstr "மாவட்டம்"
+
+#: .\core_app\models.py:23
+msgid "Districts"
+msgstr "மாவட்டங்கள்"
+
+#: .\core_app\models.py:31
+msgid "Department Code"
+msgstr "துறை குறியீடு"
+
+#: .\core_app\models.py:32
+msgid "Department Name"
+msgstr "துறை பெயர்"
+
+#: .\core_app\models.py:33 .\grievance_app\models.py:116
+msgid "Department District"
+msgstr "துறை மாவட்டம்"
+
+#: .\core_app\models.py:44 .\user\templates\user\user_dashboard.html:304
+#: .\user\templates\user\user_dashboard.html:380
+msgid "Department"
+msgstr "துறை"
+
+#: .\core_app\models.py:45
+msgid "Departments"
+msgstr "துறைகள்"
+
+#: .\grievance_app\models.py:17 .\user\templates\user\user_dashboard.html:148
+#: .\user\templates\user\user_dashboard.html:288
+msgid "Pending"
+msgstr "நிலுவையில் உள்ளது"
+
+#: .\grievance_app\models.py:18 .\user\templates\user\user_dashboard.html:152
+#: .\user\templates\user\user_dashboard.html:289
+msgid "In Progress"
+msgstr "முன்னேற்றத்தில் உள்ளது"
+
+#: .\grievance_app\models.py:19 .\user\templates\user\user_dashboard.html:156
+#: .\user\templates\user\user_dashboard.html:290
+msgid "Resolved"
+msgstr "தீர்க்கப்பட்டது"
+
+#: .\grievance_app\models.py:20
+msgid "Rejected"
+msgstr "நிராகரிக்கப்பட்டது"
+
+#: .\grievance_app\models.py:21
+msgid "Escalated"
+msgstr "அதிகரித்தது"
+
+#: .\grievance_app\models.py:24
+msgid "Low (30 days)"
+msgstr "குறைந்த (30 நாட்கள்)"
+
+#: .\grievance_app\models.py:25
+msgid "Medium (15 days)"
+msgstr "நடுத்தர (15 நாட்கள்)"
+
+#: .\grievance_app\models.py:26
+msgid "High (7 days)"
+msgstr "உயர் (7 நாட்கள்)"
+
+#: .\grievance_app\models.py:27
+msgid "Critical (3 days)"
+msgstr "சிக்கலானது (3 நாட்கள்)"
+
+#: .\grievance_app\models.py:30
+msgid "Website"
+msgstr "வலைத்தளம்"
+
+#: .\grievance_app\models.py:31
+msgid "Mobile App"
+msgstr "மொபைல் பயன்பாடு"
+
+#: .\grievance_app\models.py:32
+msgid "Office Visit"
+msgstr "அலுவலக வருகை"
+
+#: .\grievance_app\models.py:33
+msgid "Email"
+msgstr "மின்னஞ்சல்"
+
+#: .\grievance_app\models.py:40
+msgid "Grievance ID"
+msgstr "குறை தீர்க்கும் ஐடி"
+
+#: .\grievance_app\models.py:44
+msgid "Filing Date"
+msgstr "தாக்கல் தேதி"
+
+#: .\grievance_app\models.py:48
+msgid "Last Updated"
+msgstr "கடைசியாக புதுப்பிக்கப்பட்டது"
+
+#: .\grievance_app\models.py:54 .\user\templates\user\help_system.html:403
+msgid "Subject"
+msgstr "பொருள்"
+
+#: .\grievance_app\models.py:57
+msgid "Detailed Description"
+msgstr "விரிவான விளக்கம்"
+
+#: .\grievance_app\models.py:62
+msgid "Responsible Department"
+msgstr "பொறுப்பான துறை"
+
+#: .\grievance_app\models.py:67
+msgid "Source Channel"
+msgstr "மூல சேனல்"
+
+#: .\grievance_app\models.py:75
+msgid "Current Status"
+msgstr "தற்போதைய நிலை"
+
+#: .\grievance_app\models.py:81
+msgid "Priority Level"
+msgstr "முன்னுரிமை நிலை"
+
+#: .\grievance_app\models.py:86
+msgid "Resolution Due Date"
+msgstr "தீர்மானம் செலுத்தும் தேதி"
+
+#: .\grievance_app\models.py:92
+msgid "Applicant Name"
+msgstr "விண்ணப்பதாரரின் பெயர்"
+
+#: .\grievance_app\models.py:96
+msgid "Applicant Address"
+msgstr "விண்ணப்பதாரர் முகவரி"
+
+#: .\grievance_app\models.py:97
+msgid "Provide full residential address"
+msgstr "முழு குடியிருப்பு முகவரியை வழங்குதல்"
+
+#: .\grievance_app\models.py:102
+msgid "Phone Number"
+msgstr "தொலைபேசி எண்"
+
+#: .\grievance_app\models.py:108 .\user\templates\user\help_system.html:399
+msgid "Email Address"
+msgstr "மின்னஞ்சல் முகவரி"
+
+#: .\grievance_app\models.py:123
+msgid "Created By"
+msgstr "உருவாக்கியது"
+
+#: .\grievance_app\models.py:133
+msgid "Public Grievance"
+msgstr "பொது குறை"
+
+#: .\grievance_app\models.py:134
+msgid "Public Grievances"
+msgstr "பொது குறைகள்"
+
+#: .\user\models.py:19
+msgid "System Administrator"
+msgstr "கணினி நிர்வாகி"
+
+#: .\user\models.py:20
+msgid "District Collector"
+msgstr "மாவட்ட சேகரிப்பாளர்"
+
+#: .\user\models.py:21
+msgid "Department Officer"
+msgstr "துறை அதிகாரி"
+
+#: .\user\models.py:22
+msgid "Public User"
+msgstr "பொது பயனர்"
+
+#: .\user\models.py:27
+msgid "User Type"
+msgstr "பயனர் வகை"
+
+#: .\user\models.py:28
+msgid "Determines the user's role and permissions in the system"
+msgstr "கணினியில் பயனரின் பங்கு மற்றும் அனுமதிகளை தீர்மானிக்கிறது"
+
+#: .\user\models.py:33
+msgid "System User"
+msgstr "கணினி பயனர்"
+
+#: .\user\models.py:34
+msgid "System Users"
+msgstr "கணினி பயனர்கள்"
+
+#: .\user\models.py:80
+msgid "Address"
+msgstr "முகவரி"
+
+#: .\user\models.py:88
+msgid "Gender"
+msgstr "பாலினம்"
+
+#: .\user\models.py:90
+msgid "Date of Birth"
+msgstr "பிறந்த தேதி"
+
+#: .\user\models.py:92
+msgid "Thaluk"
+msgstr "தாலுக்"
+
+#: .\user\models.py:93
+msgid "Village"
+msgstr "கிராமம்"
+
+#: .\user\models.py:94
+msgid "Panchayath"
+msgstr "பான்சாயெத்"
+
+#: .\user\models.py:105
+msgid "Public User Profile"
+msgstr "பொது பயனர் சுயவிவரம்"
+
+#: .\user\models.py:106
+msgid "Public User Profiles"
+msgstr "பொது பயனர் சுயவிவரங்கள்"
+
+#: .\user\templates\partials\navbar.html:14
+msgid "Grievance Portal"
+msgstr "குறை தீர்க்கும் போர்டல்"
+
+#: .\user\templates\partials\navbar.html:15
+msgid "Government of Kerala"
+msgstr "கேரள அரசு"
+
+#: .\user\templates\partials\navbar.html:29
+msgid "Home"
+msgstr "வீடு"
+
+#: .\user\templates\partials\navbar.html:34
+msgid "Profile"
+msgstr "சுயவிவரம்"
+
+#: .\user\templates\partials\navbar.html:39
+msgid "Help"
+msgstr "உதவி"
+
+#: .\user\templates\partials\navbar.html:54
+#: .\user\templates\user\user_dashboard.html:140
+msgid "Welcome"
+msgstr "வரவேற்கிறோம்"
+
+#: .\user\templates\partials\navbar.html:64
+msgid "Settings"
+msgstr "அமைப்புகள்"
+
+#: .\user\templates\partials\navbar.html:70
+msgid "Logout"
+msgstr "வெளியேற்றம்"
+
+#: .\user\templates\partials\navbar.html:79
+msgid "Login"
+msgstr "உள்நுழைவு"
+
+#: .\user\templates\user\help_system.html:4
+#: .\user\templates\user\help_system.html:131
+msgid "Help Center"
+msgstr "உதவி மையம்"
+
+#: .\user\templates\user\help_system.html:4
+msgid "Grievance Management"
+msgstr "குறை தீர்க்கும் மேலாண்மை"
+
+#: .\user\templates\user\help_system.html:132
+msgid "Find answers to common questions or contact our support team"
+msgstr ""
+"பொதுவான கேள்விகளுக்கான பதில்களைக் கண்டறியவும் அல்லது எங்கள் ஆதரவு குழுவைத் "
+"தொடர்பு கொள்ளவும்"
+
+#: .\user\templates\user\help_system.html:136
+msgid "Search help articles..."
+msgstr "உதவி கட்டுரைகளைத் தேடுங்கள் ..."
+
+#: .\user\templates\user\help_system.html:148
+msgid "FAQs"
+msgstr "கேள்விகள்"
+
+#: .\user\templates\user\help_system.html:149
+msgid "Guides"
+msgstr "வழிகாட்டிகள்"
+
+#: .\user\templates\user\help_system.html:150
+#: .\user\templates\user\help_system.html:331
+msgid "Contact Support"
+msgstr "தொடர்பு ஆதரவு"
+
+#: .\user\templates\user\help_system.html:151
+#: .\user\templates\user\help_system.html:456
+msgid "Check Status"
+msgstr "நிலையை சரிபார்க்கவும்"
+
+#: .\user\templates\user\help_system.html:157
+msgid "Frequently Asked Questions"
+msgstr "அடிக்கடி கேட்கப்படும் கேள்விகள்"
+
+#: .\user\templates\user\help_system.html:169
+msgid "How do I file a new complaint?"
+msgstr "புதிய புகாரை எவ்வாறு தாக்கல் செய்வது?"
+
+#: .\user\templates\user\help_system.html:170
+msgid ""
+"Click on 'New Complaint' in your dashboard and fill out the required details"
+" about your grievance."
+msgstr ""
+"உங்கள் டாஷ்போர்டில் உள்ள 'புதிய புகார்' என்பதைக் கிளிக் செய்து, உங்கள் குறை "
+"பற்றிய தேவையான விவரங்களை நிரப்பவும்."
+
+#: .\user\templates\user\help_system.html:186
+msgid "How long does resolution take?"
+msgstr "தீர்மானம் எவ்வளவு நேரம் எடுக்கும்?"
+
+#: .\user\templates\user\help_system.html:187
+msgid ""
+"Most complaints are resolved within 30 days, but complex issues may take "
+"longer."
+msgstr ""
+"பெரும்பாலான புகார்கள் 30 நாட்களுக்குள் தீர்க்கப்படுகின்றன, ஆனால் சிக்கலான "
+"பிரச்சினைகள் அதிக நேரம் ஆகலாம்."
+
+#: .\user\templates\user\help_system.html:203
+msgid "Can I edit my complaint?"
+msgstr "எனது புகாரைத் திருத்த முடியுமா?"
+
+#: .\user\templates\user\help_system.html:204
+msgid ""
+"Yes, you can edit complaints that are still in 'Pending' status from your "
+"dashboard."
+msgstr ""
+"ஆம், உங்கள் டாஷ்போர்டில் இருந்து 'நிலுவையில் உள்ள' அந்தஸ்தில் இருக்கும் "
+"புகார்களை நீங்கள் திருத்தலாம்."
+
+#: .\user\templates\user\help_system.html:220
+msgid "What file types can I upload?"
+msgstr "நான் என்ன கோப்பு வகைகளை பதிவேற்ற முடியும்?"
+
+#: .\user\templates\user\help_system.html:221
+msgid "We accept JPG, PNG, PDF, and MP4 files up to 5MB each."
+msgstr ""
+"நாங்கள் JPG, PNG, PDF மற்றும் MP4 கோப்புகளை ஒவ்வொன்றும் 5MB வரை "
+"ஏற்றுக்கொள்கிறோம்."
+
+#: .\user\templates\user\help_system.html:230
+msgid "More Questions"
+msgstr "மேலும் கேள்விகள்"
+
+#: .\user\templates\user\help_system.html:235
+msgid "How do I check the status of my complaint?"
+msgstr "எனது புகாரின் நிலையை எவ்வாறு சரிபார்க்கலாம்?"
+
+#: .\user\templates\user\help_system.html:240
+msgid ""
+"You can view the current status of all your complaints in the 'My "
+"Complaints' section of your dashboard. Each complaint will show its current "
+"status (Pending, In Progress, Resolved, etc.) and you can click on it for "
+"detailed updates."
+msgstr ""
+"உங்கள் டாஷ்போர்டின் 'எனது புகார்கள்' பிரிவில் உங்கள் எல்லா புகார்களின் "
+"தற்போதைய நிலையையும் நீங்கள் காணலாம். ஒவ்வொரு புகாரும் அதன் தற்போதைய நிலையைக்"
+" காண்பிக்கும் (நிலுவையில் உள்ளது, முன்னேற்றத்தில் உள்ளது, தீர்க்கப்பட்டது, "
+"முதலியன) மற்றும் விரிவான புதுப்பிப்புகளுக்கு நீங்கள் அதைக் கிளிக் செய்யலாம்."
+
+#: .\user\templates\user\help_system.html:248
+msgid "What should I do if my complaint is rejected?"
+msgstr "எனது புகார் நிராகரிக்கப்பட்டால் நான் என்ன செய்ய வேண்டும்?"
+
+#: .\user\templates\user\help_system.html:253
+msgid ""
+"If your complaint is rejected, you will receive a notification explaining "
+"the reason. You can either:"
+msgstr ""
+"உங்கள் புகார் நிராகரிக்கப்பட்டால், காரணத்தை விளக்கும் அறிவிப்பைப் "
+"பெறுவீர்கள். நீங்கள் செய்யலாம்:"
+
+#: .\user\templates\user\help_system.html:255
+msgid "Submit a new complaint with additional information"
+msgstr "கூடுதல் தகவலுடன் புதிய புகாரை சமர்ப்பிக்கவும்"
+
+#: .\user\templates\user\help_system.html:256
+msgid "Appeal the decision by contacting our support team"
+msgstr ""
+"எங்கள் ஆதரவு குழுவைத் தொடர்புகொள்வதன் மூலம் முடிவை மேல்முறையீடு செய்யுங்கள்"
+
+#: .\user\templates\user\help_system.html:257
+msgid "Escalate to a higher authority if applicable"
+msgstr "பொருந்தினால் உயர் அதிகாரத்திற்கு அதிகரிக்கவும்"
+
+#: .\user\templates\user\help_system.html:266
+msgid "How do I change my account information?"
+msgstr "எனது கணக்கு தகவலை எவ்வாறு மாற்றுவது?"
+
+#: .\user\templates\user\help_system.html:271
+msgid ""
+"You can update your personal information from the 'Profile' section in your "
+"account settings. Note that changing your email address may require "
+"verification."
+msgstr ""
+"உங்கள் கணக்கு அமைப்புகளில் உள்ள 'சுயவிவர' பிரிவில் இருந்து உங்கள் தனிப்பட்ட "
+"தகவல்களை புதுப்பிக்கலாம். உங்கள் மின்னஞ்சல் முகவரியை மாற்ற சரிபார்ப்பு "
+"தேவைப்படலாம் என்பதை நினைவில் கொள்க."
+
+#: .\user\templates\user\help_system.html:280
+msgid "Step-by-Step Guides"
+msgstr "படிப்படியான வழிகாட்டிகள்"
+
+#: .\user\templates\user\help_system.html:286
+msgid "Filing a complaint"
+msgstr "புகார் தாக்கல்"
+
+#: .\user\templates\user\help_system.html:288
+msgid "How to File a Complaint"
+msgstr "புகார் எவ்வாறு தாக்கல் செய்வது"
+
+#: .\user\templates\user\help_system.html:289
+msgid ""
+"Learn the step-by-step process for submitting a new grievance through the "
+"portal."
+msgstr ""
+"போர்ட்டல் மூலம் ஒரு புதிய குறைகளை சமர்ப்பிப்பதற்கான படிப்படியான "
+"செயல்முறையைக் கற்றுக்கொள்ளுங்கள்."
+
+#: .\user\templates\user\help_system.html:291
+#: .\user\templates\user\help_system.html:305
+#: .\user\templates\user\help_system.html:319
+msgid "View Guide"
+msgstr "வழிகாட்டியைக் காண்க"
+
+#: .\user\templates\user\help_system.html:300
+msgid "Tracking status"
+msgstr "கண்காணிப்பு நிலை"
+
+#: .\user\templates\user\help_system.html:302
+msgid "Tracking Your Complaint"
+msgstr "உங்கள் புகாரைக் கண்காணித்தல்"
+
+#: .\user\templates\user\help_system.html:303
+msgid "Understand how to monitor the progress of your filed grievances."
+msgstr ""
+"நீங்கள் தாக்கல் செய்யப்பட்ட குறைகளின் முன்னேற்றத்தை எவ்வாறு கண்காணிப்பது "
+"என்பதைப் புரிந்து கொள்ளுங்கள்."
+
+#: .\user\templates\user\help_system.html:314
+msgid "Uploading documents"
+msgstr "ஆவணங்களை பதிவேற்றுகிறது"
+
+#: .\user\templates\user\help_system.html:316
+msgid "Uploading Documents"
+msgstr "ஆவணங்களை பதிவேற்றுகிறது"
+
+#: .\user\templates\user\help_system.html:317
+msgid "Best practices for attaching evidence to strengthen your complaint."
+msgstr "உங்கள் புகாரை வலுப்படுத்த ஆதாரங்களை இணைப்பதற்கான சிறந்த நடைமுறைகள்."
+
+#: .\user\templates\user\help_system.html:332
+msgid ""
+"Can't find what you're looking for? Our support team is ready to help you "
+"with any questions or issues."
+msgstr ""
+"நீங்கள் தேடுவதைக் கண்டுபிடிக்க முடியவில்லையா? ஏதேனும் கேள்விகள் அல்லது "
+"சிக்கல்களுக்கு உங்களுக்கு உதவ எங்கள் ஆதரவு குழு தயாராக உள்ளது."
+
+#: .\user\templates\user\help_system.html:343
+msgid "Call Us"
+msgstr "எங்களை அழைக்கவும்"
+
+#: .\user\templates\user\help_system.html:347
+msgid "Monday-Friday, 9AM-6PM"
+msgstr "திங்கள் -ஃபே, காலை 9 மணி முதல் மாலை 6 மணி வரை"
+
+#: .\user\templates\user\help_system.html:360
+msgid "Email Us"
+msgstr "எங்களுக்கு மின்னஞ்சல் அனுப்புங்கள்"
+
+#: .\user\templates\user\help_system.html:364
+msgid "Typically respond within 24 hours"
+msgstr "பொதுவாக 24 மணி நேரத்திற்குள் பதிலளிக்கவும்"
+
+#: .\user\templates\user\help_system.html:377
+msgid "Visit Us"
+msgstr "எங்களைப் பார்வையிடவும்"
+
+#: .\user\templates\user\help_system.html:380
+msgid "Grievance Redressal Center"
+msgstr "குறை தீர்க்கும் மையம்"
+
+#: .\user\templates\user\help_system.html:381
+msgid "Government Complex, New Delhi"
+msgstr "அரசு வளாகம், புது தில்லி"
+
+#: .\user\templates\user\help_system.html:382
+msgid "By appointment only"
+msgstr "நியமனம் மூலம் மட்டுமே"
+
+#: .\user\templates\user\help_system.html:392
+msgid "Send Us a Message"
+msgstr "எங்களுக்கு ஒரு செய்தியை அனுப்புங்கள்"
+
+#: .\user\templates\user\help_system.html:395
+msgid "Your Name"
+msgstr "உங்கள் பெயர்"
+
+#: .\user\templates\user\help_system.html:405
+msgid "Select a topic"
+msgstr "ஒரு தலைப்பைத் தேர்ந்தெடுக்கவும்"
+
+#: .\user\templates\user\help_system.html:406
+msgid "Complaint Assistance"
+msgstr "புகார் உதவி"
+
+#: .\user\templates\user\help_system.html:407
+msgid "Technical Issue"
+msgstr "தொழில்நுட்ப பிரச்சினை"
+
+#: .\user\templates\user\help_system.html:408
+msgid "Account Help"
+msgstr "கணக்கு உதவி"
+
+#: .\user\templates\user\help_system.html:409
+msgid "Other Inquiry"
+msgstr "பிற விசாரணை"
+
+#: .\user\templates\user\help_system.html:413
+msgid "Message"
+msgstr "செய்தி"
+
+#: .\user\templates\user\help_system.html:417
+msgid "Send Message"
+msgstr "செய்தி அனுப்பவும்"
+
+#: .\user\templates\user\help_system.html:428
+msgid "Check Complaint Status"
+msgstr "புகார் நிலையை சரிபார்க்கவும்"
+
+#: .\user\templates\user\help_system.html:437
+msgid "How to Check Status"
+msgstr "நிலையை எவ்வாறு சரிபார்க்கலாம்"
+
+#: .\user\templates\user\help_system.html:438
+msgid ""
+"You can check the status of your complaint by entering your Complaint ID "
+"below or visiting the 'My Complaints' section in your dashboard."
+msgstr ""
+"கீழே உள்ள உங்கள் புகார் ஐடியை உள்ளிட்டு அல்லது உங்கள் டாஷ்போர்டில் உள்ள "
+"'எனது புகார்கள்' பிரிவைப் பார்வையிடுவதன் மூலம் உங்கள் புகாரின் நிலையை "
+"நீங்கள் சரிபார்க்கலாம்."
+
+#: .\user\templates\user\help_system.html:448
+#: .\user\templates\user\user_dashboard.html:376
+msgid "Complaint ID"
+msgstr "புகார் ஐடி"
+
+#: .\user\templates\user\help_system.html:452
+msgid "Registered Email"
+msgstr "பதிவுசெய்யப்பட்ட மின்னஞ்சல்"
+
+#: .\user\templates\user\user_dashboard.html:4
+msgid "Citizen Dashboard"
+msgstr "குடிமகன் டாஷ்போர்டு"
+
+#: .\user\templates\user\user_dashboard.html:4
+msgid "Kerala Grievance Management"
+msgstr "கேரள குறை மேலாண்மை"
+
+#: .\user\templates\user\user_dashboard.html:141
+msgid "Track your grievances with Kerala Government departments"
+msgstr "கேரள அரசு துறைகளுடன் உங்கள் குறைகளை கண்காணிக்கவும்"
+
+#: .\user\templates\user\user_dashboard.html:144
+msgid "Total Complaints"
+msgstr "மொத்த புகார்கள்"
+
+#: .\user\templates\user\user_dashboard.html:162
+msgid "Kerala Grievance"
+msgstr "கேரள குறை"
+
+#: .\user\templates\user\user_dashboard.html:169
+msgid "Quick Actions"
+msgstr "விரைவான செயல்கள்"
+
+#: .\user\templates\user\user_dashboard.html:178
+msgid "Submit New Complaint"
+msgstr "புதிய புகாரை சமர்ப்பிக்கவும்"
+
+#: .\user\templates\user\user_dashboard.html:179
+msgid "File a new grievance or request"
+msgstr "புதிய குறை அல்லது கோரிக்கையை தாக்கல் செய்யுங்கள்"
+
+#: .\user\templates\user\user_dashboard.html:191
+msgid "View My Complaints"
+msgstr "எனது புகார்களைக் காண்க"
+
+#: .\user\templates\user\user_dashboard.html:192
+msgid "View and manage your complaints"
+msgstr "உங்கள் புகார்களைக் காணலாம் மற்றும் நிர்வகிக்கவும்"
+
+#: .\user\templates\user\user_dashboard.html:204
+msgid "Get Help"
+msgstr "உதவி கிடைக்கும்"
+
+#: .\user\templates\user\user_dashboard.html:205
+msgid "Find answers to common questions"
+msgstr "பொதுவான கேள்விகளுக்கான பதில்களைக் கண்டறியவும்"
+
+#: .\user\templates\user\user_dashboard.html:217
+msgid "Account Settings"
+msgstr "கணக்கு அமைப்புகள்"
+
+#: .\user\templates\user\user_dashboard.html:218
+msgid "Update your profile"
+msgstr "உங்கள் சுயவிவரத்தைப் புதுப்பிக்கவும்"
+
+#: .\user\templates\user\user_dashboard.html:228
+msgid "Recent Activity"
+msgstr "சமீபத்திய செயல்பாடு"
+
+#: .\user\templates\user\user_dashboard.html:231
+msgid "Latest Updates on Your Complaints"
+msgstr "உங்கள் புகார்கள் குறித்த சமீபத்திய புதுப்பிப்புகள்"
+
+#: .\user\templates\user\user_dashboard.html:232
+msgid "View All"
+msgstr "அனைத்தையும் காண்க"
+
+#: .\user\templates\user\user_dashboard.html:251
+#, python-format
+msgid ""
+"\n"
+"                  Your complaint <strong>\"%(subject)s\"</strong> \n"
+"                  "
+msgstr ""
+"\n"
+" %(subject)s"
+
+#: .\user\templates\user\user_dashboard.html:254
+msgid "has been resolved"
+msgstr "தீர்க்கப்பட்டுள்ளது"
+
+#: .\user\templates\user\user_dashboard.html:255
+msgid "is now in progress"
+msgstr "இப்போது செயலில் உள்ளது"
+
+#: .\user\templates\user\user_dashboard.html:256
+msgid "is pending review"
+msgstr "மதிப்பாய்வு நிலுவையில் உள்ளது"
+
+#: .\user\templates\user\user_dashboard.html:257
+msgid "at"
+msgstr "at"
+
+#: .\user\templates\user\user_dashboard.html:270
+msgid "No recent activity found"
+msgstr "சமீபத்திய செயல்பாடு எதுவும் கிடைக்கவில்லை"
+
+#: .\user\templates\user\user_dashboard.html:284
+msgid "My Complaints"
+msgstr "எனது புகார்கள்"
+
+#: .\user\templates\user\user_dashboard.html:287
+msgid "All Statuses"
+msgstr "அனைத்து நிலைகளும்"
+
+#: .\user\templates\user\user_dashboard.html:293
+msgid "Export"
+msgstr "ஏற்றுமதி"
+
+#: .\user\templates\user\user_dashboard.html:302
+msgid "ID"
+msgstr "ஐடி"
+
+#: .\user\templates\user\user_dashboard.html:303
+#: .\user\templates\user\user_dashboard.html:392
+msgid "Title"
+msgstr "தலைப்பு"
+
+#: .\user\templates\user\user_dashboard.html:305
+msgid "Status"
+msgstr "நிலை"
+
+#: .\user\templates\user\user_dashboard.html:306
+msgid "Actions"
+msgstr "செயல்கள்"
+
+#: .\user\templates\user\user_dashboard.html:337
+msgid "No complaints found"
+msgstr "புகார்கள் எதுவும் கிடைக்கவில்லை"
+
+#: .\user\templates\user\user_dashboard.html:344
+msgid "Showing 1 to 3 of 12 complaints"
+msgstr "12 புகார்களில் 1 முதல் 3 வரை காட்டுகிறது"
+
+#: .\user\templates\user\user_dashboard.html:348
+msgid "Previous"
+msgstr "முந்தைய"
+
+#: .\user\templates\user\user_dashboard.html:354
+msgid "Next"
+msgstr "அடுத்து"
+
+#: .\user\templates\user\user_dashboard.html:369
+msgid "Edit Complaint"
+msgstr "புகாரைத் திருத்தவும்"
+
+#: .\user\templates\user\user_dashboard.html:382
+msgid "Select Department"
+msgstr "துறையைத் தேர்ந்தெடுக்கவும்"
+
+#: .\user\templates\user\user_dashboard.html:383
+msgid "Health Department"
+msgstr "சுகாதாரத் துறை"
+
+#: .\user\templates\user\user_dashboard.html:384
+msgid "Education Department"
+msgstr "கல்வித் துறை"
+
+#: .\user\templates\user\user_dashboard.html:385
+msgid "Transport Department"
+msgstr "போக்குவரத்துத் துறை"
+
+#: .\user\templates\user\user_dashboard.html:386
+msgid "Revenue Department"
+msgstr "வருவாய் துறை"
+
+#: .\user\templates\user\user_dashboard.html:387
+msgid "Public Works Department"
+msgstr "பொதுப்பணித் துறை"
+
+#: .\user\templates\user\user_dashboard.html:396
+msgid "Location"
+msgstr "இடம்"
+
+#: .\user\templates\user\user_dashboard.html:400
+msgid "Description"
+msgstr "விளக்கம்"
+
+#: .\user\templates\user\user_dashboard.html:405
+msgid "Cancel"
+msgstr "ரத்துசெய்"
+
+#: .\user\templates\user\user_dashboard.html:407
+msgid "Update Complaint"
+msgstr "புகாரைப் புதுப்பிக்கவும்"

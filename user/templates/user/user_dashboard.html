@@ -1,581 +1,420 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Citizen Dashboard | Kerala Grievance Management</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --indigo: #002855;
-      --indigo-light: #08438f;
-      --accent: #ffc107;
-      --bg: #f4f6f9;
-      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
-    }
+{% extends "base.html" %}
+{% load i18n static %}
 
-    body {
-      background: var(--bg);
-      font-family: 'Segoe UI', sans-serif;
-    }
+{% block title %}{% trans "Citizen Dashboard" %} | {% trans "Kerala Grievance Management" %}{% endblock %}
 
-    .navbar-custom {
-      background: var(--indigo);
-      padding: 1rem 2rem;
-      border-bottom: 4px solid var(--indigo-light);
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-    }
+{% block extra_css %}
+<style>
+  :root {
+    --indigo: #002855;
+    --indigo-light: #08438f;
+    --accent: #ffc107;
+    --bg: #f4f6f9;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+  }
 
-    .welcome-banner {
-      background: linear-gradient(to right, var(--indigo), var(--indigo-light));
-      border-radius: 12px;
-      color: white;
-    }
+  .welcome-banner {
+    background: linear-gradient(to right, var(--indigo), var(--indigo-light));
+    border-radius: 12px;
+    color: white;
+  }
 
-    .stat-card {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      padding: 1rem;
-      backdrop-filter: blur(5px);
-    }
+  .stat-card {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 1rem;
+    backdrop-filter: blur(5px);
+  }
 
-    .quick-action-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: var(--card-shadow);
-      transition: all 0.3s ease;
-      border-left: 4px solid var(--accent);
-    }
+  .quick-action-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--accent);
+  }
 
-    .quick-action-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--card-shadow-hover);
-    }
+  .quick-action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow-hover);
+  }
 
-    .action-icon {
-      background: rgba(255, 193, 7, 0.2);
-      color: var(--accent);
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-    }
+  .action-icon {
+    background: rgba(255, 193, 7, 0.2);
+    color: var(--accent);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
 
-    .activity-item {
-      border-left: 3px solid var(--accent);
-      padding-left: 1rem;
-      transition: all 0.3s ease;
-    }
+  .activity-item {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    transition: all 0.3s ease;
+  }
 
-    .activity-item:hover {
-      background: rgba(0, 40, 85, 0.05);
-    }
+  .activity-item:hover {
+    background: rgba(0, 40, 85, 0.05);
+  }
 
-    .notification-badge {
-      animation: pulse 1.5s infinite;
-    }
+  .notification-badge {
+    animation: pulse 1.5s infinite;
+  }
 
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
 
-    .btn-primary-custom {
-      background: var(--indigo);
-      border-color: var(--indigo);
-    }
+  .btn-accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
 
-    .btn-primary-custom:hover {
-      background: var(--indigo-light);
-      border-color: var(--indigo-light);
-    }
+  .btn-accent:hover {
+    background: #e0a800;
+    border-color: #e0a800;
+  }
 
-    .btn-accent {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #000;
-    }
+  .status-badge-pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
 
-    .btn-accent:hover {
-      background: #e0a800;
-      border-color: #e0a800;
-    }
+  .status-badge-progress {
+    background: #dbeafe;
+    color: #1e40af;
+  }
 
-    .status-badge-pending {
-      background: #fef3c7;
-      color: #92400e;
-    }
+  .status-badge-resolved {
+    background: #dcfce7;
+    color: #166534;
+  }
 
-    .status-badge-progress {
-      background: #dbeafe;
-      color: #1e40af;
-    }
+  .timeline-item {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+  }
 
-    .status-badge-resolved {
-      background: #dcfce7;
-      color: #166534;
-    }
+  .timeline-item:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid white;
+  }
 
-    .timeline-item {
-      position: relative;
-      padding-left: 2rem;
-      margin-bottom: 1.5rem;
-    }
+  .timeline-item:after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 16px;
+    bottom: -1.5rem;
+    width: 2px;
+    background: var(--accent);
+  }
 
-    .timeline-item:before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: 3px solid white;
-    }
+  .timeline-item:last-child:after {
+    display: none;
+  }
+</style>
+{% endblock %}
 
-    .timeline-item:after {
-      content: '';
-      position: absolute;
-      left: 7px;
-      top: 16px;
-      bottom: -1.5rem;
-      width: 2px;
-      background: var(--accent);
-    }
+{% block content %}
+<!-- Welcome Section -->
+<section class="mb-5">
+  <div class="welcome-banner p-4 p-md-5 d-flex flex-column flex-md-row align-items-center">
+    <div class="flex-grow-1 mb-4 mb-md-0">
+      <h1>{% trans "Welcome" %}, {{ user.first_name|default:user.username }}!</h1>
+      <p class="mb-4 opacity-90">{% trans "Track your grievances with Kerala Government departments" %}</p>
+      <div class="d-flex flex-wrap gap-3">
+        <div class="stat-card">
+          <p class="small mb-1">{% trans "Total Complaints" %}</p>
+          <p class="h4 fw-bold mb-0">{{ status_counts.total }}</p>
+        </div>
+        <div class="stat-card">
+          <p class="small mb-1">{% trans "Pending" %}</p>
+          <p class="h4 fw-bold mb-0">{{ status_counts.pending }}</p>
+        </div>
+        <div class="stat-card">
+          <p class="small mb-1">{% trans "In Progress" %}</p>
+          <p class="h4 fw-bold mb-0">{{ status_counts.in_progress }}</p>
+        </div>
+        <div class="stat-card">
+          <p class="small mb-1">{% trans "Resolved" %}</p>
+          <p class="h4 fw-bold mb-0">{{ status_counts.resolved }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center text-md-end">
+      <img src="{% static 'images/grivence.jpg' %}" alt="{% trans 'Kerala Grievance' %}" class="img-fluid" style="max-height: 250px;">
+    </div>
+  </div>
+</section>
 
-    .timeline-item:last-child:after {
-      display: none;
-    }
-
-    .footer-custom {
-      background: var(--indigo);
-      color: white;
-    }
-
-    .footer-links a {
-      color: rgba(255, 255, 255, 0.7);
-      transition: color 0.3s;
-    }
-
-    .footer-links a:hover {
-      color: white;
-      text-decoration: none;
-    }
-
-    .kerala-logo {
-      height: 60px;
-      margin-bottom: 1rem;
-    }
-  </style>
-</head>
-<body>
-  <!-- Top Navigation -->
-  <nav class="navbar-custom navbar-expand-lg navbar-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="{% static 'images/kerala_watermark.png' %}" 
-     alt="Kerala Government Logo" 
-     class="kerala-logo me-3" 
-     style="filter: brightness(0) invert(1);">
-
-        <span class="fw-bold">Kerala Grievance Portal</span>
+<!-- Quick Actions -->
+<section class="mb-5">
+  <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-bolt me-2 text-accent"></i>{% trans "Quick Actions" %}</h2>
+  <div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+      <a href="{% url 'public_user:submit_complaint' %}" class="quick-action-card text-decoration-none p-4 d-block">
+        <div class="d-flex align-items-center">
+          <div class="action-icon me-3">
+            <i class="fas fa-plus"></i>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold mb-1 text-dark">{% trans "Submit New Complaint" %}</h3>
+            <p class="small text-muted mb-0">{% trans "File a new grievance or request" %}</p>
+          </div>
+        </div>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a href="{% url 'public_user:view_grievances' %}" class="quick-action-card text-decoration-none p-4 d-block">
+        <div class="d-flex align-items-center">
+          <div class="action-icon me-3">
+            <i class="fas fa-list"></i>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold mb-1 text-dark">{% trans "View My Complaints" %}</h3>
+            <p class="small text-muted mb-0">{% trans "View and manage your complaints" %}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a href="{% url 'public_user:help' %}" class="quick-action-card text-decoration-none p-4 d-block">
+        <div class="d-flex align-items-center">
+          <div class="action-icon me-3">
+            <i class="fas fa-question"></i>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold mb-1 text-dark">{% trans "Get Help" %}</h3>
+            <p class="small text-muted mb-0">{% trans "Find answers to common questions" %}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <a href="{% url 'public_user:account_settings' %}" class="quick-action-card text-decoration-none p-4 d-block">
+        <div class="d-flex align-items-center">
+          <div class="action-icon me-3">
+            <i class="fas fa-user-cog"></i>
+          </div>
+          <div>
+            <h3 class="h6 fw-bold mb-1 text-dark">{% trans "Account Settings" %}</h3>
+            <p class="small text-muted mb-0">{% trans "Update your profile" %}</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Activity Section -->
+<section class="mb-5">
+  <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-clock-rotate-left me-2 text-accent"></i>{% trans "Recent Activity" %}</h2>
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h3 class="h6 mb-0">{% trans "Latest Updates on Your Complaints" %}</h3>
+      <a href="#" class="small text-primary">{% trans "View All" %}</a>
+    </div>
+    <div class="card-body p-0">
+      <div class="list-group list-group-flush">
+        {% for grievance in grievances|slice:":3" %}
+        <div class="list-group-item border-0 py-3">
+          <div class="activity-item">
+            <div class="d-flex">
+              <div class="flex-shrink-0 
+                {% if grievance.status == 'RESOLVED' %}text-success
+                {% elif grievance.status == 'IN_PROGRESS' %}text-primary
+                {% else %}text-warning{% endif %} me-3">
+                <i class="fas 
+                  {% if grievance.status == 'RESOLVED' %}fa-check
+                  {% elif grievance.status == 'IN_PROGRESS' %}fa-road
+                  {% else %}fa-exclamation{% endif %}"></i>
+              </div>
+              <div>
+                <p class="mb-1">
+                  {% blocktrans with subject=grievance.subject %}
+                  Your complaint <strong>"{{ subject }}"</strong> 
+                  {% endblocktrans %}
+                  {% if grievance.status == 'RESOLVED' %}{% trans "has been resolved" %}
+                  {% elif grievance.status == 'IN_PROGRESS' %}{% trans "is now in progress" %}
+                  {% else %}{% trans "is pending review" %}{% endif %}.</p>
+                <small class="text-muted">{{ grievance.last_updated|date:"F j, Y" }} {% trans "at" %} {{ grievance.last_updated|time:"g:i A" }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="list-group-item border-0 py-3">
+          <div class="activity-item">
+            <div class="d-flex">
+              <div class="flex-shrink-0 text-muted me-3">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <div>
+                <p class="mb-1">{% trans "No recent activity found" %}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Complaints Section -->
+<section class="mb-5 d-none" id="complaintsSection">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+    <h2 class="h4 fw-bold mb-3 mb-md-0 text-indigo"><i class="fas fa-file-alt me-2 text-accent"></i>{% trans "My Complaints" %}</h2>
+    <div class="d-flex flex-column flex-sm-row gap-3 w-100 w-md-auto">
+      <select id="statusFilter" class="form-select form-select-sm shadow-sm">
+        <option value="all">{% trans "All Statuses" %}</option>
+        <option value="Pending">{% trans "Pending" %}</option>
+        <option value="In Progress">{% trans "In Progress" %}</option>
+        <option value="Resolved">{% trans "Resolved" %}</option>
+      </select>
+      <button class="btn btn-sm btn-primary-custom shadow-sm d-flex align-items-center justify-content-center">
+        <i class="fas fa-download me-2"></i> {% trans "Export" %}
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-lg-center">
-          <li class="nav-item">
-            <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#"><i class="fas fa-user me-1"></i> Profile</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell me-1"></i>
-              <span class="position-relative">
-                Notifications
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
-                  2
-                </span>
+    </div>
+  </div>
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">{% trans "ID" %}</th>
+            <th>{% trans "Title" %}</th>
+            <th>{% trans "Department" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th class="pe-4">{% trans "Actions" %}</th>
+          </tr>
+        </thead>
+        <tbody id="complaintsTableBody">
+          {% for grievance in grievances %}
+          <tr>
+            <td class="ps-4">{{ grievance.grievance_id }}</td>
+            <td>{{ grievance.subject }}</td>
+            <td>{{ grievance.department.name }}</td>
+            <td>
+              <span class="badge 
+                {% if grievance.status == 'PENDING' %}status-badge-pending
+                {% elif grievance.status == 'IN_PROGRESS' %}status-badge-progress
+                {% elif grievance.status == 'RESOLVED' %}status-badge-resolved
+                {% else %}bg-secondary{% endif %}">
+                {{ grievance.get_status_display }}
               </span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
-              <li><h6 class="dropdown-header"><i class="fas fa-bell me-2"></i>Notifications</h6></li>
-              <li>
-                <a class="dropdown-item" href="#">
-                  <div class="d-flex">
-                    <div class="flex-shrink-0 text-primary me-3">
-                      <i class="fas fa-road"></i>
-                    </div>
-                    <div>
-                      <p class="mb-0">Your complaint (ID: 1) is now In Progress</p>
-                      <small class="text-muted">Yesterday at 2:45 PM</small>
-                    </div>
-                  </div>
+            </td>
+            <td class="pe-4">
+              <div class="d-flex gap-2">
+                <a href="{% url 'public_user:view_grievances' %}" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-eye"></i>
                 </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="#">
-                  <div class="d-flex">
-                    <div class="flex-shrink-0 text-success me-3">
-                      <i class="fas fa-check"></i>
-                    </div>
-                    <div>
-                      <p class="mb-0">Complaint (ID: 3) has been resolved</p>
-                      <small class="text-muted">2 days ago at 10:30 AM</small>
-                    </div>
-                  </div>
-                </a>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-center text-primary" href="#">View All Notifications</a></li>
-            </ul>
+                <button class="btn btn-sm btn-outline-secondary">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center py-4">{% trans "No complaints found" %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer bg-light d-flex flex-column flex-md-row justify-content-between align-items-center">
+      <div class="small text-muted mb-2 mb-md-0">{% blocktrans %}Showing 1 to 3 of 12 complaints{% endblocktrans %}</div>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">{% trans "Previous" %}</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#"><i class="fas fa-question-circle me-1"></i> Help</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item">
+            <a class="page-link" href="#">{% trans "Next" %}</a>
           </li>
         </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main Content -->
-  <main class="container py-4">
-    <!-- Welcome Section -->
-    <section class="mb-5">
-      <div class="welcome-banner p-4 p-md-5 d-flex flex-column flex-md-row align-items-center">
-        <div class="flex-grow-1 mb-4 mb-md-0">
-        <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
-          <p class="mb-4 opacity-90">Track your grievances with Kerala Government departments</p>
-          <!-- Replace the static stats with dynamic ones -->
-<div class="d-flex flex-wrap gap-3">
-  <div class="stat-card">
-    <p class="small mb-1">Total Complaints</p>
-    <p class="h4 fw-bold mb-0">{{ status_counts.total }}</p>
-  </div>
-  <div class="stat-card">
-    <p class="small mb-1">Pending</p>
-    <p class="h4 fw-bold mb-0">{{ status_counts.pending }}</p>
-  </div>
-  <div class="stat-card">
-    <p class="small mb-1">In Progress</p>
-    <p class="h4 fw-bold mb-0">{{ status_counts.in_progress }}</p>
-  </div>
-  <div class="stat-card">
-    <p class="small mb-1">Resolved</p>
-    <p class="h4 fw-bold mb-0">{{ status_counts.resolved }}</p>
-  </div>
-</div>
-        </div>
-        <div class="text-center text-md-end">
-          <img src="{% static 'images/grivence.jpg' %}" alt="Kerala Grivence" class="img-fluid" style="max-height: 250px;">
-        </div>
-      </div>
-    </section>
-
-    <!-- Quick Actions -->
-    <section class="mb-5">
-      <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-bolt me-2 text-accent"></i>Quick Actions</h2>
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-3">
-          <a href="{% url 'public_user:submit_complaint' %}" class="quick-action-card text-decoration-none p-4 d-block">
-            <div class="d-flex align-items-center">
-              <div class="action-icon me-3">
-                <i class="fas fa-plus"></i>
-              </div>
-              <div>
-                <h3 class="h6 fw-bold mb-1 text-dark">Submit New Complaint</h3>
-                <p class="small text-muted mb-0">File a new grievance or request</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <a href="{% url 'public_user:view_grievances' %}" class="quick-action-card text-decoration-none p-4 d-block">
-            <div class="d-flex align-items-center">
-              <div class="action-icon me-3">
-                <i class="fas fa-list"></i>
-              </div>
-              <div>
-                <h3 class="h6 fw-bold mb-1 text-dark">View My Complaints</h3>
-                <p class="small text-muted mb-0">View and manage your complaints</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <a href="{% url 'public_user:help' %}" class="quick-action-card text-decoration-none p-4 d-block">
-            <div class="d-flex align-items-center">
-              <div class="action-icon me-3">
-                <i class="fas fa-question"></i>
-              </div>
-              <div>
-                <h3 class="h6 fw-bold mb-1 text-dark">Get Help</h3>
-                <p class="small text-muted mb-0">Find answers to common questions</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col-md-6 col-lg-3">
-          <a href="{% url 'public_user:account_settings' %}" class="quick-action-card text-decoration-none p-4 d-block">
-            <div class="d-flex align-items-center">
-              <div class="action-icon me-3">
-                <i class="fas fa-user-cog"></i>
-              </div>
-              <div>
-                <h3 class="h6 fw-bold mb-1 text-dark">Account Settings</h3>
-                <p class="small text-muted mb-0">Update your profile</p>
-              </div>
-            </div>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Recent Activity Section -->
-    <section class="mb-5">
-      <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-clock-rotate-left me-2 text-accent"></i>Recent Activity</h2>
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-          <h3 class="h6 mb-0">Latest Updates on Your Complaints</h3>
-          <a href="#" class="small text-primary">View All</a>
-        </div>
-        <div class="card-body p-0">
-         <div class="list-group list-group-flush">
-  {% for grievance in grievances|slice:":3" %}
-  <div class="list-group-item border-0 py-3">
-    <div class="activity-item">
-      <div class="d-flex">
-        <div class="flex-shrink-0 
-          {% if grievance.status == 'RESOLVED' %}text-success
-          {% elif grievance.status == 'IN_PROGRESS' %}text-primary
-          {% else %}text-warning{% endif %} me-3">
-          <i class="fas 
-            {% if grievance.status == 'RESOLVED' %}fa-check
-            {% elif grievance.status == 'IN_PROGRESS' %}fa-road
-            {% else %}fa-exclamation{% endif %}"></i>
-        </div>
-        <div>
-          <p class="mb-1">Your complaint <strong>"{{ grievance.subject }}"</strong> 
-            {% if grievance.status == 'RESOLVED' %}has been resolved
-            {% elif grievance.status == 'IN_PROGRESS' %}is now in progress
-            {% else %}is pending review{% endif %}.</p>
-          <small class="text-muted">{{ grievance.last_updated|date:"F j, Y" }} at {{ grievance.last_updated|time:"g:i A" }}</small>
-        </div>
-      </div>
+      </nav>
     </div>
   </div>
-  {% empty %}
-  <div class="list-group-item border-0 py-3">
-    <div class="activity-item">
-      <div class="d-flex">
-        <div class="flex-shrink-0 text-muted me-3">
-          <i class="fas fa-info-circle"></i>
-        </div>
-        <div>
-          <p class="mb-1">No recent activity found</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-        </div>
-      </div>
-    </section>
+</section>
 
-    <!-- Complaints Section -->
-    <section class="mb-5 d-none" id="complaintsSection">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-        <h2 class="h4 fw-bold mb-3 mb-md-0 text-indigo"><i class="fas fa-file-alt me-2 text-accent"></i>My Complaints</h2>
-        <div class="d-flex flex-column flex-sm-row gap-3 w-100 w-md-auto">
-          <select id="statusFilter" class="form-select form-select-sm shadow-sm">
-            <option value="all">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
-          </select>
-          <button class="btn btn-sm btn-primary-custom shadow-sm d-flex align-items-center justify-content-center">
-            <i class="fas fa-download me-2"></i> Export
+<!-- Complaint Details Modal -->
+
+<!-- Edit Complaint Modal -->
+<div class="modal fade" id="editComplaintModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{% trans "Edit Complaint" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editComplaintForm">
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <label for="editComplaintId" class="form-label">{% trans "Complaint ID" %}</label>
+              <input type="text" class="form-control" id="editComplaintId" readonly>
+            </div>
+            <div class="col-md-6">
+              <label for="editDept" class="form-label">{% trans "Department" %}</label>
+              <select class="form-select" id="editDept" required>
+                <option value="">{% trans "Select Department" %}</option>
+                <option value="Health">{% trans "Health Department" %}</option>
+                <option value="Education">{% trans "Education Department" %}</option>
+                <option value="Transport">{% trans "Transport Department" %}</option>
+                <option value="Revenue">{% trans "Revenue Department" %}</option>
+                <option value="Public Works">{% trans "Public Works Department" %}</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editTitle" class="form-label">{% trans "Title" %}</label>
+            <input type="text" class="form-control" id="editTitle" required>
+          </div>
+          <div class="mb-3">
+            <label for="editLocation" class="form-label">{% trans "Location" %}</label>
+            <input type="text" class="form-control" id="editLocation" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDesc" class="form-label">{% trans "Description" %}</label>
+            <textarea class="form-control" id="editDesc" rows="5" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i> {% trans "Update Complaint" %}
           </button>
         </div>
-      </div>
-      <div class="card border-0 shadow-sm">
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              <tr>
-                <th class="ps-4">ID</th>
-                <th>Title</th>
-                <th>Department</th>
-                <th>Status</th>
-                <th class="pe-4">Actions</th>
-              </tr>
-            </thead>
-          <tbody id="complaintsTableBody">
-  {% for grievance in grievances %}
-  <tr>
-    <td class="ps-4">{{ grievance.grievance_id }}</td>
-    <td>{{ grievance.subject }}</td>
-    <td>{{ grievance.department.name }}</td>
-    <td>
-      <span class="badge 
-        {% if grievance.status == 'PENDING' %}status-badge-pending
-        {% elif grievance.status == 'IN_PROGRESS' %}status-badge-progress
-        {% elif grievance.status == 'RESOLVED' %}status-badge-resolved
-        {% else %}bg-secondary{% endif %}">
-        {{ grievance.get_status_display }}
-      </span>
-    </td>
-    <td class="pe-4">
-      <div class="d-flex gap-2">
-        <a href="{% url 'public_user:view_grievances' %}" class="btn btn-sm btn-outline-primary">
-          <i class="fas fa-eye"></i>
-        </a>
-        <button class="btn btn-sm btn-outline-secondary">
-          <i class="fas fa-edit"></i>
-        </button>
-      </div>
-    </td>
-  </tr>
-  {% empty %}
-  <tr>
-    <td colspan="5" class="text-center py-4">No complaints found</td>
-  </tr>
-  {% endfor %}
-</tbody>
-          </table>
-        </div>
-        <div class="card-footer bg-light d-flex flex-column flex-md-row justify-content-between  align-items-center">
-          <div class="small text-muted mb-2 mb-md-0">Showing 1 to 3 of 12 complaints</div>
-          <nav>
-            <ul class="pagination pagination-sm mb-0">
-              <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1">Previous</a>
-              </li>
-              <li class="page-item active"><a class="page-link" href="#">1</a></li>
-              <li class="page-item"><a class="page-link" href="#">2</a></li>
-              <li class="page-item"><a class="page-link" href="#">3</a></li>
-              <li class="page-item">
-                <a class="page-link" href="#">Next</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
-    </section>
-
-    <!-- Complaint Details Modal -->
-  
-    <!-- Edit Complaint Modal -->
-    <div class="modal fade" id="editComplaintModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Edit Complaint</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form id="editComplaintForm">
-            <div class="modal-body">
-              <div class="row mb-3">
-                <div class="col-md-6 mb-3 mb-md-0">
-                  <label for="editComplaintId" class="form-label">Complaint ID</label>
-                  <input type="text" class="form-control" id="editComplaintId" readonly>
-                </div>
-                <div class="col-md-6">
-                  <label for="editDept" class="form-label">Department</label>
-                  <select class="form-select" id="editDept" required>
-                    <option value="">Select Department</option>
-                    <option value="Health">Health Department</option>
-                    <option value="Education">Education Department</option>
-                    <option value="Transport">Transport Department</option>
-                    <option value="Revenue">Revenue Department</option>
-                    <option value="Public Works">Public Works Department</option>
-                  </select>
-                </div>
-              </div>
-              <div class="mb-3">
-                <label for="editTitle" class="form-label">Title</label>
-                <input type="text" class="form-control" id="editTitle" required>
-              </div>
-              <div class="mb-3">
-                <label for="editLocation" class="form-label">Location</label>
-                <input type="text" class="form-control" id="editLocation" required>
-              </div>
-              <div class="mb-3">
-                <label for="editDesc" class="form-label">Description</label>
-                <textarea class="form-control" id="editDesc" rows="5" required></textarea>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save me-2"></i> Update Complaint
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+      </form>
     </div>
-  </main>
+  </div>
+</div>
+{% endblock %}
 
-  <!-- Footer -->
-  <footer class="footer-custom py-5 mt-5">
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-lg-4">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Emblem_of_Kerala.svg/1200px-Emblem_of_Kerala.svg.png" alt="Kerala Government Logo" class="kerala-logo mb-3">
-          <p class="small text-white-50">A platform for citizens to raise concerns and track their resolution with Kerala Government departments.</p>
-        </div>
-        <div class="col-lg-2 col-md-4">
-          <h5 class="h6 text-white mb-3">Quick Links</h5>
-          <ul class="list-unstyled footer-links">
-            <li class="mb-2"><a href="#">Home</a></li>
-            <li class="mb-2"><a href="#">Submit Complaint</a></li>
-            <li class="mb-2"><a href="#">Track Status</a></li>
-            <li class="mb-2"><a href="#">FAQs</a></li>
-          </ul>
-        </div>
-        <div class="col-lg-2 col-md-4">
-          <h5 class="h6 text-white mb-3">Departments</h5>
-          <ul class="list-unstyled footer-links">
-            <li class="mb-2"><a href="#">Public Works</a></li>
-            <li class="mb-2"><a href="#">Health</a></li>
-            <li class="mb-2"><a href="#">Education</a></li>
-            <li class="mb-2"><a href="#">Revenue</a></li>
-          </ul>
-        </div>
-        <div class="col-lg-4 col-md-4">
-          <h5 class="h6 text-white mb-3">Contact Us</h5>
-          <ul class="list-unstyled footer-links">
-            <li class="mb-2"><i class="fas fa-envelope me-2"></i> grievances@kerala.gov.in</li>
-            <li class="mb-2"><i class="fas fa-phone me-2"></i> 0471-2345678</li>
-            <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Thiruvananthapuram, Kerala</li>
-          </ul>
-        </div>
-      </div>
-      <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
-      <div class="text-center small text-white-50">
-        <p>© 2025 Government of Kerala. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+{% block extra_js %}
+<script>
 document.addEventListener('DOMContentLoaded', function() {
   // Show/hide complaints section
   document.getElementById('viewAllComplaints').addEventListener('click', function() {
@@ -599,5 +438,4 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-</body>
-</html>
+{% endblock %}
