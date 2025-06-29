@@ -28,3 +28,5 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+        env:
+          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
