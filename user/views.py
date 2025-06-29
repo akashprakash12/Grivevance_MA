@@ -19,21 +19,28 @@ from django.urls import reverse
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
+
 def create_public_user(request):
     if request.method == 'POST':
         user_form = PublicUserForm(request.POST)
         profile_form = PublicUserProfileForm(request.POST)
         if user_form.is_valid() and profile_form.is_valid():
             try:
+                password = user_form.cleaned_data['password']
                 user = user_form.save(commit=False)
-                user.user_type = 'PUBLIC'
+                user.set_password(password)
+                user.user_type = 'PUBLIC'  # Consistent with other parts of your code
+                user.is_active = True
+                user.date_joined = timezone.now()
                 user.save()
+
                 profile = profile_form.save(commit=False)
                 profile.user = user
                 profile.save()
+
                 messages.success(request, f"Public user '{user.username}' created successfully.")
-                return redirect('public_user:user_dashboard')
-            except IntegrityError as e:
+                return redirect('public_user:user_dashboard')  # Or 'view_public_users' if you prefer
+            except Exception as e:
                 messages.error(request, f"Error: {str(e)}")
     else:
         user_form = PublicUserForm()

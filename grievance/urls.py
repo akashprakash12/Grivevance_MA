@@ -24,19 +24,19 @@ from django.views.i18n import set_language
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin_app/', include('admin_app.urls')),
-    path('officer/', include('officer.urls')),       # ✅ Included once
+    path('officer/', include('officer.urls')),
     path('collector/', include('collector.urls')),
     path('', include('accounts.urls')),
     path('core/', include('core_app.urls')),
-    path('public_user/', include('user.urls', namespace='public_user')),  # ✅ correct
+    path('public_user/', include('user.urls', namespace='public_user')),
     path('grievance/', include('grievance_app.urls')),
     path('facebook/', include('posts.urls')),
-    path('hod/', include('hod.urls',namespace='hod')),
+    path('district_officer/', include('district_officer.urls')),
+    path('hod/', include('hod.urls', namespace='hod')),
     path('i18n/', include('django.conf.urls.i18n')),
     path('set-language/', set_language, name='set_language'),
-    
-
 ]
+
 # Serve media files during development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,7 +1,11 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-.env
-facebook_realtime.log
+*.py[cod]
+
+# Django media and log files
+media/
 *.log
 -e "*.pyc\n__pycache__/" 
 locale/*/LC_MESSAGES/*.mo
+*.json
+
