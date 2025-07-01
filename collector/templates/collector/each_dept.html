@@ -269,13 +269,11 @@
     <div class="report-container">
       <!-- Action Buttons -->
       <div class="action-buttons">
-        <a href="" class="btn btn-success">
+        <a href="{% url 'officer:create_officer_collector' %}" class="btn btn-success">
           <i class="fas fa-user-plus me-1"></i> Create Officer
         </a>
-        <a href="" class="btn btn-warning">
-          <i class="fas fa-users-cog me-1"></i> Update Officers
-        </a>
-        <a href="" class="btn btn-info">
+        
+        <a href="{% url 'core:department_update' department.code %}" class="btn btn-info">
           <i class="fas fa-edit me-1"></i> Update Department
         </a>
       </div>
@@ -329,6 +327,10 @@
           </div>
 
           <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
+            <a href="{% url 'collector:export_department_grievances_excel' department.code %}?{{ request.GET.urlencode }}" 
+   class="btn btn-success">
+   <i class="fas fa-file-excel"></i> Export Excel
+</a>
             <a href="{% url 'collector:department_grievances_download' department.code %}" class="btn btn-danger">
               <i class="fas fa-file-pdf me-1"></i> Export PDF
             </a>

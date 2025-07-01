@@ -7,3 +7,26 @@ media/
 *.log
 *.json
 env.txt
+-e "*.pyc\n__pycache__/" 
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# macOS system files
+.DS_Store
+
+# VS Code settings (optional)
+.vscode/
+
+# Migrations __pycache__ (handled by the general __pycache__/ rule)
+
