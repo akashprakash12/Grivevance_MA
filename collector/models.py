@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from officer.models import OfficerProfile
+from core_app.models import Department
 
 from user.models import User
 from core_app.models import District
@@ -98,3 +100,35 @@ class CollectorProfile(models.Model):
     def __str__(self):
         status = "Active" if self.is_active else "Handovered"
         return f"Collector of {self.district} ({status})"
+
+
+#for collector order
+# # models.py
+
+class CollectorOrder(models.Model):
+    title = models.CharField(max_length=150)
+    remark = models.TextField()
+    departments = models.ManyToManyField(Department, related_name='collector_orders')
+    attachment = models.FileField(upload_to='admin_orders/', null=True, blank=True)
+    due_date = models.DateField()
+    assigned_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "collector_order"
+
+    def __str__(self):
+        return f"{self.title} (Due: {self.due_date})"
+
+
+class CollectorOrderAssignment(models.Model):
+    order = models.ForeignKey(CollectorOrder, on_delete=models.CASCADE, related_name="assignments")
+    officer = models.ForeignKey(OfficerProfile, on_delete=models.CASCADE)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "collector_order_assignment"
+        unique_together = ('order', 'officer')
+
+    def __str__(self):
+        return f"{self.officer} assigned to {self.order}"

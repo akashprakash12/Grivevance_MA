@@ -1,6 +1,23 @@
+# Byte-compiled / cache files
 __pycache__/
+*.py[cod]
 *.pyc
+
+# Virtual environment
+.venv/
+
+# Environment variables
 .env
-facebook_realtime.log
+
+# Logs
 *.log
--e "*.pyc\n__pycache__/" 
+facebook_realtime.log
+
+# macOS system files
+.DS_Store
+
+# VS Code settings (optional)
+.vscode/
+
+# Ignore files with -e prefix (not usually necessary, but kept if you use it)
+-e "*.pyc\n__pycache__/"

@@ -9,6 +9,7 @@ import string
 import smtplib
 import secrets
 import csv
+from io import BytesIO  #
 from pathlib import Path
 from urllib.parse import quote
 from email.mime.text import MIMEText
@@ -18,7 +19,13 @@ import pandas as pd
 import openpyxl  # Required for Excel export
 from fpdf import FPDF
 from pathlib import Path
+from django.http import JsonResponse
+from .forms import AdministrativeOrderForm
+from .models import CollectorOrder, CollectorOrderAssignment
+from openpyxl.utils import get_column_letter  # Add this import at the top
 
+from openpyxl import Workbook
+from openpyxl.styles import Font
 # Django imports
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden, FileResponse, HttpResponseRedirect
@@ -493,7 +500,7 @@ def department_card_view(request, department_id):
     )
     district    = collector.district
     department  = get_object_or_404(Department, code=department_id)
-
+    
     # ---------- filters from request ----------
     status_filter = request.GET.get("status", "ALL")
     date_from     = request.GET.get("date_from")
@@ -1235,6 +1242,94 @@ def department_grievances_download(request, department_id):
         print(f"Error in PDF generation: {str(e)}")
         return HttpResponse(f"An error occurred while generating the PDF: {str(e)}", status=500)
 
+@login_required
+def export_department_grievances_excel(request, department_id):
+    """
+    Export department grievances to Excel with filters preserved
+    """
+    try:
+        # 1. Get collector and validate department ownership
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        department = get_object_or_404(Department, code=department_id, district=collector.district)
+        
+        # 2. Apply filters (same as department_card_view)
+        grievances = Grievance.objects.filter(
+            district=collector.district,
+            department=department
+        ).select_related('department')
+        
+        status_filter = request.GET.get("status", "ALL")
+        if status_filter != "ALL":
+            grievances = grievances.filter(status=status_filter)
+            
+        date_from = request.GET.get("date_from")
+        date_to = request.GET.get("date_to")
+        if date_from:
+            grievances = grievances.filter(date_filed__gte=date_from)
+        if date_to:
+            grievances = grievances.filter(date_filed__lte=date_to)
+            
+        search_query = request.GET.get("search", "").strip()
+        if search_query:
+            grievances = grievances.filter(
+                Q(grievance_id__icontains=search_query) |
+                Q(contact_number__icontains=search_query)
+            )
+            
+        # 3. Create Excel workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Grievances"
+        
+        # Headers
+        headers = [
+            "Grievance ID", "Date Filed", "Status", "Priority",
+            "Applicant Name", "Contact", "Address", "Subject", 
+            "Description", "Due Date", "Last Updated"
+        ]
+        ws.append(headers)
+        
+        # Data rows
+        for grievance in grievances:
+            ws.append([
+                grievance.grievance_id,
+                grievance.date_filed.strftime('%Y-%m-%d %H:%M') if grievance.date_filed else "",
+                grievance.get_status_display(),
+                grievance.get_priority_display(),
+                grievance.applicant_name,
+                grievance.contact_number,
+                grievance.applicant_address,
+                grievance.subject,
+                grievance.description,
+                grievance.due_date.strftime('%Y-%m-%d') if grievance.due_date else "",
+                grievance.last_updated.strftime('%Y-%m-%d %H:%M') if grievance.last_updated else "",
+            ])
+        
+        # Style headers
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+        
+        # Column widths
+        column_widths = [18, 16, 12, 12, 25, 15, 30, 30, 50, 12, 16]
+        for i, width in enumerate(column_widths, 1):
+            ws.column_dimensions[get_column_letter(i)].width = width
+            
+        # 4. Return the file
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        filename = f"{department.code}_grievances_{timezone.now().strftime('%Y%m%d')}.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Failed to generate Excel: {str(e)}")
+        return redirect('collector:department_card', department_id=department_id)
 ### ------------------------- ###
 ###  Communication Views      ###
 ### ------------------------- ###
@@ -1748,3 +1843,153 @@ def collector_reset_password(request):
             return redirect("accounts:login")
 
     return render(request, "collector/reset_password.html")    
+
+
+
+
+# @login_required
+# def create_collector_order(request):
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         district = collector.district
+#     except CollectorProfile.DoesNotExist:
+#         return redirect("collector:collector_dashboard")
+
+#     departments = Department.objects.filter(district=district).order_by('name')
+
+#     if request.method == "POST":
+#         form = AdministrativeOrderForm(request.POST, request.FILES, user=request.user)
+#         if form.is_valid():
+#             order = form.save(commit=False)
+#             order.assigned_by = request.user
+#             order.created_at = timezone.now()
+
+#             if not order.assigned_officer:
+#                 selected_depts = form.cleaned_data['departments']
+#                 hods = OfficerProfile.objects.filter(department__in=selected_depts, is_hod=True)
+#                 if hods.exists():
+#                     order.assigned_officer = hods.first()
+
+#             order.save()
+#             form.save_m2m()
+#             return redirect("collector:collector_dashboard")
+#     else:
+#         form = AdministrativeOrderForm(user=request.user)
+
+#     return render(request, "collector/create_order.html", {"form": form, "departments": departments})
+
+
+# @login_required
+# def get_officers_by_department(request):
+#     dept_ids = request.GET.getlist('dept_ids[]')
+#     officers = OfficerProfile.objects.filter(
+#         department_id__in=dept_ids, is_hod=True
+#     ).select_related('user', 'department')
+
+#     officer_list = [
+#         {
+#             "id": officer.id,
+#             "name": f"{officer.user.first_name} {officer.user.last_name} ({officer.department.name})"
+#         }
+#         for officer in officers
+#     ]
+#     return JsonResponse({"officers": officer_list})
+
+
+
+
+
+
+
+#for collector ordering
+
+
+# @login_required
+# def create_collector_order(request):
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         district = collector.district
+#     except CollectorProfile.DoesNotExist:
+#         return redirect("collector:collector_dashboard")
+
+#     departments = Department.objects.filter(district=district).order_by("name")
+
+#     if request.method == "POST":
+#         title = request.POST.get("title")
+#         remark = request.POST.get("remark")
+#         due_date = request.POST.get("due_date")
+#         attachment = request.FILES.get("attachment")
+
+#         # Validate required fields
+#         if not (title and remark and due_date and request.POST.getlist("departments[]")):
+#             return render(
+#                 request,
+#                 "collector/create_order.html",
+#                 {
+#                     "departments": departments,
+#                     "error": "All required fields must be filled, and at least one department must be selected."
+#                 }
+#             )
+
+#         # Create the order
+#         order = CollectorOrder.objects.create(
+#             title=title,
+#             remark=remark,
+#             due_date=due_date,
+#             attachment=attachment,
+#             assigned_by=request.user,
+#             created_at=timezone.now()
+#         )
+
+#         # Process departments and officers
+#         dept_ids = request.POST.getlist("departments[]")
+#         officer_ids = request.POST.getlist("officers[]")
+
+#         for dept_id in dept_ids:
+#             try:
+#                 department = Department.objects.get(code=dept_id, district=district)
+#                 order.departments.add(department)
+
+#                 # If no officers selected, assign to HOD
+#                 if not officer_ids:
+#                     try:
+#                         hod = OfficerProfile.objects.get(department=department, is_hod=True)
+#                         CollectorOrderAssignment.objects.create(order=order, officer=hod)
+#                     except OfficerProfile.DoesNotExist:
+#                         # Skip if no HOD exists for the department
+#                         continue
+#                 else:
+#                     # Assign to selected officers
+#                     for officer_id in officer_ids:
+#                         try:
+#                             officer = OfficerProfile.objects.get(id=officer_id, department__district=district)
+#                             CollectorOrderAssignment.objects.create(order=order, officer=officer)
+#                         except OfficerProfile.DoesNotExist:
+#                             continue  # Skip invalid officer IDs
+#             except Department.DoesNotExist:
+#                 continue  # Skip invalid department IDs
+
+#         return redirect("collector:collector_dashboard")
+
+#     return render(request, "collector/create_order.html", {"departments": departments})
+
+# @login_required
+# def get_officers_by_department(request):
+#     dept_ids = request.GET.getlist('dept_ids[]')
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         officers = OfficerProfile.objects.filter(
+#             department__code__in=dept_ids,
+#             department__district=collector.district
+#         ).select_related('user', 'department')
+
+#         officer_list = [
+#             {
+#                 "id": officer.id,
+#                 "name": f"{officer.user.first_name} {officer.user.last_name} ({officer.department.name})"
+#             }
+#             for officer in officers
+#         ]
+#         return JsonResponse({"officers": officer_list})
+#     except CollectorProfile.DoesNotExist:
+#         return JsonResponse({"officers": []}, status=403)

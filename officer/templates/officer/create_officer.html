@@ -1,8 +1,30 @@
 <form method="post">
-    {% csrf_token %}
-    {{ user.as_p }}
-    {{ user_profile.as_p }}
-    <button type="submit">Save</button>
-    {% for msg in messages %}<p>{{ msg }}</p>{% endfor %}
-  </form>
-  
+  {% csrf_token %}
+
+  {% if departments %}
+    <div class="mb-3">
+      <label for="department_id" class="form-label">Select Department</label>
+      <select name="department_id" class="form-select" required>
+        <option value="">-- Choose --</option>
+        {% for dept in departments %}
+          <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+        {% endfor %}
+      </select>
+    </div>
+  {% endif %}
+
+  <!-- Officer Form Fields -->
+  {% for field in user %}
+    <div class="mb-3">
+      <label class="form-label">{{ field.label }}</label>
+      {{ field }}
+    </div>
+  {% endfor %}
+
+  <div class="form-check">
+    <input type="checkbox" class="form-check-input" name="is_hod" id="is_hod">
+    <label for="is_hod" class="form-check-label">Assign as HOD</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary mt-3">Create Officer</button>
+</form>
