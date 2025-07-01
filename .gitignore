@@ -8,9 +8,6 @@ media/
 *.json
 env.txt
 -e "*.pyc\n__pycache__/" 
-# Byte-compiled / cache files
-__pycache__/
-*.py[cod]
 *.pyc
 
 # Virtual environment
