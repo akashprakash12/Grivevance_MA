@@ -23,6 +23,3 @@ media/
 
 # VS Code settings
 .vscode/
-
-# Ignore files with -e prefix (legacy/edge case)
--e "*.pyc\n__pycache__/"
