@@ -1,4 +1,10 @@
-# Byte-compiled / cache / optimized files
+__pycache__/
+*.pyc
+.env
+facebook_realtime.log
+*.log
+-e "*.pyc\n__pycache__/" 
+# Byte-compiled / cache files
 __pycache__/
 *.py[cod]
 *.pyc
@@ -8,18 +14,15 @@ __pycache__/
 
 # Environment variables
 .env
-env.txt
 
-# Logs and JSON data
+# Logs
 *.log
-*.json
-facebook_realtime.log
-
-# Django media
-media/
 
 # macOS system files
 .DS_Store
 
-# VS Code settings
+# VS Code settings (optional)
 .vscode/
+
+# Migrations __pycache__ (handled by the general __pycache__/ rule)
+
