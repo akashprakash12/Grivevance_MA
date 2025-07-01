@@ -1,4 +1,4 @@
-# Byte-compiled / cache files
+# Byte-compiled / cache / optimized files
 __pycache__/
 *.py[cod]
 *.pyc
@@ -8,16 +8,21 @@ __pycache__/
 
 # Environment variables
 .env
+env.txt
 
-# Logs
+# Logs and JSON data
 *.log
+*.json
 facebook_realtime.log
+
+# Django media
+media/
 
 # macOS system files
 .DS_Store
 
-# VS Code settings (optional)
+# VS Code settings
 .vscode/
 
-# Ignore files with -e prefix (not usually necessary, but kept if you use it)
+# Ignore files with -e prefix (legacy/edge case)
 -e "*.pyc\n__pycache__/"
