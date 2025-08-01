@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-@emnqx!c)bn+cj1u=mi2_^v#_mf#1*l70mr6g23n79t+t^p%36
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'expert-lizard-vastly.ngrok-free.app']
 
 
 # Application definition
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'accounts',
     'core_app',
     'posts',
+    'whatsapp',
     'hod'
 
 
@@ -126,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'  # Replace with your desired time zone
 
 USE_I18N = True
 
@@ -148,3 +150,11 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 FB_ACCESS_TOKEN = config('FB_ACCESS_TOKEN')
 FB_PAGE_ID = config('FB_PAGE_ID')
+
+# Add these settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# File upload settings
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB

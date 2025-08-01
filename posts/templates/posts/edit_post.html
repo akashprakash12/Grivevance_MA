@@ -4,137 +4,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit Complaint</title>
+  <title>Edit Post</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --indigo: #002855;
-      --indigo-light: #08438f;
-      --accent: #ffc107;
-      --bg: #f4f6f9;
-      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+      --fb-blue: #1877f2;
+      --fb-blue-dark: #166fe5;
+      --fb-green: #42b72a;
+      --fb-green-dark: #36a420;
+      --fb-bg: #f0f2f5;
+      --fb-card-bg: #ffffff;
+      --fb-text-primary: #050505;
+      --fb-text-secondary: #65676b;
+      --fb-divider: #ced0d4;
     }
     
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
+      font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--fb-bg);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 20px;
+      color: var(--fb-text-primary);
     }
     
     .edit-container {
       width: 100%;
       max-width: 700px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: var(--card-shadow);
-      padding: 30px;
-      border-left: 5px solid var(--accent);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .edit-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 5px;
-      width: 100%;
-      background: linear-gradient(to right, var(--accent), transparent 80%);
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
+      background: var(--fb-card-bg);
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin: 0 auto;
+      border: 1px solid var(--fb-divider);
     }
     
     .header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--fb-divider);
     }
     
     .header-icon {
-      font-size: 2.5rem;
-      color: var(--accent);
-      margin-bottom: 15px;
+      font-size: 2rem;
+      color: var(--fb-blue);
+      margin-bottom: 10px;
     }
     
     .header h1 {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 600;
-      color: var(--indigo);
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
     
     .header p {
-      color: #6c757d;
+      color: var(--fb-text-secondary);
       font-size: 14px;
     }
     
     .alert-danger {
-      background-color: rgba(220, 53, 69, 0.1);
-      color: #dc3545;
+      background-color: #fff4e6;
+      color: #cc3300;
       border: none;
-      border-radius: 8px;
-      padding: 12px 15px;
-      margin-bottom: 25px;
+      border-radius: 6px;
+      padding: 10px 15px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
+      font-size: 14px;
+    }
+
+    .alert-warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
     }
     
-    .alert-danger i {
+    .alert-danger i,
+    .alert-warning i {
       margin-right: 10px;
-      font-size: 1.2rem;
+      font-size: 1rem;
     }
     
     .form-label {
-      font-weight: 500;
-      color: var(--indigo);
+      font-weight: 600;
       margin-bottom: 8px;
+      font-size: 15px;
     }
     
     .form-control {
-      border-radius: 8px;
-      padding: 12px 15px;
-      border: 1px solid #dee2e6;
-      transition: all 0.3s;
-      min-height: 150px;
+      border-radius: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--fb-divider);
+      transition: all 0.2s;
+      min-height: 120px;
+      font-size: 15px;
     }
     
     .form-control:focus {
-      border-color: var(--indigo-light);
-      box-shadow: 0 0 0 0.25rem rgba(0, 40, 85, 0.25);
+      border-color: var(--fb-blue);
+      box-shadow: 0 0 0 2px #e7f3ff;
     }
     
     .form-text {
       font-size: 13px;
-      color: #6c757d;
+      color: var(--fb-text-secondary);
       margin-top: 5px;
+    }
+    
+    .time-input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .time-input {
+      width: 100px;
+    }
+    
+    .time-unit {
+      color: var(--fb-text-secondary);
+      font-size: 14px;
     }
     
     .button-group {
       display: flex;
-      gap: 15px;
-      margin-top: 30px;
-      flex-direction: column;
-    }
-    
-    @media (min-width: 576px) {
-      .button-group {
-        flex-direction: row;
-      }
+      gap: 10px;
+      margin-top: 20px;
     }
     
     .btn {
       flex: 1;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 500;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 600;
       font-size: 15px;
-      transition: all 0.3s;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -142,41 +154,38 @@
     }
     
     .btn-primary {
-      background-color: var(--indigo);
-      border-color: var(--indigo);
+      background-color: var(--fb-blue);
+      border-color: var(--fb-blue);
     }
     
     .btn-primary:hover {
-      background-color: var(--indigo-light);
-      border-color: var(--indigo-light);
-      transform: translateY(-2px);
-      box-shadow: var(--card-shadow-hover);
+      background-color: var(--fb-blue-dark);
+      border-color: var(--fb-blue-dark);
     }
     
     .btn-outline-secondary {
-      color: var(--indigo);
-      border-color: #dee2e6;
+      color: var(--fb-text-primary);
+      border-color: var(--fb-divider);
+      background-color: #f0f2f5;
     }
     
     .btn-outline-secondary:hover {
-      background-color: #f8f9fa;
-      border-color: #dee2e6;
-      transform: translateY(-2px);
+      background-color: #e4e6eb;
+      border-color: var(--fb-divider);
     }
     
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      font-size: 13px;
-      color: #6c757d;
+    .current-media {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--fb-text-secondary);
     }
     
-    .footer a {
-      color: var(--indigo-light);
+    .current-media a {
+      color: var(--fb-blue);
       text-decoration: none;
     }
     
-    .footer a:hover {
+    .current-media a:hover {
       text-decoration: underline;
     }
   </style>
@@ -187,8 +196,8 @@
       <div class="header-icon">
         <i class="fas fa-edit"></i>
       </div>
-      <h1>Edit Your Complaint</h1>
-      <p>Update your grievance details</p>
+      <h1>Edit Your Post</h1>
+      <p>Update your post details</p>
     </header>
 
     {% if error %}
@@ -198,14 +207,46 @@
     </div>
     {% endif %}
 
-    <form method="post">
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      Note: Media cannot be edited here. Please edit media directly on Facebook.
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      <div class="mb-4">
-        <label for="message" class="form-label">Complaint Details</label>
-        <textarea id="message" name="message" class="form-control" placeholder="Describe your complaint in detail...">{{ post.message }}</textarea>
+      <div class="mb-3">
+        <label for="message" class="form-label">Description</label>
+        <textarea id="message" name="message" class="form-control" placeholder="Describe your complaint in detail..." required>{{ post.message }}</textarea>
         <small class="form-text">Maximum 500 characters</small>
       </div>
+      
+      {% if post.image %}
+      <div class="mb-3">
+        <label class="form-label">Current Media</label>
+        <div class="current-media">
+          <a href="{{ post.image.url }}" target="_blank">{{ post.image.name }}</a>
+        </div>
+      </div>
+      {% endif %}
+      
+      <div class="mb-3">
+        <label for="monitorDuration" class="form-label">Comment Monitoring Duration</label>
+        <div class="time-input-group">
+          <input type="number" class="form-control time-input" 
+                 name="monitor_duration" id="monitorDuration" 
+                 value="{{ time_limit }}" min="1" step="1" required>
+          <span class="time-unit">minutes</span>
+        </div>
+        <small class="text-muted">Monitoring will end {{ time_limit }} minutes after post was created</small>
+      </div>
 
+      <div class="mb-3">
+        <label for="monitorEndTime" class="form-label">Comment Monitoring End Time</label>
+        <input type="datetime-local" class="form-control" name="monitor_end_time" id="monitorEndTime" 
+               value="{{ monitor_end_time }}" readonly>
+        <small class="form-text">Calculated from post creation time + duration</small>
+      </div>
+      
       <div class="button-group">
         <a href="{% url 'posts:manage_posts' %}" class="btn btn-outline-secondary">
           <i class="fas fa-arrow-left"></i>
@@ -213,14 +254,10 @@
         </a>
         <button type="submit" class="btn btn-primary">
           <i class="fas fa-check"></i>
-          Update Complaint
+          Save Changes
         </button>
       </div>
     </form>
-    
-    <div class="footer">
-      <p>Need help? <a href="#">Contact support</a></p>
-    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,6 +1,20 @@
+# Python cache
 __pycache__/
 *.pyc
+
+# Environment files
 .env
-facebook_realtime.log
+
+# Log files
 *.log
--e "*.pyc\n__pycache__/" 
+facebook_realtime.log
+
+# Media files
+media/
+
+# Migration backup (optional)
+*.sqlite3
+
+# VSCode or IDE settings (optional)
+.vscode/
+.idea/
