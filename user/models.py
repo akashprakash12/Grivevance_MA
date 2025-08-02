@@ -5,7 +5,6 @@ from django.conf import settings
 from core_app.models import District
 from django.db import transaction
 from datetime import datetime
-from django_otp.plugins.otp_totp.models import TOTPDevice
 
 class IDTracker(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -50,19 +49,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
-    
-    def has_2fa_enabled(self):
-        """Check if user has two-factor authentication enabled"""
-        return self.totpdevice_set.filter(confirmed=True).exists()
-    
-    def get_totp_device(self):
-        """Get or create a TOTP device for the user"""
-        device, created = TOTPDevice.objects.get_or_create(
-            user=self,
-            name='default',
-            defaults={'confirmed': False}
-        )
-        return device
 
 class PublicUserProfile(models.Model):
     """
@@ -107,11 +93,3 @@ class PublicUserProfile(models.Model):
 
     def __str__(self):
         return f"Public Profile of {self.user.get_full_name() or self.user.username}"
-    
-    def has_2fa_enabled(self):
-        """Convenience method to check 2FA status through user model"""
-        return self.user.has_2fa_enabled()
-    
-    def get_totp_device(self):
-        """Convenience method to get TOTP device through user model"""
-        return self.user.get_totp_device()

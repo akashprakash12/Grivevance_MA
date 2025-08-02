@@ -233,10 +233,10 @@
           </td>
           <td>
             <button onclick="viewComplaintDetails('{{ grievance.grievance_id }}')" class="btn btn-sm btn-outline-primary">View</button>
-            {% if grievance.status == 'PENDING' %}
+            
                 <a href="{% url 'public_user:update_grievance' grievance.grievance_id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                <a href="{% url 'public_user:delete_grievance' grievance.grievance_id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-            {% endif %}
+            
           </td>
         </tr>
         {% empty %}

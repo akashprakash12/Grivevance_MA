@@ -48,16 +48,7 @@ INSTALLED_APPS = [
     'posts',
     'hod',
     'district_officer',
-    
-    
-    'django_otp',
-    'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_static',
-    
-
-
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -68,11 +59,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # OTP Middleware after Auth
-    'django_otp.middleware.OTPMiddleware',
-    # Custom middleware (must come AFTER authentication)
-    'user.middleware.TwoFactorAuthMiddleware',
-    # 'user.middleware.HybridTranslationMiddleware',
 ]
 
 

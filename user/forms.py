@@ -6,22 +6,27 @@ from django.core.exceptions import ValidationError
 from user.models import User, PublicUserProfile
 
 class PublicUserForm(forms.ModelForm):
-  
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        strip=False
+    )
+    confirm_password = forms.CharField(
+        label="Confirm Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        strip=False
+    )
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'phone']
+
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
-          
         }
-       
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-     
 
     def clean(self):
         cleaned_data = super().clean()
@@ -35,8 +40,9 @@ class PublicUserForm(forms.ModelForm):
                 validate_password(password, self.instance)
             except ValidationError as e:
                 self.add_error('password', e)
-        
+
         return cleaned_data
+
 
 
 class PublicUserProfileForm(forms.ModelForm):

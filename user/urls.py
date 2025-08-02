@@ -11,7 +11,7 @@ from grievance_app.views import (
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import LogoutView
-app_name = 'public_user'  # Important for namespacing
+app_name = 'public_user'
 
 urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
@@ -23,13 +23,10 @@ urlpatterns = [
     path(('help/'), views.help, name='help'),
     path(('account_settings/'), views.account_settings, name='account_settings'),
     path('ajax/load-departments/', load_departments, name='ajax_load_departments'),
-    
+    path(('delete/'), views.delete_public_user_by_public, name='delete_public_user_by_public'),
+    path('create/', views.create_public_user, name='create_public_user'),
     # Grievance-related URLs
     path(('grievance/<str:grievance_id>/'), detail_grievance, name='detail_grievance'),
     path(('grievance/<str:grievance_id>/edit/'), update_grievance, name='update_grievance'),
     path(('grievance/<str:grievance_id>/delete/'), delete_grievance, name='delete_grievance'),
-    
-    path(('account_settings/verify-2fa/'), views.verify_2fa, name='verify_2fa'),
-    path(('account_settings/disable-2fa/'), views.disable_2fa, name='disable_2fa'),
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
