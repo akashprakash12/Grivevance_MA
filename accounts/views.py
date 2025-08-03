@@ -13,10 +13,8 @@ from officer.models import OfficerProfile
 from user.models import User
 from django.contrib.auth import update_session_auth_hash
 
+from district_officer.models import DistrictOfficerProfile  # make sure it's imported
 
-# -------------------------------
-# Login View (first‑time redirect)
-# -------------------------------
 def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -31,7 +29,7 @@ def user_login(request):
                     messages.error(request, "Your account is inactive.")
                     return redirect('accounts:login')
 
-                # Additional check for collectors
+                # Additional check for Collectors
                 if user.user_type == 'COLLECTOR':
                     try:
                         collector_profile = CollectorProfile.objects.get(user=user)
@@ -42,7 +40,18 @@ def user_login(request):
                         messages.error(request, "Collector profile not found.")
                         return redirect('accounts:login')
 
-                # === first‑time logic ===
+                # Additional check for District Officers
+                if user.user_type == 'district_officer':
+                    try:
+                        do_profile = DistrictOfficerProfile.objects.get(user=user)
+                        if not do_profile.is_active:
+                            messages.error(request, "Your district officer account has been deactivated.")
+                            return redirect('accounts:login')
+                    except DistrictOfficerProfile.DoesNotExist:
+                        messages.error(request, "District Officer profile not found.")
+                        return redirect('accounts:login')
+
+                # === first‑time login redirect ===
                 groups = set(user.groups.values_list('name', flat=True))
                 first_login_roles = {'collector', 'district_officer'}
                 is_first_login = (user.last_login is None)
@@ -119,7 +128,13 @@ def dashboard(request):
         return render(request, 'user/create_public_user.html', {'user': user})
     
     elif 'district_officer' in groups:
-        return render(request, 'district_officer/district_officer_dashboard.html', {'user': user})
+            try:
+                # Instead of rendering here, redirect to dedicated view
+                return redirect('district_officer:DO_dashboard')  # URL name should point to your collector_dashboard view
+            except CollectorProfile.DoesNotExist:
+                messages.error(request, "DO profile not found.")
+                return redirect('accounts:login')
+
 
     # === Fallback (Invalid Group or No Group Assigned) ===
     messages.error(request, "Access denied. Invalid role.")

@@ -7,7 +7,7 @@ urlpatterns = [
     path('view/', views.view_collector, name='view_collector'),
     path('delete/<str:username>/', views.delete_collector, name='delete_collector'),
     path('dashboard/', views.collector_dashboard, name='collector_dashboard'),
-    path('collector_profile/', views.collector_profile_view, name='collector_profile'),
+    path('collector_profile/', views.collector_do_profile_view, name='collector_profile'),
     path('officer_details/', views.officer_details, name='officer_details'),
     # path('search_grievance_by_id/', views.search_grievance_by_id, name='search_grievance_by_id'),
 
@@ -30,7 +30,7 @@ path('dashboard/department_card_view/<str:department_id>/', views.department_car
  # edit page – username in url
 path('update/<str:username>/', views.update_collector, name='update_collector'), # ✅
     # password post endpoint
-path('change-password/', views.collector_change_password, name='collector_change_password'),
+path('change-password/', views.change_password, name='change_password'),
 
 path('update-remark/', views.update_remark, name='update_remark'),
     path("download/<str:grievance_id>/", views.details_download, name="details_download"),

@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HOD Officers - Collector Portal</title>
+  <title>HOD Officers - DO Portal</title>
+
+  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,62 +29,60 @@
     }
 
     .navbar-custom {
-      background: var(--indigo);
-      padding: 1.2rem 2rem;
-      border-bottom: 4px solid var(--indigo-light);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      position: sticky;
-      top: 0;
-      z-index: 1050;
-    }
+  background: var(--indigo);
+  padding: 1.2rem 2rem;
+  border-bottom: 4px solid var(--indigo-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
 
-    .navbar-custom .navbar-logo {
-      height: 50px;
-      margin-right: 15px;
-    }
+.navbar-custom .navbar-logo {
+  height: 50px;
+  margin-right: 15px;
+}
 
-    .navbar-custom .navbar-brand {
-      color: #ffffff;
-      font-size: 1.5rem;
-      font-weight: 700;
-      text-decoration: none;
-      letter-spacing: 0.5px;
-    }
+.navbar-custom .navbar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
 
-    .navbar-custom .nav-link {
-      color: #ffffff !important;
-      margin-left: 1rem;
-      font-weight: 500;
-      position: relative;
-      transition: color 0.3s ease, transform 0.2s ease;
-    }
+.navbar-custom .nav-link {
+  color: #ffffff !important;
+  margin-left: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
 
-    .navbar-custom .nav-link:hover {
-      color: #FFBF00 !important;
-      text-decoration: none;
-      transform: translateY(-2px);
-    }
+.navbar-custom .nav-link:hover {
+  color: #FFBF00 !important; /* Goldenrod - dark yellow */
+  text-decoration: none;
+  transform: translateY(-2px);
+}
 
-    .navbar-custom .dropdown-menu {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
-    }
-    
-    .navbar-custom .dropdown-item:hover {
-      background-color: var(--indigo);
-      color: #ffffff;
-    }
+.navbar-custom .dropdown-menu {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
+}
+.navbar-custom .dropdown-item:hover {
+  background-color: var(--indigo);
+  color: #ffffff;
+}
 
-    .navbar-custom .dropdown:hover .dropdown-menu {
-      display: block;
-      margin-top: 0;
-    }
-
+.navbar-custom .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
     .container-custom {
       padding: 2rem;
       max-width: 1400px;
@@ -219,12 +219,12 @@
     <div class="d-flex align-items-center">
       <img src="{% static 'images/Kerala_Government.png' %}" alt="Kerala Government Logo" class="navbar-logo">
       <span class="fw-bold text-white" style="font-size: 1.7rem; font-family: 'Titillium Web', sans-serif;">
-        {{ district.name }} Collector Portal
+        {{ district.name }} DO Portal
       </span>
-    </div>
+        </div>
     
     <ul class="nav gap-3 align-items-center">
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'district_officer:DO_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
   
       <li class="nav-item">
         <a class="nav-link text-white" href="{% url 'core:create_department' %}">
@@ -234,6 +234,7 @@
   
       <!-- Reports Dropdown -->
       <li class="nav-item dropdown">
+  
         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
           <i class="fas fa-file-alt me-1"></i> Reports
         </a>
@@ -249,13 +250,13 @@
           </a></li>
         </ul>
       </li>
-      
+      <!-- Facebook Post Nav Link -->
       <li class="nav-item">
         <a class="nav-link text-white" href="{% url 'posts:index' %}" target="_blank">
           <i class="fab fa-facebook me-1"></i> FB Post
         </a>
       </li>
-      
+      <!-- Other Links -->
       <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i> Profile</a></li>
       <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i> Officers</a></li>
       <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
@@ -265,55 +266,68 @@
   <div class="container-custom">
     <div class="page-header">
       <h1 class="page-title">
-        <i class="fas fa-user-tie"></i> Heads of Departments
+        <i class="fas fa-user-tie me-2"></i> Heads of Departments
       </h1>
     </div>
 
-    {% if do_details %}
-    <div class="profile-card">
-      <h3 class="profile-title">
-        <i class="fas fa-user-shield"></i> District Officer
-        <span class="profile-badge">Deputy Administrator</span>
-      </h3>
-      <div class="profile-detail">
-        <strong>Name:</strong> {{ do_details.user.first_name }} {{ do_details.user.last_name }}
-      </div>
-      <div class="profile-detail">
-        <strong>Email:</strong> {{ do_details.user.email }}
-        <a href="{% url 'collector:send_mail' do_details.user.email %}" 
-           target="_blank" class="action-btn" title="Send Email">
-          <i class="fas fa-envelope"></i>
-        </a>
-      </div>
-      <div class="profile-detail">
-        <strong>Phone:</strong> {{ do_details.user.phone }}
-      </div>
-    </div>
-    {% endif %}
-
+    <!-- Collector Profile Section -->
+     <!-- Corrected Collector Profile Section -->
+     {% if collector_details %}
+     <div class="profile-card">
+       <h3 class="profile-title">
+         <i class="fas fa-user-shield text-indigo"></i> District Collector
+         <span class="profile-badge">District Magistrate</span>
+       </h3>
+       <div class="profile-detail">
+         <strong>Name:</strong> 
+         <span>{{ collector_details.user.first_name|upper }} {{ collector_details.user.last_name|upper }}</span>
+       </div>
+       <div class="profile-detail">
+         <strong>Email:</strong> 
+           {{ collector_details.user.email }}
+           <a href="{% url 'collector:send_mail' collector_details.user.email %}" 
+              target="_blank" class="action-btn ms-3" title="Send Email">
+             <i class="fas fa-envelope"></i>
+           </a>
+         </span>
+       </div>
+       <div class="profile-detail">
+         <strong>Phone:</strong> 
+         <span>{{ collector_details.user.phone|default:"Not provided" }}</span>
+       </div>
+     </div>
+     {% endif %}
+    <!-- HOD Officers Table -->
     <div class="officer-table">
       {% if hod_officers %}
-        <table class="table">
+        <table class="table table-hover mb-0">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Contact</th>
-              <th>Actions</th>
+              <th style="width: 25%">Name</th>
+              <th style="width: 25%">Department</th>
+              <th style="width: 35%">Contact</th>
+              <th style="width: 15%">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for officer in hod_officers %}
             <tr>
               <td>
-                <strong>{{ officer.user.first_name|upper }} {{ officer.user.last_name|upper }}</strong>
+                {{ officer.user.first_name|upper }} {{ officer.user.last_name|upper }}
               </td>
-              <td>{{ officer.department.name|upper }}</td>
+              
               <td>
-                <div class="d-flex flex-column">
+                <span class="badge bg-indigo-light text-white px-3 py-1 rounded-pill">
+                  {{ officer.department.name|upper }}
+                </span>
+              </td>
+              <td>
+                <div class="contact-info">
                   <span>{{ officer.user.email }}</span>
                   {% if officer.user.phone %}
-                  <small class="text-muted">{{ officer.user.phone }}</small>
+                  <span class="phone">
+                    <i class="fas fa-phone-alt me-1"></i>{{ officer.user.phone }}
+                  </span>
                   {% endif %}
                 </div>
               </td>

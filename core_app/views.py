@@ -6,7 +6,7 @@ from grievance_app.models import Department, District
 from collector.models import CollectorProfile
 from .forms import DeptForm, DistrictForm
 from admin_app.utils import generate_custom_id
-
+from district_officer.models import DistrictOfficerProfile
 DEBUG_PRINT = False  # set True if you want console logs
 
 def auto_dept_id() -> str:
@@ -15,10 +15,13 @@ def auto_dept_id() -> str:
 
 
 def _is_collector(user) -> bool:
+    print("im a collector")
     """Safe role check—works regardless of `related_name`."""
     return CollectorProfile.objects.filter(user=user).exists()
 
-
+def _is_DO(user) -> bool:
+    print("IM UR DO")
+    return DistrictOfficerProfile.objects.filter(user=user).exists()
 # ───────────── department views ─────────────
 @login_required
 def department_list(request):
@@ -30,6 +33,7 @@ def department_list(request):
 def department_create(request):
     user = request.user
     is_collector = _is_collector(user)
+    is_DO=_is_DO(user)
     if DEBUG_PRINT:
         print("CREATE →", "collector" if is_collector else "admin")
 
@@ -41,19 +45,24 @@ def department_create(request):
 
             if is_collector:
                 dept.district = user.collector_profile.district  # force district
+            if is_DO:
+                dept.district=user.district_officer_profile.district
 
             dept.created_by = user                           # NEW: always set creator
             dept.save()
             messages.success(request, "Department created successfully.")
-            return redirect(
-                "collector:collector_dashboard" if is_collector else "core:department_list"
-            )
+        return redirect(
+            "collector:collector_dashboard" if is_collector
+            else "district_officer:DO_dashboard" if is_DO
+            else "core:department_list"
+        )
+
     else:
         form = DeptForm(request=request)
 
     template = (
         "collector/collector_dept_create.html"
-        if is_collector else
+        if is_collector else "district_officer/do_dept_create.html" if is_DO else
         "core_app/department_form.html"
     )
     return render(request, template, {"form": form})

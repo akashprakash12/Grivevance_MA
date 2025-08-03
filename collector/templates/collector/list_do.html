@@ -5,8 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>District Officers</title>
+
+  <!-- Bootstrap & Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <!-- Custom Styles -->
   <style>
     :root {
       --indigo: #002855;
@@ -14,7 +18,6 @@
       --accent: #ffc107;
       --bg: #f4f6f9;
       --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
     }
 
     body {
@@ -91,15 +94,25 @@
         <i class="fas fa-users-cog me-2"></i>District Officers
       </h2>
 
+      <!-- Messages with proper coloring -->
       {% if messages %}
         {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
+          {% if message.tags == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          {% elif message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {% elif message.tags == 'warning' %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          {% else %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+          {% endif %}
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         {% endfor %}
       {% endif %}
 
+      <!-- Table -->
       <div class="table-responsive">
         <table class="table table-hover">
           <thead>
@@ -107,7 +120,9 @@
               <th>ID</th>
               <th>Name</th>
               <th>District</th>
-              <th>Contact</th>
+              <th>Phone</th>
+              <th>Email</th>
+
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -124,22 +139,26 @@
                     <span class="text-danger">Not assigned</span>
                   {% endif %}
                 </td>
-                                <td>{{ officer.user.phone|default:'Not provided' }}</td>
-                                <td>
-                                  {% if officer.is_active %}
-                                    <span class="badge badge-active">Active</span>
-                                  {% else %}
-                                    <span class="badge badge-inactive">Inactive</span>
-                                  {% endif %}
-                                </td>
-                                
+                <td>{{ officer.user.phone|default:'Not provided' }}</td>
+                <td>{{ officer.user.email|default:'Not provided' }}</td>
+
                 <td>
-                  <a href="{% url 'district_officer:update_district_officer' officer.user.username %}" class="btn btn-outline-primary btn-sm action-btn">
+                  {% if officer.is_active %}
+                    <span class="badge badge-active">Active</span>
+                  {% else %}
+                    <span class="badge badge-inactive">Inactive</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'district_officer:update_district_officer' officer.officer_id %}" class="btn btn-outline-primary btn-sm action-btn">
                     <i class="fas fa-edit"></i> Edit
                   </a>
-                  <a href="{% url 'district_officer:delete_district_officer' officer.user.username %}" class="btn btn-outline-danger btn-sm action-btn" onclick="return confirm('Are you sure you want to delete this officer?')">
-                    <i class="fas fa-trash-alt"></i> Delete
-                  </a>
+                  <a href="{% url 'district_officer:delete_district_officer' officer.officer_id %}"
+   class="btn btn-sm btn-danger"
+   onclick="return confirm('Are you sure you want to deactivate this officer?');">
+   Deactivate
+</a>
+
                 </td>
               </tr>
             {% empty %}
@@ -152,14 +171,16 @@
             {% endfor %}
           </tbody>
         </table>
-        <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-outline-secondary mb-3">
+
+        <!-- Back to Dashboard -->
+        <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-outline-secondary mt-3">
           <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
         </a>
-        
       </div>
     </div>
   </div>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
