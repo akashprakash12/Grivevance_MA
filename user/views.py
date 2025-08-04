@@ -11,6 +11,29 @@ from grievance_app.models import Grievance
 from django.urls import reverse
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+with open(os.path.join(BASE_DIR, 'static/data', 'Districtdataset.json'), encoding='utf-8') as f:
+    json_data = json.load(f)
+    district_data = json_data['data'][1:]  # Skip the header row
+
+# Extract Unique Districts and Taluks Dynamically
+def get_districts(request):
+    districts = sorted(set(row[2] for row in district_data))
+    return JsonResponse({'districts': districts})
+
+def get_taluks(request, district_name):
+    taluks = sorted(set(row[4] for row in district_data if row[2] == district_name))
+    return JsonResponse({'taluks': taluks})
+
+def get_villages(request, taluk_name):
+    villages = sorted(set(row[6] for row in district_data if row[4] == taluk_name))
+    return JsonResponse({'villages': villages})
 
 def create_public_user(request):
     if request.method == 'POST':

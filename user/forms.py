@@ -53,8 +53,8 @@ class PublicUserProfileForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'gender': forms.Select(attrs={'class': 'form-select'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'district': forms.Select(attrs={'class': 'form-select'}),
-            'thaluk': forms.TextInput(attrs={'class': 'form-control'}),
-            'village': forms.TextInput(attrs={'class': 'form-control'}),
+            'district': forms.Select(attrs={'class': 'form-select', 'id': 'id_district'}),
+            'thaluk': forms.Select(attrs={'class': 'form-select', 'id': 'id_thaluk'}),
+            'village': forms.Select(attrs={'class': 'form-select', 'id': 'id_village'}),
             'panchayath': forms.TextInput(attrs={'class': 'form-control'}),
         }
