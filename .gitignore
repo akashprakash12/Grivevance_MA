@@ -1,22 +1,27 @@
-# Byte-compiled / cache files
+# Python cache
 __pycache__/
+*.pyc
 *.py[cod]
 *.pyc
+!static/data/Districtdataset.json
 
-# Virtual environment
-.venv/
-
-# Environment variables
+# Environment files
 .env
 
-# Logs
+# Log files
 *.log
+facebook_realtime.log
 
-# macOS system files
-.DS_Store
+# Media files
+media/
 
-# VS Code settings (optional)
+# Migration backup (optional)
+*.sqlite3
+
+# Locale files (compiled translations)
+locale/*/LC_MESSAGES/*.mo
+*.json
+
+# VSCode or IDE settings (optional)
 .vscode/
-
-# Migrations __pycache__ (handled by the general __pycache__/ rule)
-
+.idea/

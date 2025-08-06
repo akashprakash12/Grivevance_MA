@@ -145,13 +145,16 @@
           <div class="text-danger small">{{ form.password.errors|striptags }}</div>
         {% endif %}
       </div>
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3 px-1">
+  <a href="{% url "public_user:create_public_user" %}" class="forgot-link">
+    <i class="fas fa-user-plus me-1"></i>Register a new account
+  </a>
+  <a href="#" class="forgot-link">
+    <i class="fas fa-key me-1"></i>Forgot password?
+  </a>
+</div>
 
-      <!-- Forgot password link -->
-      <div class="text-end">
-        <a href="#" class="forgot-link">
-          <i class="fas fa-key me-1"></i>Forgot password?
-        </a>
-      </div>
+    
 
       <!-- Submit -->
       <div class="d-grid mt-3">

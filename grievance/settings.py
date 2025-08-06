@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-@emnqx!c)bn+cj1u=mi2_^v#_mf#1*l70mr6g23n79t+t^p%36
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'expert-lizard-vastly.ngrok-free.app']
 
 SUPPORT_PHONE = "+91 7525460392"  # Replace with actual support number
 SUPPORT_EMAIL = "support@yourdomain.com"  # Replace with actual support email
@@ -41,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'widget_tweaks',
-
     'officer',
     'user',
     'admin_app',
@@ -50,23 +50,22 @@ INSTALLED_APPS = [
     'accounts',
     'core_app',
     'posts',
+    'whatsapp',
+    'hod',
     'district_officer',
-
-    'hod'
-
-
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'grievance.urls'
 
@@ -129,11 +128,28 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
 
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'en'  # Default language
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('hi', 'Hindi'),
+    ('ml', 'Malayalam'),
+    ('ta', 'Tamil'),
+]
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
+TIME_ZONE = 'Asia/Kolkata'  # Replace with your desired time zone
 
 USE_I18N = True
+USE_L10N = True
 
 USE_TZ = True
 
@@ -154,6 +170,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 FB_ACCESS_TOKEN = config('FB_ACCESS_TOKEN')
 FB_PAGE_ID = config('FB_PAGE_ID')
 
+# Add these settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# File upload settings
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'               # ✅ NO TYPOS OR EXTRA SPACES

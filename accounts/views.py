@@ -125,8 +125,8 @@ def dashboard(request):
 
     # === Public User Dashboard ===
     elif 'public' in groups:
-        return render(request, 'user/create_public_user.html', {'user': user})
-    
+        return redirect('public_user:user_dashboard')
+
     elif 'district_officer' in groups:
             try:
                 # Instead of rendering here, redirect to dedicated view
@@ -134,6 +134,7 @@ def dashboard(request):
             except CollectorProfile.DoesNotExist:
                 messages.error(request, "DO profile not found.")
                 return redirect('accounts:login')
+
 
 
     # === Fallback (Invalid Group or No Group Assigned) ===
