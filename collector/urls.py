@@ -39,9 +39,24 @@ path(
         views.department_grievances_download,
         name="department_grievances_download",
     ),
+# Department Grievance Export URLs
+ path('department/<str:department_id>/export/excel/', 
+         views.export_department_grievances_excel, 
+         name='export_department_grievances_excel'),
 
 # urls.py
 path("collector_dept_create/", views.collector_department_create, name="collector_department_create"),
+path('handover/', views.collector_handover_otp, name='collector_handover_otp'),
 
+path('handover/new-collector/', views.new_collector_info, name='new_collector_info'),
+
+path('handover/', views.collector_handover_otp, name='collector_handover_otp'),
+    path('handover/complete/', views.handover_complete, name='handover_complete'),  # Add this line
+
+path("forgot-password/", views.collector_forgot_password, name="collector_forgot_password"),
+    path("forgot-password/verify/", views.collector_verify_two_otps, name="collector_verify_two_otps"),
+    path("forgot-password/reset/", views.collector_reset_password, name="collector_reset_password"),
+# path('create-order/', views.create_collector_order, name='create_collector_order'),
+#     path('get-officers/', views.get_officers_by_department, name='get_officers_by_department'),
 
 ]

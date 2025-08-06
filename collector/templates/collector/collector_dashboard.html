@@ -29,16 +29,19 @@
       padding: 1rem 1.2rem;
     }
     .dropdown:hover .dropdown-menu {
-    display: block;
-    margin-top: 0; /* optional: align properly */
-  }
+      display: block;
+      margin-top: 0;
+    }
     .navbar-custom {
       background: var(--indigo);
       padding: 1rem 2rem;
       border-bottom: 4px solid var(--indigo-light);
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      color: display;
       display: flex;
       justify-content: space-between;
+      justify-content: between;
+      align-items: center;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -46,20 +49,20 @@
     .navbar-custom .navbar-brand {
       color: #ffffff;
       font-size: 1.4rem;
-      font-weight: 600;
+      font-weight: bold;
       letter-spacing: 0.5px;
       text-decoration: none;
     }
 
     .navbar-custom .nav-link {
-      color: #ffffff !important;
+      color: #ffffff;
       margin-left: 1rem;
-      font-weight: 500;
-      transition: 0.3s ease;
+      font-weight: normal;
+      transition: all 0.3s ease;
     }
 
     .navbar-custom .nav-link:hover {
-      color: var(--accent) !important;
+      color: var(--accent);
       text-decoration: underline;
     }
 
@@ -69,13 +72,15 @@
       border: none;
       margin-top: 10px;
       min-width: 180px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      height: auto;
+      width: min-width;
     }
 
     .navbar-custom .dropdown-item {
       color: #ffffff;
       padding: 10px 16px;
-      font-weight: 500;
+      font-weight: normal;
       transition: background-color 0.3s;
     }
 
@@ -83,7 +88,10 @@
       background-color: #e0e0e0;
       color: #0d1b2a;
     }
-
+    .navbar-logo {
+  height: 60px;
+  margin-right: 0.5rem;
+}
     @media (max-width: 768px) {
       .navbar-custom {
         flex-direction: column;
@@ -96,8 +104,8 @@
       }
     }
     .clickable-card {
-  cursor: pointer;
-}
+      cursor: pointer;
+    }
 
     .rank-section {
       background: #fff;
@@ -123,7 +131,7 @@
 
     .notice-header {
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: bold;
       color: var(--accent);
       border-bottom: 1px solid #eee;
       padding-bottom: 0.5rem;
@@ -137,7 +145,7 @@
       padding: 10px;
       border-radius: 8px;
       align-items: center;
-      transition: 0.2s ease-in-out;
+      transition: all 0.2s ease-in-out;
     }
 
     .top-rank {
@@ -145,7 +153,7 @@
       line-height: 1;
       width: 30px;
       text-align: center;
-      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
     }
 
     .rank-1 {
@@ -172,7 +180,7 @@
       padding: 20px;
       text-align: center;
       box-shadow: var(--card-shadow);
-      transition: .2s;
+      transition: all .2s;
       height: 100%;
     }
 
@@ -182,13 +190,13 @@
     }
 
     .stat-box h5 {
-      font-weight: 600;
+      font-weight: bold;
       margin-bottom: 10px;
     }
 
     .stat-box .count {
       font-size: 3rem;
-      font-weight: 800;
+      font-weight: bolder;
     }
 
     .filter-section {
@@ -201,7 +209,7 @@
 
     .filter-section h5 {
       font-size: 1.25rem;
-      font-weight: 600;
+      font-weight: bold;
       margin-bottom: 14px;
       color: var(--indigo);
     }
@@ -219,7 +227,7 @@
       padding: 20px;
       margin-bottom: 18px;
       box-shadow: var(--card-shadow);
-      transition: .25s;
+      transition: all .25s;
     }
 
     .card-dept:hover {
@@ -229,7 +237,7 @@
     }
 
     .dept-title {
-      font-weight: 600;
+      font-weight: bold;
       font-size: 1.05rem;
       margin-bottom: 6px;
       color: var(--indigo);
@@ -284,7 +292,7 @@
 
     .carousel-header {
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: bold;
       color: var(--accent);
       border-bottom: 1px solid #eee;
       padding-bottom: 0.5rem;
@@ -312,330 +320,669 @@
       color: #fff;
     }
 
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #dee2e6;
+    }
+
     @media (max-width: 768px) {
       .rank-section {
         margin-bottom: 24px;
       }
     }
+
+    /* Compact styles for filter section items */
+    .compact-input .form-control {
+      height: 32px;
+      font-size: 0.875rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .compact-input .input-group-text {
+      height: 32px;
+      font-size: 0.875rem;
+      padding: 0.25rem;
+    }
+
+    .compact-btn {
+      height: 32px;
+      font-size: 0.875rem;
+      padding: 0.25rem 0.5rem;
+      line-height: 1.5;
+    }
+
+    .filter-section .form-label {
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Grievance Card Styles */
+    .grievance-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--card-shadow);
+      transition: all 0.25s;
+      border-left: 6px solid var(--warning);
+      height: 100%;
+    }
+
+    .grievance-card:hover {
+      transform: scale(1.016);
+      box-shadow: var(--card-shadow-hover);
+      background: #f7faff;
+    }
+
+    .grievance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .grievance-id {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: var(--indigo);
+    }
+
+    .grievance-status {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 50px;
+    }
+
+    .grievance-detail {
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .grievance-label {
+      font-weight: 600;
+      color: #555;
+      display: inline-block;
+      min-width: 80px;
+    }
+
+    .grievance-value {
+      word-break: break-word;
+    }
+
+    .grievance-description {
+      position: relative;
+      margin: 12px 0;
+      max-height: 60px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .grievance-description.expanded {
+      max-height: none;
+    }
+
+    .read-more-btn {
+      color: var(--indigo-light);
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: inline-block;
+    }
+
+    .read-more-btn:hover {
+      text-decoration: underline;
+    }
+
+    .grievance-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    .grievance-btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
- <!-- NAVBAR -->
+  <!-- NAVBAR -->
+  <nav class="navbar-custom d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <img src="{% static 'images/Kerala_Government.png' %}" alt="Kerala Government Logo" class="navbar-logo">
+      <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
+    </div>
+    
+    <ul class="nav gap-3 align-items-center">
+      <li class="nav-item">
+        <a class="nav-link text-white" href="{% url 'core:create_department' %}">
+          <i class="fas fa-plus-circle me-1"></i> Create Dept
+        </a>
+      </li>
 
-<!-- NAVBAR -->
-<nav class="navbar-custom d-flex justify-content-between align-items-center">
-  <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
-  
-  <ul class="nav gap-3 align-items-center">
-    <li class="nav-item">
-      <a class="nav-link text-white" href="{% url 'collector:collector_department_create' %}">
-        <i class="fas fa-plus-circle me-1"></i> Create Dept
-      </a>
-    </li>
-    <!-- Reports Dropdown -->
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="fas fa-file-alt me-1"></i> Reports
-      </a>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="{% url 'collector:grievance_report' %}">
-          <i class="fas fa-file-contract me-2"></i> Grievance Report
-        </a></li>
-        <li><a class="dropdown-item" href="{% url 'collector:get_department_report_data' %}">
-          <i class="fas fa-building me-2"></i> Department Report
-        </a></li>
-        <li><a class="dropdown-item" href="#">
-          <i class="fas fa-building me-2"></i> Officer Report
-        </a></li>
-      </ul>
-    </li>
+      <!-- Reports Dropdown -->
+      <li class="nav-item dropdown">
+        <li class="nav-item"><a class="nav-link" href="{% url 'district_officer:create_district_officer' %}"><i class="fas fa-user me-1"></i> Create DO</a></li>
 
-    <!-- 🟦 Facebook Post Nav Link -->
-    <li class="nav-item">
-      <a 
-        class="nav-link text-white" 
-        href="{% url 'posts:index' %}" 
-        target="_blank"
-      >
-        <i class="fab fa-facebook me-1"></i> FB Post
-      </a>
-    </li>
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-file-alt me-1"></i> Reports
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="{% url 'collector:grievance_report' %}">
+            <i class="fas fa-file-contract me-2"></i> Grievance Report
+          </a></li>
+          <li><a class="dropdown-item" href="{% url 'collector:get_department_report_data' %}">
+            <i class="fas fa-building me-2"></i> Department Report
+          </a></li>
+          <li><a class="dropdown-item" href="#">
+            <i class="fas fa-building me-2"></i> Officer Report
+          </a></li>
+        </ul>
+      </li>
+      <!-- Facebook Post Nav Link -->
+      <li class="nav-item">
+        <a class="nav-link text-white" href="{% url 'posts:index' %}" target="_blank">
+          <i class="fab fa-facebook me-1"></i> FB Post
+        </a>
+      </li>
+      <!-- Other Links -->
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i> Profile</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i> Officers</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+    </ul>
+  </nav>
 
-    <!-- Other Links -->
-    <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i> Profile</a></li>
-    <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i> Officers</a></li>
-    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
-  </ul>
-</nav>
-
-
-
-
-
-<div class="container-fluid container-custom">
-  <div class="row gx-3 gy-4">
-    <!-- LEFT RANK -->
-    <div class="col-lg-2 col-md-12">
-      <div class="d-flex flex-column gap-3">
-
-        <!-- Combined Rank Section -->
-        <div style="width: 100%;">
-          <div class="rank-section position-relative">
-            <div class="notice-header"><i class="fas fa-bullhorn me-2 text-warning"></i>Top 3 Departments</div>
-            {% for dept in top3_departments %}
-            <div class="top-item rank-{{ forloop.counter }}{% if forloop.last %} mb-0{% endif %}">
-              <div class="top-rank">
-                {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}
-              </div>
-              <div>
-                <strong>{{ dept.name|upper }}</strong><br>
-                <small class="text-muted">ID: {{ dept.code }}</small><br>
-                <div class="top-badges">
-                  <span class="badge bg-primary">Total {{ dept.total }}</span>
-                  <span class="badge bg-success">Resolved {{ dept.resolved}}</span>
+  <div class="container-fluid container-custom">
+    <div class="row gx-3 gy-4">
+      <!-- LEFT RANK -->
+      <div class="col-lg-2 col-md-12">
+        <div class="d-flex flex-column gap-3">
+          <!-- Combined Rank Section -->
+          <div style="width: 100%;">
+            <div class="rank-section position-relative">
+              <div class="notice-header"><i class="fas fa-bullhorn me-2 text-warning"></i>Top 3 Departments</div>
+              {% for dept in top3_departments %}
+              <div class="top-item rank-{{ forloop.counter }}{% if forloop.last %} mb-0{% endif %}">
+                <div class="top-rank">
+                  {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}
+                </div>
+                <div>
+                  <strong>{{ dept.name|upper }}</strong><br>
+                  <small class="text-muted">ID: {{ dept.code }}</small><br>
+                  <div class="top-badges">
+                    <span class="badge bg-primary">Total {{ dept.total }}</span>
+                    <span class="badge bg-success">Resolved {{ dept.resolved }}</span>
+                  </div>
                 </div>
               </div>
+              {% empty %}
+              <div class="top-item text-muted text-center">
+                No departments with grievances found.
+              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
+          </div>
+          
+          <!-- SLIDER -->
+          <div class="carousel-section">
+            <div class="carousel-header"><i class="fas fa-mountain me-2 text-warning"></i>Explore Idukki</div>
+            <div class="carousel-box">
+              <div class="mySlides"><img src="{% static 'images/dam.jpeg' %}" alt="Slide 1"></div>
+              <div class="mySlides"><img src="{% static 'images/raman.jpeg' %}" alt="Slide 2"></div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- SLIDER -->
-        <div class="carousel-section">
-          <div class="carousel-header"><i class="fas fa-mountain me-2 text-warning"></i>Explore Idukki</div>
-          <div class="carousel-box">
-            <div class="mySlides"><img src="{% static 'images/dam.jpeg' %}" alt="Slide 1"></div>
-            <div class="mySlides"><img src="{% static 'images/raman.jpeg' %}" alt="Slide 2"></div>
-          </div>
-        </div>
+      
+<!-- RIGHT CONTENT -->
+<div class="col-lg-10 col-md-12">
+  <!-- Single row for all counts -->
+  <div class="row g-3 mb-4">
+    <!-- Total Grievances -->
+    <div class="col-md-2">
+      <div class="stat-box">
+        <h5>Total</h5>
+        <div class="count text-primary" data-target="{{ counts.total|default:0 }}">0</div>
       </div>
     </div>
-
-    <!-- RIGHT CONTENT -->
-    <div class="col-lg-10 col-md-12">
-      <div class="row g-3 text-center mb-3">
-        <div class="col-md-4"><div class="stat-box"><h5>Total Grievances</h5><div class="count text-primary" data-target="{{ counts.total_grievances|default:2 }}">0</div></div></div>
-        <div class="col-md-4"><div class="stat-box"><h5>Pending</h5><div class="count text-danger" data-target="{{ counts.pending_grievances|default:2 }}">0</div></div></div>
-        <div class="col-md-4"><div class="stat-box"><h5>Resolved</h5><div class="count text-success" data-target="{{ counts.resolved_grievances|default:0 }}">0</div></div></div>
+    
+    <!-- Pending -->
+    <div class="col-md-2">
+      <div class="stat-box">
+        <h5>Pending</h5>
+        <div class="count text-warning" data-target="{{ counts.pending|default:0 }}">0</div>
       </div>
-
-      <div class="filter-section">
-        <h5><i class="fas fa-search me-2"></i>Search & Filter Grievances</h5>
-        <form class="row g-3 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">Grievance ID / Phone</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
-              <input id="grievance-search" name="search" class="form-control" placeholder="Enter ID or Phone number">
-            </div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Department</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="fas fa-building"></i></span>
-              <select class="form-select" id="department-select" name="department">
-                <option selected disabled>Select Department</option>
-                {% for d in departments %}
-                <option value="{{ d.id }}">{{ d.name|upper }}</option>
-              {% endfor %}
-                            </select>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <button type="submit" name="sort" value="grievances" class="btn btn-outline-secondary w-100">
-              <i class="fas fa-sort-amount-down-alt"></i> Sort by Grievance Count
-            </button>
-          </div>
-        </form>
+    </div>
+    
+    <!-- In Progress -->
+    <div class="col-md-2">
+      <div class="stat-box">
+        <h5>In Progress</h5>
+        <div class="count text-info" data-target="{{ counts.in_progress|default:0 }}">0</div>
       </div>
-      
-      <div class="row g-4" id="dept-container">
-        {% for dept in departments %}
-        <div class="col-md-4 dept-card-wrapper">
-          <div class="card-dept border-{{ dept.badge_class }} clickable-card"
-               data-name="{{ dept.name }}"
-               data-code="{{ dept.code }}"
-               data-url="{% url 'collector:department_card' dept.code %}">
-            <div class="dept-title">
-              <i class="fas fa-building me-2 text-{{ dept.badge_class }}"></i>{{ dept.name }}
-              <span class="badge bg-{{ dept.badge_class }} badge-percent">
-                {{ dept.pending_percent }}%
-              </span>
+    </div>
+    
+    <!-- Resolved -->
+    <div class="col-md-2">
+      <div class="stat-box">
+        <h5>Resolved</h5>
+        <div class="count text-success" data-target="{{ counts.resolved|default:0 }}">0</div>
+      </div>
+    </div>
+    
+    <!-- Rejected -->
+    <div class="col-md-2">
+      <div class="stat-box">
+        <h5>Rejected</h5>
+        <div class="count text-danger" data-target="{{ counts.rejected|default:0 }}">0</div>
+      </div>
+    </div>
+    
+    <!-- Escalated -->
+    <div class="col-md-2">
+      <div class="stat-box">
+        <h5>Escalated</h5>
+        <div class="count text-secondary" data-target="{{ counts.escalated|default:0 }}">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rest of your existing content remains exactly the same -->
+        <div class="filter-section">
+          <h5><i class="fas fa-search me-2"></i>Search & Filter</h5>
+          <form class="row g-3 align-items-end" id="filter-form">
+            <div class="col-md-4">
+              <label class="form-label">Grievance ID / Phone</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                <input id="grievance-search" name="search" class="form-control" placeholder="Enter ID or Phone number">
+              </div>
             </div>
-      
-            <p class="mb-1"><strong>ID:</strong> {{ dept.code }}</p>
-            <p class="mb-1"><strong>Total Grievance:</strong> {{ dept.total }}</p>
-            <p><strong>Pending Grievance:</strong> {{ dept.pending }}</p>
-          </div>
+            <div class="col-md-4">
+              <label class="form-label">Department Name</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                <input id="dept-search" name="dept_search" class="form-control" placeholder="Enter department name">
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <button type="button" id="sort-btn" class="btn btn-outline-secondary w-100">
+                <i class="fas fa-sort-amount-down-alt"></i> Sort by Total
+              </button>
+            </div>
+          </form>
         </div>
-        {% endfor %}
-      </div>
-      <!-- Grievance Search Result Container -->
-      <div class="row g-4" id="grievance-container" style="display:none;">
-        {% for gr in all_grievances %}
-          <div class="col-md-4 gr-card-wrapper clickable-card"
+        
+        <div class="row g-4" id="dept-container">
+          {% for dept in departments %}
+          <div class="col-md-4 dept-card-wrapper">
+            <div class="card-dept border-{{ dept.badge_class }} clickable-card"
+                 data-name="{{ dept.name }}"
+                 data-code="{{ dept.code }}"
+                 data-total="{{ dept.total }}"
+                 data-pending="{{ dept.pending }}"
+                 data-rejected="{{ dept.rejected}}"
+                 data-pending-percent="{{ dept.pending_percent }}"
+                 data-url="{% url 'collector:department_card' dept.code %}">
+              <div class="dept-title">
+                <i class="fas fa-building me-2 text-{{ dept.badge_class }}"></i>{{ dept.name|upper }}
+                <span class="badge bg-{{ dept.badge_class }} badge-percent">
+                  {{ dept.pending_percent }}%
+                </span>
+              </div>
+              <p class="mb-1"><strong>ID:</strong> {{ dept.code }}</p>
+              <p class="mb-1"><strong>Total Grievance:</strong> {{ dept.total }}</p>
+              <p><strong>Pending Grievance:</strong> {{ dept.pending }}</p>
+              <p><strong>Rejcted Grievance:</strong> {{ dept.rejected }}</p>
+              <div class="mt-3 d-flex justify-content-end">
+                <a href="{% url 'collector:department_card' dept.code %}" class="text-decoration-none text-primary fw-medium">
+                  <i class=""></i> View Details
+                </a>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-12 empty-state">
+            <i class="fas fa-inbox fa-2x"></i>
+            <h5 class="mt-2">No departments found</h5>
+            <p>Try a different keyword or clear filters</p>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <!-- Grievance Search Result Container -->
+        <div class="row g-4" id="grievance-container" style="display:none;">
+          {% for gr in all_grievances %}
+          <div class="col-md-4 gr-card-wrapper"
                data-grv-id="{{ gr.grievance_id|lower }}"
                data-contact="{{ gr.contact_number|default:''|lower }}"
-               data-url="{% url 'grievance_detail' gr.grievance_id %}">
-            <div class="card-dept border-warning">
-              <div class="dept-title">
-                <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
-                Grievance {{ gr.grievance_id }}
+               data-url="">
+            <div class="grievance-card">
+              <div class="grievance-header">
+                <span class="grievance-id">
+                  <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                  {{ gr.grievance_id }}
+                </span>
+                <span class="grievance-status badge 
+                  {% if gr.status == 'PENDING' %}bg-warning
+                  {% elif gr.status == 'RESOLVED' %}bg-success
+                  {% elif gr.status == 'REJECTED' %}bg-danger
+                  {% else %}bg-secondary{% endif %}">
+                  {{ gr.get_status_display }}
+                </span>
               </div>
-      
-              <p class="mb-1"><strong>Status:</strong> {{ gr.status }}</p>
-              <p class="mb-1"><strong>Contact:</strong> {{ gr.contact_number }}</p>
-              <p class="mb-1"><strong>Subject:</strong> {{ gr.subject }}</p>
-              <p class="mb-1"><strong>Due Date:</strong> {{ gr.due_date|date:"M d, Y" }}</p>
-              <p class="mb-1"><strong>Address:</strong> {{ gr.address|default:"—" }}</p>
-              <p class="mb-1"><strong>Description:</strong> {{ gr.description|truncatechars:100 }}</p>
-      
-              <!-- Buttons for actions -->
-              <div class="mt-3 d-flex justify-content-between">
-                <a href="#" class="btn btn-outline-primary btn-sm">
+              
+              <div class="grievance-detail">
+                <span class="grievance-label">Contact:</span>
+                <span class="grievance-value">{{ gr.contact_number|default:"—" }}</span>
+              </div>
+              
+              <div class="grievance-detail">
+                <span class="grievance-label">Subject:</span>
+                <span class="grievance-value">{{ gr.subject|default:"—" }}</span>
+              </div>
+              
+              <div class="grievance-detail">
+                <span class="grievance-label">Due Date:</span>
+                <span class="grievance-value">{{ gr.due_date|date:"M d, Y"|default:"—" }}</span>
+              </div>
+              
+              <div class="grievance-detail">
+                <span class="grievance-label">Address:</span>
+                <span class="grievance-value">{{ gr.applicant_address|default:"—" }}</span>
+              </div>
+              
+              <div class="grievance-description" id="desc-{{ gr.id }}">
+                <div class="grievance-detail">
+                  <span class="grievance-label">Description:</span>
+                  <span class="grievance-value">{{ gr.description|default:"—" }}</span>
+                </div>
+              </div>
+              
+              {% if gr.description|length > 100 %}
+              <span class="read-more-btn" data-target="desc-{{ gr.id }}">
+                <i class="fas fa-chevron-down"></i> Read more
+              </span>
+              {% endif %}
+              
+              <div class="grievance-actions">
+                <a href="#" class="btn btn-outline-primary grievance-btn open-remark-modal" 
+                   data-grievance-id="{{ gr.id }}" 
+                   data-bs-toggle="modal" 
+                   data-bs-target="#remarkModal">
                   <i class="fas fa-comment-dots me-1"></i> Remark
                 </a>
-                <a href="#" target="_blank" class="btn btn-outline-danger btn-sm">
+                <a href="{% url 'collector:details_download' gr.grievance_id %}" 
+                   target="_blank" 
+                   class="btn btn-outline-danger grievance-btn">
                   <i class="fas fa-file-pdf me-1"></i> PDF
                 </a>
               </div>
             </div>
           </div>
-        {% endfor %}
+          {% endfor %}
+        </div>
       </div>
-      
-      
-      
     </div>
   </div>
-</div>
 
-<!-- Modal for Remark -->
-<div class="modal fade" id="remarkModal" tabindex="-1" aria-labelledby="remarkModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="post" id="remarkForm" action="{% url 'collector:update_remark' %}">
-      {% csrf_token %}
-      <input type="hidden" name="grievance_id" id="remarkGrievanceId">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="remarkModalLabel">Add Remark & Set Priority</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Remark</label>
-            <textarea class="form-control" name="remark" rows="3" required></textarea>
+  <!-- Modal for Remark -->
+  <div class="modal fade" id="remarkModal" tabindex="-1" aria-labelledby="remarkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form method="post" id="remarkForm" action="{% url 'collector:update_remark' %}">
+        {% csrf_token %}
+        <input type="hidden" name="grievance_id" id="remarkGrievanceId">
+        <!-- Add hidden input for next URL -->
+        <input type="hidden" name="next" value="{% url 'collector:collector_dashboard' %}">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="remarkModalLabel">Add Remark & Set Priority</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Priority</label>
-            <select class="form-select" name="priority" required>
-              <option value="">-- Select Priority --</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="CRITICAL">Critical</option>
-            </select>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Remark</label>
+              <textarea class="form-control" name="remark" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Priority</label>
+              <select class="form-select" name="priority" >
+                <option value="">-- Select Priority --</option>
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Submit</button>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Submit</button>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
-</div>
 
-<!-- Add this right before the closing </body> tag -->
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Store original department data for fuzzy search and sorting
+      const deptCards = Array.from(document.querySelectorAll('.dept-card-wrapper'));
+      const deptData = deptCards.map(card => {
+        return {
+          element: card,
+          name: card.querySelector('.card-dept').dataset.name.toLowerCase(),
+          code: card.querySelector('.card-dept').dataset.code.toLowerCase(),
+          total: parseInt(card.querySelector('.card-dept').dataset.total) || 0,
+          pending: parseInt(card.querySelector('.card-dept').dataset.pending) || 0,
+          pending_percent: parseFloat(card.querySelector('.card-dept').dataset.pendingPercent) || 0
+        };
+      });
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-  
-    /* make department cards clickable (unchanged) */
-    document.querySelectorAll(".clickable-card").forEach(card => {
-      card.addEventListener("click", e => {
-        if (e.target.closest("a,button,input,select,textarea")) return;
-        window.location.href = card.dataset.url;
-      });
-    });
-  
-    /* updated toggle logic */
-    const searchInput = document.getElementById("grievance-search");
-    const deptDiv     = document.getElementById("dept-container");
-    const grvDiv      = document.getElementById("grievance-container");
-    const grCards     = [...document.querySelectorAll(".gr-card-wrapper")];
-  
-    searchInput.addEventListener("input", e => {
-      const q = e.target.value.trim().toLowerCase();   // case‑insensitive
-  
-      if (!q) {
-        deptDiv.style.display = "";
-        grvDiv.style.display  = "none";
-        return;
-      }
-  
-      let anyMatch = false;
-      grCards.forEach(card => {
-        const id    = card.dataset.grvId   || ""; // already lowercase in template
-        const phone = card.dataset.contact || "";
-        const show  = id.includes(q) || phone.includes(q);  // ← key change
-        card.style.display = show ? "" : "none";
-        if (show) anyMatch = true;
-      });
-  
-      deptDiv.style.display = "none";
-      grvDiv.style.display  = "";  // show container even if no match (optional)
-    });
-  
-    /* counters + slider (unchanged) */
-    document.querySelectorAll(".count").forEach(el => {
-      const t = +el.dataset.target || 0, d = 800, s = performance.now();
-      const f = n => {
-        const p = Math.min((n - s) / d, 1);
-        el.textContent = Math.floor(p * t).toLocaleString("en-IN");
-        if (p < 1) requestAnimationFrame(f);
+      // Initialize Fuse.js for fuzzy search
+      const fuseOptions = {
+        keys: ['name', 'code'],
+        threshold: 0.4,
+        includeScore: true
       };
-      requestAnimationFrame(f);
-    });
-  
-    (function () {
-      const slides = document.querySelectorAll(".mySlides");
-      if (!slides.length) return;
-      let i = 0;
-      slides.forEach((s, k) => (s.style.display = k ? "none" : "block"));
-      setInterval(() => {
-        slides[i].style.display = "none";
-        i = (i + 1) % slides.length;
-        slides[i].style.display = "block";
-      }, 2000);
-    })();
-  });
+      const fuse = new Fuse(deptData, fuseOptions);
 
-  // Make grievance card clickable
-document.querySelectorAll(".gr-card-wrapper").forEach(card => {
-  card.addEventListener("click", () => {
-    const url = card.dataset.url;
-    if (url) window.location.href = url;
-  });
-});
+      // Make department and grievance cards clickable
+      document.querySelectorAll(".clickable-card").forEach(card => {
+        card.addEventListener("click", e => {
+          if (e.target.closest("a,button,input,select,textarea")) return;
+          window.location.href = card.dataset.url;
+        });
+      });
 
+      // Grievance search logic
+      const grievanceSearchInput = document.getElementById("grievance-search");
+      const deptDiv = document.getElementById("dept-container");
+      const grvDiv = document.getElementById("grievance-container");
+      const grCards = [...document.querySelectorAll(".gr-card-wrapper")];
 
+      grievanceSearchInput.addEventListener("input", e => {
+        const q = e.target.value.trim().toLowerCase();
+        if (q) {
+          let anyMatch = false;
+          grCards.forEach(card => {
+            const id = card.dataset.grvId || "";
+            const phone = card.dataset.contact || "";
+            const show = id.includes(q) || phone.includes(q);
+            card.style.display = show ? "" : "none";
+            if (show) anyMatch = true;
+          });
+          deptDiv.style.display = "none";
+          grvDiv.style.display = "";
+        } else {
+          deptDiv.style.display = "";
+          grvDiv.style.display = "none";
+        }
+      });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".open-remark-modal").forEach(button => {
-      button.addEventListener("click", () => {
-        const grievanceId = button.dataset.grievanceId;
-        document.getElementById("remarkGrievanceId").value = grievanceId;
+      // Department fuzzy search elements
+      const deptSearchInput = document.getElementById("dept-search");
+      const sortBtn = document.getElementById("sort-btn");
+      const deptContainer = document.getElementById("dept-container");
+
+      let currentSort = 'pending_percent'; // Start with pending_percent
+
+      // Initial sort by pending_percent
+      const initialSort = () => {
+        const cards = Array.from(document.querySelectorAll('.dept-card-wrapper'));
+        cards.sort((a, b) => {
+          const aValue = parseFloat(a.querySelector('.card-dept').dataset.pendingPercent) || 0;
+          const bValue = parseFloat(b.querySelector('.card-dept').dataset.pendingPercent) || 0;
+          return bValue - aValue; // Descending order
+        });
+        cards.forEach(card => deptContainer.appendChild(card));
+      };
+      initialSort();
+
+      let searchTimeout = null;
+      
+      // Search function - triggered on input
+      const performSearch = () => {
+        const query = deptSearchInput.value.trim().toLowerCase();
+        
+        if (!query) {
+          // Show all departments if search is empty
+          deptData.forEach(item => {
+            item.element.style.display = '';
+          });
+          // Hide empty state if showing
+          const emptyState = document.querySelector('.empty-state');
+          if (emptyState) emptyState.style.display = 'none';
+          // Re-apply current sort
+          const cards = Array.from(document.querySelectorAll('.dept-card-wrapper'));
+          cards.sort((a, b) => {
+            const key = currentSort === 'pending_percent' ? 'pendingPercent' : 'total';
+            const aValue = parseFloat(a.querySelector('.card-dept').dataset[key]) || 0;
+            const bValue = parseFloat(b.querySelector('.card-dept').dataset[key]) || 0;
+            return bValue - aValue; // Descending order
+          });
+          cards.forEach(card => deptContainer.appendChild(card));
+          return;
+        }
+
+        // Perform fuzzy search
+        const results = fuse.search(query);
+        
+        // Hide all departments first
+        deptData.forEach(item => {
+          item.element.style.display = 'none';
+        });
+        
+        // Show matching departments
+        results.forEach(result => {
+          result.item.element.style.display = '';
+        });
+        
+        // Show/hide empty state based on results
+        const emptyState = document.querySelector('.empty-state');
+        if (emptyState) {
+          emptyState.style.display = results.length > 0 ? 'none' : 'block';
+        }
+      };
+
+      // Sort function
+      const performSort = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const cards = Array.from(document.querySelectorAll('.dept-card-wrapper'));
+        
+        const sortKey = currentSort === 'pending_percent' ? 'pendingPercent' : 'total';
+        cards.sort((a, b) => {
+          const aValue = parseFloat(a.querySelector('.card-dept').dataset[sortKey]) || 0;
+          const bValue = parseFloat(b.querySelector('.card-dept').dataset[sortKey]) || 0;
+          return bValue - aValue; // Descending order
+        });
+        
+        // Re-append sorted cards
+        cards.forEach(card => {
+          deptContainer.appendChild(card);
+        });
+        
+        // Toggle sort and update button text
+        currentSort = currentSort === 'pending_percent' ? 'total' : 'pending_percent';
+        sortBtn.innerHTML = currentSort === 'pending_percent'
+          ? '<i class="fas fa-sort-amount-down-alt"></i> Sort by Total'
+          : '<i class="fas fa-sort-amount-down-alt"></i> Sort by Pending';
+      };
+
+      // Event listeners for department search
+      deptSearchInput.addEventListener('input', () => {
+        // Debounce the search to improve performance
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 300);
+      });
+      
+      // Ensure single click for sorting
+      sortBtn.removeEventListener('click', performSort); // Remove any existing listeners
+      sortBtn.addEventListener('click', performSort);
+
+      // Counters animation
+      document.querySelectorAll(".count").forEach(el => {
+        const t = +el.dataset.target || 0, d = 800, s = performance.now();
+        const f = n => {
+          const p = Math.min((n - s) / d, 1);
+          el.textContent = Math.floor(p * t).toLocaleString("en-IN");
+          if (p < 1) requestAnimationFrame(f);
+        };
+        requestAnimationFrame(f);
+      });
+
+      // Slider
+      (function () {
+        const slides = document.querySelectorAll(".mySlides");
+        if (!slides.length) return;
+        let i = 0;
+        slides.forEach((s, k) => (s.style.display = k ? "none" : "block"));
+        setInterval(() => {
+          slides[i].style.display = "none";
+          i = (i + 1) % slides.length;
+          slides[i].style.display = "block";
+        }, 2000);
+      })();
+
+      // Remark modal
+      document.querySelectorAll(".open-remark-modal").forEach(button => {
+        button.addEventListener("click", e => {
+          e.stopPropagation(); // Prevent card click
+          const grievanceId = button.dataset.grievanceId;
+          document.getElementById("remarkGrievanceId").value = grievanceId;
+        });
+      });
+
+      // Read more functionality for grievance descriptions
+      document.querySelectorAll('.read-more-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const targetId = this.getAttribute('data-target');
+          const description = document.getElementById(targetId);
+          
+          if (description.classList.contains('expanded')) {
+            description.classList.remove('expanded');
+            this.innerHTML = '<i class="fas fa-chevron-down"></i> Read more';
+          } else {
+            description.classList.add('expanded');
+            this.innerHTML = '<i class="fas fa-chevron-up"></i> Read less';
+          }
+        });
       });
     });
-  });
-</script>
-
   </script>
-  
-
-  
 </body>
 </html>
-<!-- all okay -->

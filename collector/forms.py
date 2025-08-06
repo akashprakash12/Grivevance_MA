@@ -2,7 +2,9 @@ from django import forms
 from django.forms.widgets import ClearableFileInput
 from user.models import User
 from .models import CollectorProfile
-
+from core_app.models import Department
+from officer.models import OfficerProfile
+from django.utils import timezone
 
 # ─────────────────────────────────────────────
 #  Collector •  User‑creation form
@@ -68,3 +70,56 @@ class CollectorProfileForm(forms.ModelForm):
             # ← uses Django’s default ClearableFileInput
             "profile_picture": forms.FileInput(),  # Simple FileInput (no path display)
         }
+
+
+
+
+
+
+
+
+
+
+
+
+from django import forms
+from .models import CollectorOrder
+from core_app.models import Department
+from officer.models import OfficerProfile
+from collector.models import CollectorProfile
+from django.utils import timezone
+
+
+class AdministrativeOrderForm(forms.ModelForm):
+    departments = forms.ModelMultipleChoiceField(
+        queryset=Department.objects.none(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-select department-select', 'required': 'required'}),
+        required=True
+    )
+
+    assigned_officers = forms.ModelMultipleChoiceField(
+        queryset=OfficerProfile.objects.none(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-select', 'id': 'id_assigned_officers'}),
+        required=False
+    )
+
+    class Meta:
+        model = CollectorOrder
+        fields = ['title', 'remark', 'due_date', 'departments', 'attachment']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'remark': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'min': timezone.now().date()}),
+            'attachment': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            try:
+                collector = user.collector_profile
+                self.fields['departments'].queryset = Department.objects.filter(district=collector.district).order_by('name')
+                self.fields['assigned_officers'].queryset = OfficerProfile.objects.filter(department__district=collector.district)
+            except CollectorProfile.DoesNotExist:
+                pass
