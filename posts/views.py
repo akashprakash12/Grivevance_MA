@@ -10,8 +10,11 @@ import threading
 import time
 import logging
 from datetime import datetime, timezone, timedelta
+import pandas as pd
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from posts.classi import classify_facebook_comment, save_grievances_to_excel
+
 
 logger = logging.getLogger(__name__)
 
@@ -242,14 +245,10 @@ def stop_monitor():
     logger.info("Monitor thread stopped")
 
 def monitor_complaints():
-    """
-    Continuously monitors Facebook posts for new comments until monitoring period ends.
-    Runs as a background thread when the server starts.
-    """
-    logger = logging.getLogger(__name__)
+    """Continuously monitors Facebook posts for new comments and processes them"""
     logger.info("Starting Facebook comment monitoring service")
 
-    while True:  # Main monitoring loop
+    while True:
         try:
             now = datetime.now(timezone.utc)
             
@@ -269,7 +268,6 @@ def monitor_complaints():
             
             for post in active_posts:
                 try:
-                    # Skip if post is marked as deleted
                     if post.is_deleted:
                         post.is_active = False
                         post.save()
@@ -280,12 +278,28 @@ def monitor_complaints():
                     
                     if comments:
                         new_comments_count = 0
+                        grievances = []
+                        
                         for comment in comments:
                             try:
-                                if not all(k in comment for k in ['id', 'user', 'message', 'created_time']):
-                                    logger.warning(f"Skipping incomplete comment: {comment.get('id')}")
+                                # Classify and create grievance data
+                                grievance_data = classify_facebook_comment(comment['message'])
+                                
+                                if 'error' in grievance_data:
+                                    logger.error(f"Classification failed for comment {comment['id']}: {grievance_data['error']}")
                                     continue
-                                    
+                                
+                                # Add Facebook metadata
+                                grievance_data.update({
+                                    'facebook_comment_id': comment['id'],
+                                    'facebook_post_id': post.post_id,
+                                    'facebook_user_id': comment.get('author_id', ''),
+                                    'comment_date': comment['created_time'].strftime('%Y-%m-%d %H:%M:%S')
+                                })
+                                
+                                grievances.append(grievance_data)
+                                
+                                # Save original comment to database
                                 _, created = Comment.objects.update_or_create(
                                     comment_id=comment['id'],
                                     post=post,
@@ -298,27 +312,20 @@ def monitor_complaints():
                                 )
                                 if created:
                                     new_comments_count += 1
+                                    
                             except Exception as e:
-                                logger.error(f"Error saving comment {comment.get('id')}: {str(e)}")
+                                logger.error(f"Error processing comment {comment.get('id')}: {str(e)}")
                                 continue
                         
+                        if grievances:
+                            # Save classified grievances to Excel
+                            excel_success = save_grievances_to_excel(grievances)
+                            if excel_success:
+                                logger.info(f"Saved {len(grievances)} grievances to Excel")
+                        
                         if new_comments_count > 0:
-                            logger.info(f"Added {new_comments_count} new comments for post {post.post_id}")
                             post.last_comment_fetch = now
                             post.save()
-                    
-                    # Update Excel file with current data
-                    fb_api.write_comments_to_excel(
-                        [{
-                            'id': post.post_id,
-                            'message': post.message,
-                            'created_time': post.created_at,
-                            'permalink_url': post.permalink_url,
-                            'likes': {'summary': {'total_count': 0}},  # Placeholder
-                            'comments': {'summary': {'total_count': len(comments) if comments else 0}}
-                        }],
-                        {post.post_id: comments or []}
-                    )
                     
                     # Check if monitoring period has ended
                     if post.comment_monitoring_end_time <= now:
@@ -335,4 +342,4 @@ def monitor_complaints():
             
         except Exception as e:
             logger.error(f"Critical error in monitor cycle: {str(e)}", exc_info=True)
-            time.sleep(60)  # Longer sleep after critical errors
+            time.sleep(60)
