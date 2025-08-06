@@ -396,11 +396,6 @@ def collector_dashboard(request):
         "all_grievances": all_grievances,
         "sort_by": sort_by,
         "dept_search": dept_search,
-<<<<<<< HEAD
-    }
-    return render(request, "collector/collector_dashboard.html", context)
-
-=======
         "district_images": district_images,
 
     }
@@ -447,42 +442,12 @@ def collector_do_profile_view(request):
         except DistrictOfficerProfile.DoesNotExist:
             messages.error(request, "District Officer profile not found.")
             return redirect('district_officer:DO_dashboard')
->>>>>>> origin/main
 
     else:
         messages.error(request, "Access denied. Unknown role.")
 
 @login_required
-<<<<<<< HEAD
-def collector_profile_view(request):
-    user = request.user  # Logged-in user (from User model)
-
-    try:
-        # Get the collector profile connected to this user
-        profile = CollectorProfile.objects.get(user=user)
-        collector_profile = {
-                    'full_name': f"{user.first_name} {user.last_name}",
-                    'email': user.email,
-                    'username': user.username,
-                    'district': profile.district.name,
-                    'official_address': profile.official_address,
-                    'collector_id': profile.collector_id,
-                    'tenure_start': profile.tenure_start,
-                    'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-                }
-
-        return render(request, 'collector/profile.html', collector_profile)
-
-    except CollectorProfile.DoesNotExist:
-        messages.error(request, "Collector profile not found.")
-        return redirect('dashboard')
-
-
-@login_required
-def collector_change_password(request):
-=======
 def change_password(request):
->>>>>>> origin/main
     """Handle password changes"""
     if request.method == "POST":
         user = request.user
@@ -1549,11 +1514,8 @@ def officer_details(request):
         is_active=True
     ).first()
     context = {
-<<<<<<< HEAD
-=======
         "profile": profile,
         "do_details": do_details,
->>>>>>> origin/main
         'hod_officers': hod_officers,
         "collector_details": collector_details,  # Only relevant in DO portal
 
@@ -2289,8 +2251,6 @@ def collector_reset_password(request):
             return redirect("accounts:login")
 
     return render(request, "collector/reset_password.html")    
-<<<<<<< HEAD
-=======
 
 
 
@@ -2441,4 +2401,3 @@ def collector_reset_password(request):
 #         return JsonResponse({"officers": officer_list})
 #     except CollectorProfile.DoesNotExist:
 #         return JsonResponse({"officers": []}, status=403)
->>>>>>> origin/main
