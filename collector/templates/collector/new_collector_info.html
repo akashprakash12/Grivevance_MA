@@ -1,0 +1,213 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New Collector Information</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #ffc107;
+      --primary-dark: #d39e00;
+      --text-main: #343a40;
+      --light-bg: #f8f9fa;
+      --warning: #ff6b35;
+      --warning-dark: #e85925;
+      --secondary: #6c757d;
+      --secondary-dark: #565e64;
+    }
+
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 30px;
+      color: var(--text-main);
+    }
+
+    .collector-form-card {
+      max-width: 700px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      padding: 40px;
+      position: relative;
+    }
+
+    .collector-form-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 6px;
+      width: 100%;
+      background: linear-gradient(to right, var(--primary), transparent);
+    }
+
+    .form-title {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .form-title h1 {
+      color: var(--text-main);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+
+    .btn-submit {
+      background-color: var(--primary);
+      color: #212529;
+      font-weight: 500;
+      padding: 0.75rem;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-submit:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+
+    .confirmation-checkbox {
+      display: flex;
+      align-items: flex-start;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background-color: #fffbe6;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-dark);
+    }
+
+    .confirmation-checkbox input {
+      margin-right: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .confirmation-text {
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .note {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .collector-form-card {
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="collector-form-card">
+    <div class="form-title">
+      <h1>New Collector Information</h1>
+      <p>Enter details for the new District Collector</p>
+    </div>
+    
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+    
+    <form method="post" id="handoverForm">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="first_name" class="form-label">First Name *</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ first_name|default:'' }}" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="last_name" class="form-label">Last Name *</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ last_name|default:'' }}" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="email" class="form-label">Email *</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ email|default:'' }}" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="phone" class="form-label">Phone Number</label>
+        <input type="text" class="form-control" id="phone" name="phone" value="{{ phone|default:'' }}">
+        <div class="note">Optional - include country code if international</div>
+      </div>
+      
+      <div class="confirmation-checkbox">
+        <input type="checkbox" id="confirm_details" name="confirm_details" required>
+        <label for="confirm_details" class="confirmation-text">
+          I confirm that all the details provided above are accurate and complete. 
+          I understand that sensitive login credentials will be sent to the email 
+          address provided, and I take full responsibility for ensuring this 
+          information is correct.
+        </label>
+      </div>
+      
+      <button type="submit" class="btn-submit" id="submitButton">
+        <i class="fas fa-user-plus me-2"></i> Complete Handover
+      </button>
+    </form>
+    
+    <div class="note">
+      * Required fields. The new collector will receive their login credentials via email.
+      Your account will be deactivated after successful handover.
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('handoverForm').addEventListener('submit', function(e) {
+      if (!document.getElementById('confirm_details').checked) {
+        e.preventDefault();
+        alert('Please confirm that all details are correct before proceeding.');
+      }
+    });
+
+    const form = document.getElementById('handoverForm');
+    const submitButton = document.getElementById('submitButton');
+    const requiredInputs = form.querySelectorAll('input[required]');
+    const confirmationCheckbox = document.getElementById('confirm_details');
+
+    function checkForm() {
+      let allFilled = true;
+      requiredInputs.forEach(input => {
+        if (!input.value.trim()) {
+          allFilled = false;
+        }
+      });
+      
+      submitButton.disabled = !(allFilled && confirmationCheckbox.checked);
+    }
+
+    requiredInputs.forEach(input => {
+      input.addEventListener('input', checkForm);
+    });
+    confirmationCheckbox.addEventListener('change', checkForm);
+
+    checkForm();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

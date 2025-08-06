@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify New Collector</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #ffc107;
+      --primary-dark: #d39e00;
+      --text-main: #343a40;
+      --light-bg: #f8f9fa;
+      --warning: #ff6b35;
+      --warning-dark: #e85925;
+      --secondary: #6c757d;
+      --secondary-dark: #565e64;
+    }
+
+    body {
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 30px;
+      color: var(--text-main);
+    }
+
+    .verification-card {
+      max-width: 500px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      padding: 40px;
+      position: relative;
+    }
+
+    .verification-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 6px;
+      width: 100%;
+      background: linear-gradient(to right, var(--primary), transparent);
+    }
+
+    .verification-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .verification-title h2 {
+      color: var(--text-main);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .verification-title p {
+      color: #666;
+    }
+
+    .otp-input {
+      text-align: center;
+      font-size: 1.2rem;
+      letter-spacing: 0.5rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .btn-verify {
+      background-color: var(--primary);
+      color: #212529;
+      font-weight: 500;
+      padding: 0.75rem;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-verify:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .verification-card {
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="verification-card">
+    <div class="verification-title">
+      <h2>Verify New Collector</h2>
+      <p>Enter the OTP sent to the new collector's email</p>
+    </div>
+    
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+    
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="otp" class="form-label">Verification OTP</label>
+        <input type="text" class="form-control otp-input" id="otp" name="new_collector_otp" required>
+      </div>
+      <button type="submit" class="btn-verify">
+        <i class="fas fa-check-circle me-2"></i> Verify & Complete Handover
+      </button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

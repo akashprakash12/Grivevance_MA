@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Handover Complete</h4>
+                </div>
+                
+                <div class="card-body">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle fa-5x text-success"></i>
+                    </div>
+                    
+                    <h3 class="mb-3">Success!</h3>
+                    <p class="lead">
+                        The collector handover process has been completed successfully.
+                    </p>
+                    
+                    <p>
+                        The new collector has been notified with their login credentials.
+                        Your account has now been deactivated.
+                    </p>
+                    
+                    <div class="alert alert-info mt-4">
+                        <strong>Thank you</strong> for your service as District Collector.
+                    </div>
+                    
+                    <a href="{% url 'accounts:logout' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

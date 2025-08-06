@@ -1,578 +1,523 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Settings | Grievance Management</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --indigo: #002855;
-      --indigo-light: #08438f;
-      --accent: #ffc107;
-      --bg: #f4f6f9;
-      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
-    }
+{% extends "base.html" %}
+{% load static %}
 
-    body {
-      background: var(--bg);
-      font-family: 'Segoe UI', sans-serif;
-    }
+{% block title %}Account Settings | Kerala Grievance Portal{% endblock %}
 
-    .account-tab {
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s ease;
-      color: var(--indigo);
-    }
-    .account-tab.active {
-      border-bottom-color: var(--accent);
-      color: var(--indigo);
-      font-weight: 600;
-    }
-    .account-tab:hover:not(.active) {
-      border-bottom-color: var(--accent);
-      color: var(--indigo-light);
-    }
-    .avatar-upload {
-      position: relative;
-      display: inline-block;
-    }
-    .avatar-upload:hover .avatar-overlay {
-      opacity: 1;
-    }
-    .avatar-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 9999px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      cursor: pointer;
-    }
+{% block extra_css %}
+<style>
+  :root {
+    --indigo: #002855;
+    --indigo-light: #08438f;
+    --accent: #ffc107;
+    --bg: #f4f6f9;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+  }
 
-    .navbar-custom {
-      background: var(--indigo);
-      padding: 1rem 2rem;
-      border-bottom: 4px solid var(--indigo-light);
-      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-    }
+  .account-tab {
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    color: var(--indigo);
+  }
+  .account-tab.active {
+    border-bottom-color: var(--accent);
+    color: var(--indigo);
+    font-weight: 600;
+  }
+  .account-tab:hover:not(.active) {
+    border-bottom-color: var(--accent);
+    color: var(--indigo-light);
+  }
+  .avatar-upload {
+    position: relative;
+    display: inline-block;
+  }
+  .avatar-upload:hover .avatar-overlay {
+    opacity: 1;
+  }
+  .avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
 
-    .btn-primary {
-      background-color: var(--indigo);
-      border-color: var(--indigo);
-    }
+  .btn-primary {
+    background-color: var(--indigo);
+    border-color: var(--indigo);
+  }
 
-    .btn-primary:hover {
-      background-color: var(--indigo-light);
-      border-color: var(--indigo-light);
-    }
+  .btn-primary:hover {
+    background-color: var(--indigo-light);
+    border-color: var(--indigo-light);
+  }
 
-    .card-custom {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: var(--card-shadow);
-      transition: .2s;
-    }
+  .card-custom {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    transition: .2s;
+  }
 
-    .card-custom:hover {
-      box-shadow: var(--card-shadow-hover);
-    }
+  .card-custom:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
 
-    .border-custom {
-      border-left: 5px solid var(--accent);
-    }
+  .border-custom {
+    border-left: 5px solid var(--accent);
+  }
 
-    .text-accent {
-      color: var(--accent);
-    }
+  .text-accent {
+    color: var(--accent);
+  }
 
-    .badge-accent {
-      background-color: var(--accent);
-      color: #000;
-    }
-  </style>
-</head>
-<body>
-  <!-- Top Navigation -->
-  <nav class="navbar-custom text-white">
-    <div class="container-fluid">
-   
-      <div class="d-flex align-items-center">
-        <span class="me-3 d-none d-md-inline">Welcome, Rajesh</span>
-        <img src="https://ui-avatars.com/api/?name=Rajesh+Kumar&background=random" alt="User" class="rounded-circle" width="40" height="40">
+  .badge-accent {
+    background-color: var(--accent);
+    color: #000;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3">
+      <div class="card-custom sticky-top" style="top: 20px;">
+        <div class="text-center mb-4">
+          <div class="avatar-upload mb-3 mx-auto">
+            <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|urlencode }}&background=random&size=128" alt="Profile" class="rounded-circle border border-4 border-white shadow" width="96" height="96">
+            <div class="avatar-overlay">
+              <span class="text-white"><i class="fas fa-camera me-1"></i> Change</span>
+            </div>
+          </div>
+          <h1 class="text-2xl font-bold mb-4">{{ user.get_full_name|default:user.username }}</h1>
+          <p class="text-muted small">{{ user.email }}</p>
+        </div>
+        
+        <nav class="nav flex-column gap-2">
+          <button class="account-tab active text-start px-3 py-2 rounded" data-tab="profile">
+            <i class="fas fa-user-circle me-2"></i> Profile
+          </button>
+          <button class="account-tab text-start px-3 py-2 rounded" data-tab="security">
+            <i class="fas fa-shield-alt me-2"></i> Security
+          </button>
+          <button class="account-tab text-start px-3 py-2 rounded" data-tab="notifications">
+            <i class="fas fa-bell me-2"></i> Notifications
+          </button>
+          <button class="account-tab text-start px-3 py-2 rounded" data-tab="privacy">
+            <i class="fas fa-lock me-2"></i> Privacy
+          </button>
+         
+          <a href="{% url 'accounts:logout' %}" class="nav-link text-danger px-3 py-2 rounded mt-3">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+          </a>
+        </nav>
       </div>
     </div>
-  </nav>
-
-  <!-- Main Content -->
-  <main class="container-fluid py-4">
-    <div class="row g-4">
-      <!-- Sidebar Navigation -->
-      <div class="col-md-3">
-        <div class="card-custom sticky-top" style="top: 20px;">
-          <div class="text-center mb-4">
-            <div class="avatar-upload mb-3 mx-auto">
-              <img src="https://ui-avatars.com/api/?name=Rajesh+Kumar&background=random&size=128" alt="Profile" class="rounded-circle border border-4 border-white shadow" width="96" height="96">
-              <div class="avatar-overlay">
-                <span class="text-white"><i class="fas fa-camera me-1"></i> Change</span>
-              </div>
-            </div>
-            <h2 class="h5 fw-bold">Rajesh Kumar</h2>
-            <p class="text-muted small">rajesh.k@example.com</p>
-          </div>
-          
-          <nav class="nav flex-column gap-2">
-            <button class="account-tab active text-start px-3 py-2 rounded" data-tab="profile">
-              <i class="fas fa-user-circle me-2"></i> Profile
-            </button>
-            <button class="account-tab text-start px-3 py-2 rounded" data-tab="security">
-              <i class="fas fa-shield-alt me-2"></i> Security
-            </button>
-            <button class="account-tab text-start px-3 py-2 rounded" data-tab="notifications">
-              <i class="fas fa-bell me-2"></i> Notifications
-            </button>
-            <button class="account-tab text-start px-3 py-2 rounded" data-tab="privacy">
-              <i class="fas fa-lock me-2"></i> Privacy
-            </button>
-            <button class="account-tab text-start px-3 py-2 rounded" data-tab="preferences">
-              <i class="fas fa-cog me-2"></i> Preferences
-            </button>
-            <a href="#" class="nav-link text-danger px-3 py-2 rounded mt-3">
-              <i class="fas fa-sign-out-alt me-2"></i> Logout
-            </a>
-          </nav>
-        </div>
-      </div>
-      
-      <!-- Main Content Area -->
-      <div class="col-md-9">
-        <!-- Profile Tab -->
-        <div id="profile-tab" class="account-content card-custom">
-          <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-user-circle me-2 text-accent"></i>Profile Information</h2>
-          
-          <form class="row g-4">
-            <div class="col-md-6">
-              <label for="first-name" class="form-label">First Name*</label>
-              <input type="text" id="first-name" value="Rajesh" class="form-control" required>
-            </div>
-            <div class="col-md-6">
-              <label for="last-name" class="form-label">Last Name*</label>
-              <input type="text" id="last-name" value="Kumar" class="form-control" required>
-            </div>
-            
-            <div class="col-12">
-              <label for="email" class="form-label">Email Address*</label>
-              <input type="email" id="email" value="rajesh.k@example.com" class="form-control" required>
-              <div class="form-text">You'll need to verify any email address changes.</div>
-            </div>
-            
-            <div class="col-md-6">
-              <label for="phone" class="form-label">Phone Number</label>
-              <input type="tel" id="phone" value="+91 9876543210" class="form-control">
-            </div>
-            <div class="col-md-6">
-              <label for="dob" class="form-label">Date of Birth</label>
-              <input type="date" id="dob" value="1985-06-15" class="form-control">
-            </div>
-            
-            <div class="col-12">
-              <label for="address" class="form-label">Address</label>
-              <textarea id="address" rows="3" class="form-control">123 Main Street, Kochi, Kerala</textarea>
-            </div>
-            
-            <div class="col-md-6">
-              <label for="district" class="form-label">District</label>
-              <select id="district" class="form-select">
-                <option value="Ernakulam" selected>Ernakulam</option>
-                <option value="Thiruvananthapuram">Thiruvananthapuram</option>
-                <option value="Kollam">Kollam</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label for="pincode" class="form-label">Pincode</label>
-              <input type="text" id="pincode" value="682001" class="form-control">
-            </div>
-            
-            <div class="col-12 pt-3 border-top d-flex justify-content-end gap-3">
-              <button type="button" class="btn btn-outline-secondary">
-                Cancel
-              </button>
-              <button type="submit" class="btn btn-primary">
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
+    
+    <!-- Main Content Area -->
+    <div class="col-md-9">
+      <!-- Profile Tab -->
+      <div id="profile-tab" class="account-content card-custom">
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-user-circle me-2 text-accent"></i>Profile Information</h2>
         
-        <!-- Security Tab -->
-        <div id="security-tab" class="account-content card-custom d-none">
-          <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-shield-alt me-2 text-accent"></i>Security Settings</h2>
+        <form method="post" class="row g-4" id="profile-form">
+          {% csrf_token %}
+          <input type="hidden" name="update_profile" value="1">
           
-          <div class="row g-4">
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h3 class="h5 fw-semibold">Password</h3>
-                    <p class="text-muted small">Last changed 3 months ago</p>
-                  </div>
-                  <button class="btn btn-primary btn-sm" onclick="showPasswordModal()">
-                    Change Password
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h3 class="h5 fw-semibold">Two-Factor Authentication</h3>
-                    <p class="text-muted small">Add an extra layer of security to your account</p>
-                  </div>
-                  <div class="d-flex align-items-center">
-                    <span class="badge bg-danger me-3">Disabled</span>
-                    <button class="btn btn-outline-secondary btn-sm">
-                      Enable
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <h3 class="h5 fw-semibold">Active Sessions</h3>
-                    <p class="text-muted small">Manage devices that are logged into your account</p>
-                  </div>
-                  <button class="btn btn-outline-secondary btn-sm">
-                    View Sessions
-                  </button>
-                </div>
-                <div class="list-group list-group-flush">
-                  <div class="list-group-item bg-light d-flex align-items-center">
-                    <i class="fas fa-desktop text-muted me-3"></i>
-                    <div class="flex-grow-1">
-                      <p class="fw-medium mb-0">Windows 10 • Chrome</p>
-                      <p class="text-muted small mb-0">Kochi, Kerala • Active now</p>
-                    </div>
-                    <button class="btn btn-link text-danger">
-                      <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                  </div>
-                  <div class="list-group-item bg-light d-flex align-items-center">
-                    <i class="fas fa-mobile-alt text-muted me-3"></i>
-                    <div class="flex-grow-1">
-                      <p class="fw-medium mb-0">Android • Firefox</p>
-                      <p class="text-muted small mb-0">Last active 2 days ago</p>
-                    </div>
-                    <button class="btn btn-link text-danger">
-                      <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="col-md-6">
+            <label for="id_first_name" class="form-label">First Name*</label>
+            {{ user_form.first_name }}
+            {% if user_form.first_name.errors %}
+              <div class="text-danger">{{ user_form.first_name.errors }}</div>
+            {% endif %}
           </div>
-        </div>
-        
-        <!-- Notifications Tab -->
-        <div id="notifications-tab" class="account-content card-custom d-none">
-          <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-bell me-2 text-accent"></i>Notification Preferences</h2>
+          <div class="col-md-6">
+            <label for="id_last_name" class="form-label">Last Name*</label>
+            {{ user_form.last_name }}
+            {% if user_form.last_name.errors %}
+              <div class="text-danger">{{ user_form.last_name.errors }}</div>
+            {% endif %}
+          </div>
           
-          <form class="row g-4">
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <h3 class="h5 fw-semibold mb-3">Email Notifications</h3>
-                
-                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label class="form-check-label fw-medium" for="status-updates">Complaint Status Updates</label>
-                    <p class="text-muted small">Receive emails when your complaint status changes</p>
-                  </div>
-                  <input class="form-check-input" type="checkbox" id="status-updates" checked>
-                </div>
-                
-                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label class="form-check-label fw-medium" for="announcements">Important Announcements</label>
-                    <p class="text-muted small">Receive important system updates and announcements</p>
-                  </div>
-                  <input class="form-check-input" type="checkbox" id="announcements" checked>
-                </div>
-                
-                <div class="form-check form-switch d-flex justify-content-between align-items-center">
-                  <div>
-                    <label class="form-check-label fw-medium" for="newsletter">Newsletter</label>
-                    <p class="text-muted small">Receive monthly newsletter with grievance resolution statistics</p>
-                  </div>
-                  <input class="form-check-input" type="checkbox" id="newsletter">
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <h3 class="h5 fw-semibold mb-3">Push Notifications</h3>
-                
-                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label class="form-check-label fw-medium" for="new-messages">New Messages</label>
-                    <p class="text-muted small">Notify me about new messages from support</p>
-                  </div>
-                  <input class="form-check-input" type="checkbox" id="new-messages" checked>
-                </div>
-                
-                <div class="form-check form-switch d-flex justify-content-between align-items-center">
-                  <div>
-                    <label class="form-check-label fw-medium" for="urgent-updates">Urgent Updates</label>
-                    <p class="text-muted small">Notify me about urgent updates to my complaints</p>
-                  </div>
-                  <input class="form-check-input" type="checkbox" id="urgent-updates" checked>
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 pt-3 border-top d-flex justify-content-end gap-3">
-              <button type="button" class="btn btn-outline-secondary">
-                Reset to Default
-              </button>
-              <button type="submit" class="btn btn-primary">
-                Save Preferences
-              </button>
-            </div>
-          </form>
-        </div>
-        
-        <!-- Privacy Tab -->
-        <div id="privacy-tab" class="account-content card-custom d-none">
-          <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-lock me-2 text-accent"></i>Privacy Settings</h2>
+          <div class="col-12">
+            <label for="id_email" class="form-label">Email Address*</label>
+            {{ user_form.email }}
+            {% if user_form.email.errors %}
+              <div class="text-danger">{{ user_form.email.errors }}</div>
+            {% endif %}
+            <div class="form-text">You'll need to verify any email address changes.</div>
+          </div>
           
-          <div class="row g-4">
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <h3 class="h5 fw-semibold mb-3">Data Privacy</h3>
-                <p class="text-muted mb-4">We respect your privacy and are committed to protecting your personal information. Here you can control how your data is used.</p>
-                
-                <div class="form-check mb-3">
-                  <input class="form-check-input" type="checkbox" id="data-collection" checked>
-                  <label class="form-check-label fw-medium" for="data-collection">Allow data collection for analytics</label>
-                  <p class="text-muted small">Help us improve our services by sharing anonymous usage data</p>
-                </div>
-                
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="personalization" checked>
-                  <label class="form-check-label fw-medium" for="personalization">Enable personalized recommendations</label>
-                  <p class="text-muted small">Get tailored suggestions based on your complaint history</p>
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <h3 class="h5 fw-semibold mb-3">Data Export & Deletion</h3>
-                
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                  <div>
-                    <p class="fw-medium mb-0">Export your data</p>
-                    <p class="text-muted small">Download a copy of all your personal data we store</p>
-                  </div>
-                  <button class="btn btn-outline-secondary btn-sm">
-                    Request Export
-                  </button>
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <p class="fw-medium mb-0">Delete your account</p>
-                    <p class="text-muted small">Permanently remove your account and all associated data</p>
-                  </div>
-                  <button class="btn btn-outline-danger btn-sm">
-                    Delete Account
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 pt-3 border-top d-flex justify-content-end">
-              <button type="button" class="btn btn-primary">
-                Save Privacy Settings
-              </button>
-            </div>
+          <div class="col-md-6">
+            <label for="id_phone" class="form-label">Phone Number</label>
+            {{ user_form.phone }}
+            {% if user_form.phone.errors %}
+              <div class="text-danger">{{ user_form.phone.errors }}</div>
+            {% endif %}
           </div>
-        </div>
-        
-        <!-- Preferences Tab -->
-        <div id="preferences-tab" class="account-content card-custom d-none">
-          <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-cog me-2 text-accent"></i>Account Preferences</h2>
+          <div class="col-md-6">
+            <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+            {{ profile_form.date_of_birth }}
+            {% if profile_form.date_of_birth.errors %}
+              <div class="text-danger">{{ profile_form.date_of_birth.errors }}</div>
+            {% endif %}
+          </div>
           
-          <form class="row g-4">
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <h3 class="h5 fw-semibold mb-3">Language & Region</h3>
-                
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label for="language" class="form-label">Language</label>
-                    <select id="language" class="form-select">
-                      <option value="en" selected>English</option>
-                      <option value="hi">Hindi</option>
-                      <option value="ml">Malayalam</option>
-                      <option value="ta">Tamil</option>
-                    </select>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="timezone" class="form-label">Timezone</label>
-                    <select id="timezone" class="form-select">
-                      <option value="Asia/Kolkata" selected>(UTC+5:30) India Standard Time</option>
-                      <option value="UTC">(UTC) Coordinated Universal Time</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 card border-0 bg-light">
-              <div class="card-body">
-                <h3 class="h5 fw-semibold mb-3">Display Preferences</h3>
-                
-                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label class="form-check-label fw-medium" for="dark-mode">Dark Mode</label>
-                    <p class="text-muted small">Switch between light and dark theme</p>
-                  </div>
-                  <input class="form-check-input" type="checkbox" id="dark-mode">
-                </div>
-                
-                <div class="form-check form-switch d-flex justify-content-between align-items-center">
-                  <div>
-                    <label class="form-check-label fw-medium" for="high-contrast">High Contrast Mode</label>
-                    <p class="text-muted small">Increase color contrast for better visibility</p>
-                  </div>
-                  <input class="form-check-input" type="checkbox" id="high-contrast">
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-12 pt-3 border-top d-flex justify-content-end gap-3">
-              <button type="button" class="btn btn-outline-secondary">
-                Reset Defaults
-              </button>
-              <button type="submit" class="btn btn-primary">
-                Save Preferences
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Change Password Modal -->
-  <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Change Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form class="modal-body">
-          <div class="mb-3">
-            <label for="current-password" class="form-label">Current Password*</label>
-            <input type="password" id="current-password" class="form-control" required>
+          <div class="col-12">
+            <label for="id_address" class="form-label">Address</label>
+            {{ profile_form.address }}
+            {% if profile_form.address.errors %}
+              <div class="text-danger">{{ profile_form.address.errors }}</div>
+            {% endif %}
           </div>
-          <div class="mb-3">
-            <label for="new-password" class="form-label">New Password*</label>
-            <input type="password" id="new-password" class="form-control" required>
-            <div class="form-text">Must be at least 8 characters with 1 number and 1 special character</div>
+          
+          <div class="col-md-6">
+            <label for="id_district" class="form-label">District</label>
+            {{ profile_form.district }}
+            {% if profile_form.district.errors %}
+              <div class="text-danger">{{ profile_form.district.errors }}</div>
+            {% endif %}
           </div>
-          <div class="mb-3">
-            <label for="confirm-password" class="form-label">Confirm New Password*</label>
-            <input type="password" id="confirm-password" class="form-control" required>
+          <div class="col-md-6">
+            <label for="id_gender" class="form-label">Gender</label>
+            {{ profile_form.gender }}
+            {% if profile_form.gender.errors %}
+              <div class="text-danger">{{ profile_form.gender.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6">
+            <label for="id_thaluk" class="form-label">Thaluk</label>
+            {{ profile_form.thaluk }}
+            {% if profile_form.thaluk.errors %}
+              <div class="text-danger">{{ profile_form.thaluk.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label for="id_village" class="form-label">Village</label>
+            {{ profile_form.village }}
+            {% if profile_form.village.errors %}
+              <div class="text-danger">{{ profile_form.village.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6">
+            <label for="id_panchayath" class="form-label">Panchayath</label>
+            {{ profile_form.panchayath }}
+            {% if profile_form.panchayath.errors %}
+              <div class="text-danger">{{ profile_form.panchayath.errors }}</div>
+            {% endif %}
+          </div>
+         
+          
+          <div class="col-12 pt-3 border-top d-flex justify-content-end gap-3">
+            <button type="button" class="btn btn-outline-secondary" onclick="resetForm('profile-form')">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Save Changes
+            </button>
           </div>
         </form>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary">Update Password</button>
+      </div>
+      
+      <!-- Security Tab -->
+      <div id="security-tab" class="account-content card-custom d-none">
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-shield-alt me-2 text-accent"></i>Security Settings</h2>
+        
+        <div class="row g-4">
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <h3 class="h5 fw-semibold mb-3">Change Password</h3>
+               <form method="post" id="password-change-form" action="{% url 'public_user:account_settings' %}#security" data-tab="security">
+        {% csrf_token %}
+        <input type="hidden" name="change_password" value="1">
+        
+        <div class="mb-3">
+          <label for="current-password" class="form-label">Current Password*</label>
+          <input type="password" id="current-password" name="current_password" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="new-password" class="form-label">New Password*</label>
+          <input type="password" id="new-password" name="new_password" class="form-control" required
+                 pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+                 title="Must contain at least 8 characters, one number and one special character">
+          <div class="form-text">Must be at least 8 characters with 1 number and 1 special character</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="confirm-password" class="form-label">Confirm New Password*</label>
+          <input type="password" id="confirm-password" name="confirm_new_password" class="form-control" required>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary">
+            Update Password
+          </button>
+        </div>
+      </form>
+            </div>
+          </div>
+          
+          <!-- Active Sessions Section -->
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h3 class="h5 fw-semibold">Active Sessions</h3>
+                  <p class="text-muted small">Manage devices that are logged into your account</p>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm">
+                  View Sessions
+                </button>
+              </div>
+              <div class="list-group list-group-flush">
+                <div class="list-group-item bg-light d-flex align-items-center">
+                  <i class="fas fa-desktop text-muted me-3"></i>
+                  <div class="flex-grow-1">
+                    <p class="fw-medium mb-0">{{ request.META.HTTP_USER_AGENT }}</p>
+                    <p class="text-muted small mb-0">Active now</p>
+                  </div>
+                  <button class="btn btn-link text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <!-- Notifications Tab -->
+      <div id="notifications-tab" class="account-content card-custom d-none">
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-bell me-2 text-accent"></i>Notification Preferences</h2>
+        
+        <form class="row g-4">
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <h3 class="h5 fw-semibold mb-3">Email Notifications</h3>
+              
+              <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                <div>
+                  <label class="form-check-label fw-medium" for="status-updates">Complaint Status Updates</label>
+                  <p class="text-muted small">Receive emails when your complaint status changes</p>
+                </div>
+                <input class="form-check-input" type="checkbox" id="status-updates" checked>
+              </div>
+              
+              <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                <div>
+                  <label class="form-check-label fw-medium" for="announcements">Important Announcements</label>
+                  <p class="text-muted small">Receive important system updates and announcements</p>
+                </div>
+                <input class="form-check-input" type="checkbox" id="announcements" checked>
+              </div>
+              
+              <div class="form-check form-switch d-flex justify-content-between align-items-center">
+                <div>
+                  <label class="form-check-label fw-medium" for="newsletter">Newsletter</label>
+                  <p class="text-muted small">Receive monthly newsletter with grievance resolution statistics</p>
+                </div>
+                <input class="form-check-input" type="checkbox" id="newsletter">
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <h3 class="h5 fw-semibold mb-3">Push Notifications</h3>
+              
+              <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                <div>
+                  <label class="form-check-label fw-medium" for="new-messages">New Messages</label>
+                  <p class="text-muted small">Notify me about new messages from support</p>
+                </div>
+                <input class="form-check-input" type="checkbox" id="new-messages" checked>
+              </div>
+              
+              <div class="form-check form-switch d-flex justify-content-between align-items-center">
+                <div>
+                  <label class="form-check-label fw-medium" for="urgent-updates">Urgent Updates</label>
+                  <p class="text-muted small">Notify me about urgent updates to my complaints</p>
+                </div>
+                <input class="form-check-input" type="checkbox" id="urgent-updates" checked>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-12 pt-3 border-top d-flex justify-content-end gap-3">
+            <button type="button" class="btn btn-outline-secondary">
+              Reset to Default
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Save Preferences
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Privacy Tab -->
+      <div id="privacy-tab" class="account-content card-custom d-none">
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-lock me-2 text-accent"></i>Privacy Settings</h2>
+        
+        <div class="row g-4">
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <h3 class="h5 fw-semibold mb-3">Data Privacy</h3>
+              <p class="text-muted mb-4">We respect your privacy and are committed to protecting your personal information. Here you can control how your data is used.</p>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="data-collection" checked>
+                <label class="form-check-label fw-medium" for="data-collection">Allow data collection for analytics</label>
+                <p class="text-muted small">Help us improve our services by sharing anonymous usage data</p>
+              </div>
+              
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="personalization" checked>
+                <label class="form-check-label fw-medium" for="personalization">Enable personalized recommendations</label>
+                <p class="text-muted small">Get tailored suggestions based on your complaint history</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <h3 class="h5 fw-semibold mb-3">Data Export & Deletion</h3>
+              
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                  <p class="fw-medium mb-0">Export your data</p>
+                  <p class="text-muted small">Download a copy of all your personal data we store</p>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm">
+                  Request Export
+                </button>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="fw-medium mb-0">Delete your account</p>
+                  <p class="text-muted small">Permanently remove your account and all associated data</p>
+                </div>
+                <a href="{% url 'public_user:delete_public_user_by_public'%}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+                  Delete Account
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-12 pt-3 border-top d-flex justify-content-end">
+            <button type="button" class="btn btn-primary">
+              Save Privacy Settings
+            </button>
+          </div>
+        </div>
+      </div>
+      
     </div>
   </div>
+</div>
+{% endblock %}
 
-  <!-- Footer -->
-  <footer class="bg-indigo text-white py-4 mt-4">
-    <div class="container-fluid text-center">
-      <p class="mb-1">© 2025 Government Grievance Portal. All rights reserved.</p>
-      <p class="small mb-0">For assistance, contact support@grievance.gov.in or call 1800-123-4567</p>
-    </div>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Tab switching functionality
-    document.querySelectorAll('.account-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        // Skip if this tab is already active
-        if (tab.classList.contains('active')) return;
-        
-        // Remove active class from all tabs
-        document.querySelectorAll('.account-tab').forEach(t => {
-          t.classList.remove('active');
-        });
-        
-        // Add active class to clicked tab
-        tab.classList.add('active');
-        
-        // Hide all content sections
-        document.querySelectorAll('.account-content').forEach(content => {
-          content.classList.add('d-none');
-        });
-        
-        // Show the selected content section
-        const tabId = tab.getAttribute('data-tab');
-        document.getElementById(`${tabId}-tab`).classList.remove('d-none');
+{% block extra_js %}
+<script>
+  // Tab switching functionality
+  document.querySelectorAll('.account-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Skip if this tab is already active
+      if (tab.classList.contains('active')) return;
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.account-tab').forEach(t => {
+        t.classList.remove('active');
       });
+      
+      // Add active class to clicked tab
+      tab.classList.add('active');
+      
+      // Hide all content sections
+      document.querySelectorAll('.account-content').forEach(content => {
+        content.classList.add('d-none');
+      });
+      
+      // Show the selected content section
+      const tabId = tab.getAttribute('data-tab');
+      document.getElementById(`${tabId}-tab`).classList.remove('d-none');
     });
-    
-    // Show password modal
-    function showPasswordModal() {
-      const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
-      modal.show();
+  });
+  
+  // Show password modal
+  function showPasswordModal() {
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+  }
+  
+  // Reset form to initial values
+  function resetForm(formId) {
+    document.getElementById(formId).reset();
+  }
+  
+  // Initialize the first tab as active
+  document.querySelector('.account-tab.active').click();
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordForm = document.getElementById('password-change-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Client-side validation
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('Please fill in all password fields!');
+                e.preventDefault();
+                return false;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match!');
+                e.preventDefault();
+                return false;
+            }
+            
+            if (newPassword.length < 8) {
+                alert('Password must be at least 8 characters long!');
+                e.preventDefault();
+                return false;
+            }
+            
+            // Additional complexity check
+            const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+            if (!regex.test(newPassword)) {
+                alert('Password must contain at least one letter, one number and one special character!');
+                e.preventDefault();
+                return false;
+            }
+            
+            return true;
+        });
     }
-    
-    // Avatar upload functionality
-    document.querySelector('.avatar-overlay').addEventListener('click', function() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      
-      input.onchange = e => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            document.querySelector('.avatar-upload img').src = event.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      
-      input.click();
-    });
-    
-    // Initialize the first tab as active
-    document.querySelector('.account-tab.active').click();
-  </script>
-</body>
-</html>
+});
+</script>
+{% endblock %}
