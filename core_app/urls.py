@@ -14,4 +14,6 @@ urlpatterns = [
     path('district/create/', views.district_create, name='district_create'),
     path('district/update/<str:code>/', views.district_update, name='district_update'),
     path('district/delete/<str:code>/', views.district_delete, name='district_delete'),
+
+    
 ]

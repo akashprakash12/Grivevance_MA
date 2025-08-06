@@ -1,0 +1,41 @@
+<!-- templates/admin/create_do.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Create District Officer (Admin)</h2>
+    
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                User Information
+            </div>
+            <div class="card-body">
+                {% for field in user_form %}
+                <div class="mb-3">
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="text-danger">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                District Information
+            </div>
+            <div class="card-body">
+                {{ profile_form.district }}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success">Create Officer</button>
+        <a href="{% url 'district_officer:view_district_officers' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

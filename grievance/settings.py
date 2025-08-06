@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'widget_tweaks',
-
     'officer',
     'user',
     'admin_app',
@@ -49,21 +48,21 @@ INSTALLED_APPS = [
     'core_app',
     'posts',
     'whatsapp',
-    'hod'
-
-
+    'hod',
+    'district_officer',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'grievance.urls'
 
@@ -126,11 +125,28 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
+LANGUAGE_CODE = 'en'  # Default language
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('hi', 'Hindi'),
+    ('ml', 'Malayalam'),
+    ('ta', 'Tamil'),
+]
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 TIME_ZONE = 'Asia/Kolkata'  # Replace with your desired time zone
 
 USE_I18N = True
+USE_L10N = True
 
 USE_TZ = True
 
@@ -158,3 +174,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # File upload settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'               # ✅ NO TYPOS OR EXTRA SPACES
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'internshipidk456@gmail.com'    # ✅ Use real email
+EMAIL_HOST_PASSWORD = 'zahbaxmtljdpcccv'   # ✅ Use app-specific password, not your email password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+

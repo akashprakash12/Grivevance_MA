@@ -1,6 +1,7 @@
 # Python cache
 __pycache__/
 *.pyc
+*.py[cod]
 
 # Environment files
 .env
@@ -14,6 +15,10 @@ media/
 
 # Migration backup (optional)
 *.sqlite3
+
+# Locale files (compiled translations)
+locale/*/LC_MESSAGES/*.mo
+*.json
 
 # VSCode or IDE settings (optional)
 .vscode/
