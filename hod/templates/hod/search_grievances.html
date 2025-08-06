@@ -1,107 +1,147 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Search Grievances - HOD Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
-<style>
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #121212;
-    color: #eee;
-    margin: 0; padding: 20px;
-    display: flex; flex-direction: column; align-items: center;
-  }
-  header {
-    width: 100%; max-width: 1024px;
-    margin-bottom: 32px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 12px;
-  }
-  h1 {
-    font-weight: 800;
-    font-size: 2rem;
-  }
-  form {
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 32px;
-  }
-  input[type="text"] {
-    width: 100%;
-    padding: 14px 16px;
-    font-size: 1rem;
-    border-radius: 12px;
-    border: none;
-    background: #1e1e1e;
-    color: #eee;
-  }
-  button {
-    margin-top: 12px;
-    width: 100%;
-    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-    border: none;
-    padding: 14px;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  button:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
-  }
-  table {
-    width: 100%;
-    max-width: 1024px;
-    border-collapse: collapse;
-    background: #1e1e1e;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
-  }
-  thead tr {
-    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  }
-  thead th {
-    padding: 14px;
-    text-align: left;
-    color: white;
-  }
-  tbody tr:nth-child(even) {
-    background: #242424;
-  }
-  tbody td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #333;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search Grievances - HOD Panel</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts Material Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #343a40;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      border: none;
+    }
+    .table {
+      margin-bottom: 0;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1><span class="material-icons" aria-hidden="true">search</span>Search Grievances</h1>
-</header>
-<form method="GET" action="">
-  <input type="text" name="q" placeholder="Enter grievance ID, subject, status, etc." value="" aria-label="Search grievances" />
-  <button type="submit">Search</button>
-</form>
 
-<table role="grid" aria-label="Search Results">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Subject</th>
-      <th>Status</th>
-      <th>Priority</th>
-      <th>Due Date</th>
-      <th>Last Updated</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- Rows here -->
-  </tbody>
-</table>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold d-flex flex-column" href="#">
+  {{ hod_profile.user.get_full_name }} <small class="fw-normal">{{ hod_profile.department }}</small>
+</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hodNavbar" aria-controls="hodNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="hodNavbar">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="grievanceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Grievances
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'hod:assign_grievance' %}">Assign Grievance</a></li>
+            <li><a class="dropdown-item" href="{% url 'hod:check_progress' %}">Check Progress</a></li>
+            <li><a class="dropdown-item active" href="{% url 'hod:search_grievance' %}">Search Grievances</a></li>
+            <li><a class="dropdown-item" href="{% url 'hod:officers_assigned_grievances' %}">Assigned Grievances</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="requestDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Requests
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'hod:approve_extension_requests' %}">Extension Approvals</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Department: Computer Science</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container mt-4">
+
+  <header class="section-title">
+    <span class="material-icons" aria-hidden="true">search</span>
+    <h1>Search Grievances</h1>
+  </header>
+
+  <!-- Search Form -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form method="GET" action="">
+        <div class="mb-3">
+          <label for="search-input" class="form-label fw-bold">Search Filter</label>
+          <input type="text" id="search-input" name="q" class="form-control form-control-lg" placeholder="Enter grievance ID, subject, status, etc." value="{{ query }}" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="card">
+    <div class="card-header fw-bold">
+      Search Results
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Due Date</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if grievances %}
+            {% for grievance in grievances %}
+              <tr>
+                <td>{{ grievance.grievance_id }}</td>
+                <td>{{ grievance.subject }}</td>
+                <td>{{ grievance.status }}</td>
+                <td>{{ grievance.priority }}</td>
+                <td>{{ grievance.due_date|date:"Y-m-d" }}</td>
+                <td>{{ grievance.last_updated|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center text-muted">No grievances found. Try a different search query.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

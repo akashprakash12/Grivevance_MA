@@ -1,85 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Grievance Progress - HOD Panel</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
-<style>
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #121212;
-    color: #eee;
-    margin: 0; padding: 20px;
-    display: flex; flex-direction: column; align-items: center;
-  }
-  header {
-    width: 100%; max-width: 1200px;
-    margin-bottom: 32px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 12px;
-  }
-  h1 {
-    font-weight: 800;
-    font-size: 2rem;
-  }
-  table {
-    width: 100%;
-    max-width: 1200px;
-    border-collapse: collapse;
-    background: #1e1e1e;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
-  }
-  thead tr {
-    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  }
-  thead th {
-    padding: 14px;
-    text-align: left;
-    color: white;
-  }
-  tbody tr:nth-child(even) {
-    background: #242424;
-  }
-  tbody td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #333;
-  }
-  tbody tr:hover {
-    background: #4338ca;
-    color: white;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grievance Progress - HOD Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-bg: #ffffff;
+      --card-border: #e0e0e0;
+      --text-dark: #212529;
+      --text-light: #6c757d;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 32px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--indigo-light);
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: var(--indigo);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    table {
+      width: 100%;
+      max-width: 1200px;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    thead tr {
+      background: var(--indigo-light);
+      color: white;
+    }
+
+    thead th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    tbody tr:hover {
+      background-color: #e8f0fe;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1><span class="material-icons" aria-hidden="true">timeline</span>Grievance Progress</h1>
-</header>
-<table role="grid" aria-label="Grievance Progress Table">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Subject</th>
-      <th>Status</th>
-      <th>Priority</th>
-      <th>Due Date</th>
-      <th>Last Updated</th>
-    </tr>
-  </thead>
-  <tbody>
-    <!-- Example row: 
-    <tr>
-      <td>GRI20250612345</td>
-      <td>Water Pollution</td>
-      <td>In Progress</td>
-      <td>Medium</td>
-      <td>2025-07-12</td>
-      <td>2025-06-20</td>
-    </tr>
-    -->
-  </tbody>
-</table>
+  <header>
+    <h1><span class="material-icons" aria-hidden="true">timeline</span>Grievance Progress</h1>
+  </header>
+
+  <table role="grid" aria-label="Grievance Progress Table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Subject</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Due Date</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Example row -->
+      <tr>
+        <td>GRI20250612345</td>
+        <td>Water Pollution</td>
+        <td>In Progress</td>
+        <td>Medium</td>
+        <td>2025-07-12</td>
+        <td>2025-06-20</td>
+      </tr>
+    </tbody>
+  </table>
 </body>
 </html>
