@@ -5,96 +5,401 @@
   <meta charset="UTF-8" />
   <title>{{ department.name }} – Collector Portal</title>
 
-  <!-- Bootstrap & FontAwesome -->
+  <!-- Bootstrap & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    :root{
-      --indigo:#002855;
-      --indigo-light:#08438f;
-      --accent:#ffc107;
-      --bg:#f4f6f9;
-      --card-shadow:0 2px 8px rgba(0,0,0,.08);
-      --card-shadow-hover:0 6px 16px rgba(0,0,0,.12);
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0,0,0,.08);
+      --card-shadow-hover: 0 6px 16px rgba(0,0,0,.12);
     }
-    html,body{height:100%;overflow:auto}
-    body{margin:0;background:var(--bg);font-family:'Segoe UI',sans-serif}
+    html, body {
+      height: 100%;
+      overflow: auto;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-    /* Layout */
-    .container-custom{padding:1rem 1.2rem;height:calc(100vh - 80px);overflow:auto}
+    /* Layout */
+    .container-custom {
+      padding: 1rem 1.2rem;
+      height: calc(100vh - 80px);
+      overflow: auto;
+    }
 
-    /* Navbar */
-    .navbar-custom{background:var(--indigo);padding:1rem 2rem;border-bottom:4px solid var(--indigo-light);box-shadow:0 3px 6px rgba(0,0,0,.3)}
-    .navbar-custom .nav-link{color:#fff!important;font-weight:500;margin-left:1rem}
-    .navbar-custom .nav-link:hover{color:var(--accent)!important;text-decoration:underline}
+    .navbar-custom {
+  background: var(--indigo);
+  padding: 1.2rem 2rem;
+  border-bottom: 4px solid var(--indigo-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
 
-    /* Cards */
-    .report-container{background:#fff;border-radius:12px;padding:25px;box-shadow:var(--card-shadow);margin-top:20px}
-    .report-heading{font-weight:700;color:var(--indigo);border-bottom:2px solid var(--accent);padding-bottom:10px;margin-bottom:20px}
+.navbar-custom .navbar-logo {
+  height: 50px;
+  margin-right: 15px;
+}
 
-    .stat-card{background:#fff;border-radius:12px;padding:15px;text-align:center;box-shadow:var(--card-shadow);transition:.2s;height:100%}
-    .stat-card:hover{box-shadow:var(--card-shadow-hover);transform:translateY(-3px)}
-    .stat-card h5{font-weight:600;margin-bottom:8px;color:var(--indigo)}
-    .stat-card .count{font-size:2.4rem;font-weight:800}
+.navbar-custom .navbar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
 
-    /* Filter */
-    .filter-section{background:#f8f9fa;border-left:4px solid var(--accent);padding:20px;border-radius:10px;margin-bottom:25px}
+.navbar-custom .nav-link {
+  color: #ffffff !important;
+  margin-left: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
 
-    /* Table */
-    .table-responsive{max-height:65vh;overflow:auto;border-radius:10px}
-    .table thead{background:var(--indigo);color:#fff;position:sticky;top:0;z-index:10}
-    .text-truncate-2{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
+.navbar-custom .nav-link:hover {
+  color: #FFBF00 !important; /* Goldenrod - dark yellow */
+  text-decoration: none;
+  transform: translateY(-2px);
+}
 
-    .status-badge{padding:5px 10px;border-radius:50px;font-size:.85rem;font-weight:500}
-    .status-pending{background:#fff3cd;color:#856404}
-    .status-in_progress{background:#cce5ff;color:#004085}
-    .status-resolved{background:#d4edda;color:#155724}
-    .status-rejected{background:#f8d7da;color:#721c24}
-    .status-escalated{background:#e2e3e5;color:#383d41}
+.navbar-custom .dropdown-menu {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
+}
 
-    .empty-state{padding:40px;text-align:center;color:#6c757d}
-    .empty-state i{font-size:3rem;margin-bottom:15px;color:#dee2e6}
+.navbar-custom .dropdown-item:hover {
+  background-color: var(--indigo);
+  color: #ffffff;
+}
+
+.navbar-custom .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
+
+    /* Cards */
+    .report-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: var(--card-shadow);
+      margin-top: 20px;
+    }
+    .report-heading {
+      font-weight: 700;
+      color: var(--indigo);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .heading-line {
+      height: 1px;
+      background-color: #e0e0e0;
+      margin: 10px 0 20px 0;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      transition: .2s;
+      height: 100%;
+    }
+    .stat-card:hover {
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-3px);
+    }
+    .stat-card h5 {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--indigo);
+    }
+    .stat-card .count {
+      font-size: 2.4rem;
+      font-weight: 800;
+    }
+
+    /* Filter */
+    .filter-section {
+      background: #f8f9fa;
+      border-left: 4px solid var(--accent);
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+
+    /* Table Improvements */
+    .table-container {
+      max-height: 65vh;
+      overflow: hidden;
+      border-radius: 10px;
+      position: relative;
+    }
+    .table-responsive {
+      overflow: auto;
+      max-height: 65vh;
+    }
+    .table {
+      width: 100%;
+      margin-bottom: 0;
+      table-layout: fixed;
+    }
+    .table thead {
+      background: var(--indigo);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .table th {
+      white-space: nowrap;
+      position: relative;
+      border-bottom: 2px solid #fff;
+    }
+    .table td {
+      vertical-align: middle;
+    }
+    .description-cell {
+      white-space: normal;
+      word-wrap: break-word;
+      max-width: 250px;
+      overflow-y: auto;
+      max-height: 100px;
+    }
+    .subject-cell {
+      white-space: normal;
+      word-wrap: break-word;
+      max-width: 180px;
+    }
+    .description-cell::-webkit-scrollbar,
+    .subject-cell::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .description-cell::-webkit-scrollbar-thumb,
+    .subject-cell::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 5px;
+    }
+    .description-cell::-webkit-scrollbar-track,
+    .subject-cell::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    /* Status badges */
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 50px;
+      font-size: .85rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-in_progress {
+      background: #cce5ff;
+      color: #004085;
+    }
+    .status-resolved {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-rejected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .status-escalated {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: #6c757d;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: #dee2e6;
+    }
+    
+    /* Action buttons */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: flex-end;
+    }
+    .action-btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    /* Loading indicator */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      display: none;
+    }
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .stat-card .count {
+        font-size: 1.8rem;
+      }
+      .description-cell {
+        max-width: 200px;
+      }
+      .subject-cell {
+        max-width: 150px;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- NAVBAR -->
-  <nav class="navbar-custom d-flex justify-content-between align-items-center flex-wrap">
-    <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
-    <ul class="nav gap-3 align-items-center">
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i>Dashboard</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i>Officers</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i>Profile</a></li>
-      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
-    </ul>
-  </nav>
+  <!-- NAVBAR -->
+  <!-- NAVBAR -->
+<nav class="navbar-custom">
+  <div class="d-flex align-items-center">
+    <img src="{% static 'images/Kerala_Government.png' %}" alt="Kerala Government Logo" class="navbar-logo">
+    <span class="fw-bold text-white" style="font-size: 1.7rem; font-family: 'Titillium Web', sans-serif;">
+      {{ district.name }} Collector Portal
+    </span>
+  </div>
+  
+  <ul class="nav gap-3 align-items-center">
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'core:create_department' %}">
+        <i class="fas fa-plus-circle me-1"></i> Create Dept
+      </a>
+    </li>
+
+    <!-- District Officer Link -->
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'district_officer:view_district_officers' %}">
+        <i class="fas fa-user me-1"></i> District Officer
+      </a>
+    </li>
+
+    <!-- Reports Dropdown -->
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-file-alt me-1"></i> Reports
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{% url 'collector:grievance_report' %}">
+          <i class="fas fa-file-contract me-2"></i> Grievance Report
+        </a></li>
+        <li><a class="dropdown-item" href="{% url 'collector:get_department_report_data' %}">
+          <i class="fas fa-building me-2"></i> Department Report
+        </a></li>
+        <li><a class="dropdown-item" href="#">
+          <i class="fas fa-building me-2"></i> Officer Report
+        </a></li>
+      </ul>
+    </li>
+    
+    <!-- Facebook Post Nav Link -->
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'posts:index' %}" target="_blank">
+        <i class="fab fa-facebook me-1"></i> FB Post
+      </a>
+    </li>
+    
+    <!-- Other Links -->
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'collector:collector_profile' %}">
+        <i class="fas fa-user me-1"></i> Profile
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'collector:officer_details' %}">
+        <i class="fas fa-users me-1"></i> Officers
+      </a>
+    </li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'accounts:logout' %}">
+        <i class="fas fa-sign-out-alt me-1"></i> Logout
+      </a>
+    </li>
+  </ul>
+</nav>
 
   <div class="container-custom">
     <div class="report-container">
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <a href="{% url 'officer:create_officer_collector' %}" class="btn btn-success">
+          <i class="fas fa-user-plus me-1"></i> Create Officer
+        </a>
+        
+        <a href="{% url 'core:department_update' department.code %}" class="btn btn-info">
+          <i class="fas fa-edit me-1"></i> Update Department
+        </a>
+      </div>
 
       <h3 class="report-heading">
-        <i class="fas fa-building me-2"></i>{{ department.name|upper }} – GRIEVANCE DETAILS
+        <i class="fas fa-building me-2"></i>{{ department.name|upper }} – GRIEVANCE DETAILS
       </h3>
+      <div class="heading-line"></div>
 
-      <!-- STATS -->
+      <!-- STATS -->
       <div class="row g-3 mb-4">
         <div class="col-md-2"><div class="stat-card"><h5>Total</h5><div class="count text-primary">{{ counts.total }}</div></div></div>
         <div class="col-md-2"><div class="stat-card"><h5>Pending</h5><div class="count text-danger">{{ counts.pending }}</div></div></div>
-        <div class="col-md-2"><div class="stat-card"><h5>In Progress</h5><div class="count text-warning">{{ counts.in_progress }}</div></div></div>
+        <div class="col-md-2"><div class="stat-card"><h5>In Progress</h5><div class="count text-warning">{{ counts.in_progress }}</div></div></div>
         <div class="col-md-2"><div class="stat-card"><h5>Resolved</h5><div class="count text-success">{{ counts.resolved }}</div></div></div>
         <div class="col-md-2"><div class="stat-card"><h5>Rejected</h5><div class="count text-secondary">{{ counts.rejected }}</div></div></div>
         <div class="col-md-2"><div class="stat-card"><h5>Escalated</h5><div class="count text-info">{{ counts.escalated }}</div></div></div>
       </div>
 
-      <!-- FILTERS -->
+      <!-- FILTERS -->
       <div class="filter-section">
-        <form method="get" class="row g-3">
+        <form method="get" class="row g-3" id="grievanceFilterForm">
           <div class="col-md-3">
             <label class="form-label fw-bold">Status</label>
             <select class="form-select" name="status">
-              <option value="ALL" {% if status_filter == "ALL" %}selected{% endif %}>All Status</option>
+              <option value="ALL" {% if status_filter == "ALL" %}selected{% endif %}>All Status</option>
               <option value="PENDING" {% if status_filter == "PENDING" %}selected{% endif %}>Pending</option>
-              <option value="IN_PROGRESS" {% if status_filter == "IN_PROGRESS" %}selected{% endif %}>In Progress</option>
+              <option value="IN_PROGRESS" {% if status_filter == "IN_PROGRESS" %}selected{% endif %}>In Progress</option>
               <option value="RESOLVED" {% if status_filter == "RESOLVED" %}selected{% endif %}>Resolved</option>
               <option value="REJECTED" {% if status_filter == "REJECTED" %}selected{% endif %}>Rejected</option>
               <option value="ESCALATED" {% if status_filter == "ESCALATED" %}selected{% endif %}>Escalated</option>
@@ -102,12 +407,12 @@
           </div>
 
           <div class="col-md-3">
-            <label class="form-label fw-bold">Date From</label>
+            <label class="form-label fw-bold">Date From</label>
             <input type="date" class="form-control" name="date_from" value="{{ date_filed }}">
           </div>
 
           <div class="col-md-3">
-            <label class="form-label fw-bold">Date To</label>
+            <label class="form-label fw-bold">Date To</label>
             <input type="date" class="form-control" name="date_to" value="{{ last_updated }}">
           </div>
 
@@ -115,21 +420,21 @@
             <label class="form-label fw-bold">Search</label>
             <div class="input-group">
               <span class="input-group-text"><i class="fas fa-search"></i></span>
-              <input type="text" class="form-control" name="search" placeholder="GRV.ID or PH.NO" value="{{ search_query }}">
+              <input type="text" class="form-control" name="search" placeholder="GRV.ID or PH.NO" value="{{ search_query }}">
             </div>
           </div>
 
           <div class="col-12 d-flex gap-2 mt-3 justify-content-end">
-            <!-- Reset: link to same view without params -->
-            <a href="{% url 'collector:department_grievances_download' department.code %}"
-            class="btn btn-danger">
-           <i class="fas fa-file-pdf me-1"></i> Export PDF
-         </a>
-
+            <a href="{% url 'collector:export_department_grievances_excel' department.code %}?{{ request.GET.urlencode }}" 
+   class="btn btn-success">
+   <i class="fas fa-file-excel"></i> Export Excel
+</a>
+            <a href="{% url 'collector:department_grievances_download' department.code %}" class="btn btn-danger">
+              <i class="fas fa-file-pdf me-1"></i> Export PDF
+            </a>
             <a href="{% url 'collector:department_card' department.code %}" class="btn btn-outline-secondary btn-export">
               <i class="fas fa-sync-alt me-1"></i>Reset
             </a>
-            
             <button type="submit" class="btn btn-primary btn-export">
               <i class="fas fa-search me-1"></i>Search
             </button>
@@ -137,54 +442,69 @@
         </form>
       </div>
 
-      <!-- TABLE -->
-      <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
-          <thead>
-            <tr>
-              <th>GRV ID</th><th>Status</th><th>Applicant</th>
-              <th>Contact</th><th>Description</th><th>Priority</th><th>Due Date</th><th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for grievance in grievances %}
-            <tr>
-              <td class="fw-bold">{{ grievance.grievance_id }}</td>
-              <td><span class="status-badge status-{{ grievance.status|lower }}">{{ grievance.get_status_display }}</span></td>
-              <td>{{ grievance.applicant_name }}</td>
-              <td>{{ grievance.contact_number }}</td>
-              <td class="text-truncate-2">{{ grievance.description }}</td>
-              <td>{{ grievance.priority }}</td>
-              <td>{{ grievance.due_date|date:"Y-m-d"|default:"-" }}</td>
-              <td>
-                <a href="#" class="btn btn-sm btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#remarkModal"
-              data-grievance-id="{{ grievance.id }}">
-              <i class="fas fa-eye me-1"></i>Remark
-            </a>
-            <!-- NEW: PDF download button -->
-            <a href="{% url 'collector:details_download' grievance.grievance_id %}"
-            class="btn btn-danger">
-           <i class="fas fa-file-pdf me-1"></i> Export PDF
-            </a>
-
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="9" class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <h5>No grievances found</h5>
-                <p>Try adjusting your filters or check back later.</p>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <!-- TABLE CONTAINER WITH LOADING INDICATOR -->
+      <div class="table-container">
+        <div class="loading-overlay">
+          <div class="spinner-border text-primary spinner" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle">
+            <thead>
+              <tr>
+                <th style="width: 120px;">GRV ID</th>
+                <th style="width: 100px;">Status</th>
+                <th style="width: 120px;">Applicant</th>
+                <th style="width: 100px;">Contact</th>
+                <th style="width: 150px;">Subject</th>
+                <th style="width: 200px;">Description</th>
+                <th style="width: 80px;">Priority</th>
+                <th style="width: 100px;">Due Date</th>
+                <th style="width: 120px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for grievance in grievances %}
+              <tr>
+                <td class="fw-bold">{{ grievance.grievance_id }}</td>
+                <td><span class="status-badge status-{{ grievance.status|lower }}">{{ grievance.get_status_display }}</span></td>
+                <td>{{ grievance.applicant_name }}</td>
+                <td>{{ grievance.contact_number }}</td>
+                <td class="subject-cell">{{ grievance.subject }}</td>
+                <td class="description-cell">{{ grievance.description }}</td>
+                <td>{{ grievance.priority }}</td>
+                <td>{{ grievance.due_date|date:"Y-m-d"|default:"-" }}</td>
+                <td>
+                  <div class="d-flex gap-2">
+                    <a href="#" class="btn btn-sm btn-primary action-btn"
+                      data-bs-toggle="modal"
+                      data-bs-target="#remarkModal"
+                      data-grievance-id="{{ grievance.id }}">
+                      <i class="fas fa-eye me-1"></i>Remark
+                    </a>
+                    <a href="{% url 'collector:details_download' grievance.grievance_id %}"
+                      class="btn btn-sm btn-danger action-btn">
+                      <i class="fas fa-file-pdf me-1"></i> PDF
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9" class="empty-state">
+                  <i class="fas fa-inbox"></i>
+                  <h5>No grievances found</h5>
+                  <p>Try adjusting your filters or check back later.</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- PAGINATION -->
+      <!-- PAGINATION -->
       {% if grievances.has_other_pages %}
       {% with query=request.GET.urlencode %}
       <nav class="mt-4">
@@ -215,62 +535,81 @@
     </div>
   </div>
 
-
-
   <!-- Modal for Remark -->
-<div class="modal fade" id="remarkModal" tabindex="-1" aria-labelledby="remarkModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="post" id="remarkForm" action="{% url 'collector:update_remark' %}">
-      {% csrf_token %}
-      <input type="hidden" name="grievance_id" id="remarkGrievanceId">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="remarkModalLabel">Add Remark & Set Priority</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Remark</label>
-            <textarea class="form-control" name="remark" rows="3" required></textarea>
+  <div class="modal fade" id="remarkModal" tabindex="-1" aria-labelledby="remarkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form method="post" id="remarkForm" action="{% url 'collector:update_remark' %}">
+        {% csrf_token %}
+        <input type="hidden" name="grievance_id" id="remarkGrievanceId">
+        <!-- Add hidden input for next URL -->
+        <input type="hidden" name="next" value="{% url 'collector:department_card' department.code %}">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="remarkModalLabel">Add Remark & Set Priority</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Priority</label>
-            <select class="form-select" name="priority" required>
-              <option value="">-- Select Priority --</option>
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Remark</label>
+              <textarea class="form-control" name="remark" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Priority</label>
+              <select class="form-select" name="priority" >
+                <option value="">-- Select Priority --</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Submit</button>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Submit</button>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
-</div>
 
-  <!-- Scripts -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Highlight active filters visually
     document.addEventListener('DOMContentLoaded', () => {
+      // Highlight active filters visually
       const params = new URLSearchParams(window.location.search);
       document.querySelectorAll('.filter-section input, .filter-section select').forEach(el => {
         if(params.get(el.name)) el.classList.add('is-valid');
       });
+
+      // For remark and priority modal
+      const remarkModal = document.getElementById('remarkModal');
+      if (remarkModal) {
+        remarkModal.addEventListener('show.bs.modal', event => {
+          const button = event.relatedTarget;
+          const grievanceId = button.getAttribute('data-grievance-id');
+          document.getElementById('remarkGrievanceId').value = grievanceId;
+        });
+      }
+
+      // Show loading indicator during form submission
+      const filterForm = document.getElementById('grievanceFilterForm');
+      if (filterForm) {
+        filterForm.addEventListener('submit', function() {
+          document.querySelector('.loading-overlay').style.display = 'flex';
+        });
+      }
+
+      // Make cells scrollable
+      const scrollableCells = document.querySelectorAll('.description-cell, .subject-cell');
+      scrollableCells.forEach(cell => {
+        // Add scroll indicators if content is scrollable
+        cell.addEventListener('scroll', function() {
+          this.style.boxShadow = this.scrollTop > 0 ? 
+            'inset 0 5px 5px -5px rgba(0,0,0,0.2)' : 
+            'none';
+        });
+      });
     });
-
-
-
-    //for remark and priority
-    const remarkModal = document.getElementById('remarkModal');
-  remarkModal.addEventListener('show.bs.modal', event => {
-    const button = event.relatedTarget;
-    const grievanceId = button.getAttribute('data-grievance-id');
-    document.getElementById('remarkGrievanceId').value = grievanceId;
-  });
   </script>
 </body>
 </html>

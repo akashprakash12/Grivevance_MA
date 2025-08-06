@@ -28,6 +28,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SUPPORT_PHONE = "+91 7525460392"  # Replace with actual support number
+SUPPORT_EMAIL = "support@yourdomain.com"  # Replace with actual support email
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -47,6 +50,8 @@ INSTALLED_APPS = [
     'accounts',
     'core_app',
     'posts',
+    'district_officer',
+
     'hod'
 
 
@@ -148,3 +153,14 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 FB_ACCESS_TOKEN = config('FB_ACCESS_TOKEN')
 FB_PAGE_ID = config('FB_PAGE_ID')
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'               # ✅ NO TYPOS OR EXTRA SPACES
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'internshipidk456@gmail.com'    # ✅ Use real email
+EMAIL_HOST_PASSWORD = 'zahbaxmtljdpcccv'   # ✅ Use app-specific password, not your email password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+

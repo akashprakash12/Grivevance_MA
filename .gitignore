@@ -1,9 +1,22 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / cache files
 __pycache__/
 *.py[cod]
+*.pyc
 
-# Django media and log files
-media/
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+
+# Logs
 *.log
-*.json
-env.txt
+
+# macOS system files
+.DS_Store
+
+# VS Code settings (optional)
+.vscode/
+
+# Migrations __pycache__ (handled by the general __pycache__/ rule)
+

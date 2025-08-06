@@ -1,0 +1,450 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Department Report – DO Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+        <style>
+          :root {
+            --indigo: #002855;
+            --indigo-light: #08438f;
+            --accent: #ffc107;
+            --bg: #f4f6f9;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+            --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+          }
+      
+          html, body {
+            height: 100%;
+            overflow: auto;
+          }
+      
+          body {
+            margin: 0;
+            background: var(--bg);
+            font-family: 'Segoe UI', sans-serif;
+          }
+      
+          .container-custom {
+            padding: 1rem 1.2rem;
+            max-width: 100%;
+            height: calc(100vh - 80px);
+            overflow: auto;
+          }
+      
+  .navbar-custom {
+  background: var(--indigo);
+  padding: 1.2rem 2rem;
+  border-bottom: 4px solid var(--indigo-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
+
+.navbar-custom .navbar-logo {
+  height: 50px;
+  margin-right: 15px;
+}
+
+.navbar-custom .navbar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.navbar-custom .nav-link {
+  color: #ffffff !important;
+  margin-left: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #FFBF00 !important; /* Goldenrod - dark yellow */
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.navbar-custom .dropdown-menu {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
+}
+.navbar-custom .dropdown-item:hover {
+  background-color: var(--indigo);
+  color: #ffffff;
+}
+
+.navbar-custom .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
+
+
+      
+          .report-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-top: 20px;
+          }
+      
+          .report-heading {
+            font-weight: 700;
+            color: var(--indigo);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+          }
+      
+          .filter-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--accent);
+          }
+      
+          .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            max-height: 65vh;
+            overflow: auto;
+            display: block;
+          }
+      
+          .table thead {
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+          }
+      
+          .table th {
+            font-weight: 600;
+            padding: 12px 10px;
+            white-space: nowrap;
+          }
+      
+          .table td {
+            padding: 10px;
+            vertical-align: middle;
+            max-width: 200px;
+            overflow: auto;
+            white-space: nowrap;
+          }
+      
+          .table td::-webkit-scrollbar {
+            height: 5px;
+            width: 5px;
+          }
+      
+          .table td::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 5px;
+          }
+      
+          .table td::-webkit-scrollbar-track {
+            background: #f1f1f1;
+          }
+      
+          .btn-export {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 8px 15px;
+          }
+      
+          .status-badge {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+          }
+      
+          .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+          }
+      
+          .status-resolved {
+            background-color: #d4edda;
+            color: #155724;
+          }
+      
+          .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+          }
+      
+          .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: #6c757d;
+          }
+      
+          .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+          }
+      
+          .text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; /* <- new standard */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+        </style>
+</head>
+<body>
+
+<!-- Navigation -->
+ <!-- NAVBAR -->
+ <nav class="navbar-custom d-flex justify-content-between align-items-center">
+  <div class="d-flex align-items-center">
+    <img src="{% static 'images/Kerala_Government.png' %}" alt="Kerala Government Logo" class="navbar-logo">
+    <span class="fw-bold text-white" style="font-size: 1.7rem; font-family: 'Titillium Web', sans-serif;">
+      {{ district.name }} DO Portal
+    </span>
+      </div>
+  
+  <ul class="nav gap-3 align-items-center">
+    <li class="nav-item"><a class="nav-link" href="{% url 'district_officer:DO_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'core:create_department' %}">
+        <i class="fas fa-plus-circle me-1"></i> Create Dept
+      </a>
+    </li>
+
+    <!-- Reports Dropdown -->
+    <li class="nav-item dropdown">
+
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-file-alt me-1"></i> Reports
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{% url 'collector:grievance_report' %}">
+          <i class="fas fa-file-contract me-2"></i> Grievance Report
+        </a></li>
+        <li><a class="dropdown-item" href="{% url 'collector:get_department_report_data' %}">
+          <i class="fas fa-building me-2"></i> Department Report
+        </a></li>
+        <li><a class="dropdown-item" href="#">
+          <i class="fas fa-building me-2"></i> Officer Report
+        </a></li>
+      </ul>
+    </li>
+    <!-- Facebook Post Nav Link -->
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'posts:index' %}" target="_blank">
+        <i class="fab fa-facebook me-1"></i> FB Post
+      </a>
+    </li>
+    <!-- Other Links -->
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_profile' %}"><i class="fas fa-user me-1"></i> Profile</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:officer_details' %}"><i class="fas fa-users me-1"></i> Officers</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+  </ul>
+</nav>
+
+<div class="container-custom">
+
+  <h3 class="report-heading"><i class="fas fa-building me-2"></i>DEPARTMENT PERFORMANCE REPORT</h3>
+
+  <!-- Filter Form -->
+  <div class="filter-section">
+    <form method="get" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label fw-bold">Search</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-search"></i></span>
+          <input type="text" id="searchBox" class="form-control" placeholder="Department name">
+        </div>
+        
+      </div>
+      <div class="col-md-3">
+        <label class="form-label fw-bold">Sort By</label>
+        <select name="sort_by" class="form-select">
+          <option value="">Default</option>
+          <option value="name" {% if request.GET.sort_by == "name" %}selected{% endif %}>Name (A-Z)</option>
+          <option value="-total" {% if request.GET.sort_by == "-total" %}selected{% endif %}>Total Grievances</option>
+          <option value="-pending" {% if request.GET.sort_by == "-pending" %}selected{% endif %}>Pending</option>
+          <option value="-resolved" {% if request.GET.sort_by == "-resolved" %}selected{% endif %}>Resolved</option>
+        </select>
+      </div>
+      <div class="col-12 d-flex flex-wrap gap-2 justify-content-end mb-3">
+        <a href="{% url 'collector:export_department_excel' %}" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export Excel
+        </a>
+        <a href="{% url 'collector:export_department_pdf' %}" class="btn btn-danger">
+            <i class="fas fa-file-pdf"></i> Export PDF
+        </a>
+        <a href="?" class="btn btn-outline-secondary">
+            <i class="fas fa-sync-alt me-1"></i> Reset
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search me-1"></i> Search
+        </button>
+    </div>
+    
+    </form>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card border-start border-primary border-4 h-100">
+        <div class="card-body">
+          <h6 class="text-muted">Total Departments</h6>
+          <h3>{{ summary.total_depts }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-start border-success border-4 h-100">
+        <div class="card-body">
+          <h6 class="text-muted">Avg Resolution Rate</h6>
+          <h3>{{ summary.avg_resolution_rate }}%</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Department</th><th>Code</th><th>Total</th>
+          <th>Pending</th><th>Resolved</th><th>Rejected</th><th>Escalated</th>
+          <th>Resolution Rate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in department_report %}
+        <tr>
+          <td class="fw-bold">{{ d.name|upper }}</td>
+          <td>{{ d.code }}</td>
+          <td>{{ d.total }}</td>
+          <td><span class="badge bg-warning text-dark">{{ d.pending }}</span></td>
+          <td><span class="badge bg-success">{{ d.resolved }}</span></td>
+          <td><span class="badge bg-danger">{{ d.rejected }}</span></td>
+          <td><span class="badge bg-info text-dark">{{ d.escalated }}</span></td>
+          <td>
+            <div class="d-flex align-items-center">
+              <div class="progress-container me-2">
+                <div class="progress progress-thin">
+                  <div class="progress-bar bg-success" role="progressbar"
+                       aria-valuenow="{{ d.resolution_rate }}"
+                       aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+              {{ d.resolution_rate }}%
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="11" class="empty-state text-center">
+            <i class="fas fa-inbox fa-2x"></i>
+            <h5 class="mt-2">No department data found</h5>
+            <p>Try adjusting your filters or check back later</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    document.querySelectorAll('.filter-section input, .filter-section select').forEach(el => {
+      if (params.get(el.name)) {
+        el.classList.add('is-valid');
+      }
+    });
+  });
+
+  <!-- ✅ Fuse.js CDN (add just before </body>) -->
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Highlight valid filters
+    const params = new URLSearchParams(window.location.search);
+    document.querySelectorAll('.filter-section input, .filter-section select').forEach(el => {
+      if (params.get(el.name)) {
+        el.classList.add('is-valid');
+      }
+    });
+
+    // ✅🔥 Fuzzy search logic
+    const searchInput = document.getElementById('searchBox');
+    const tableBody = document.querySelector('table tbody');
+    const originalRows = Array.from(tableBody.querySelectorAll('tr')).map(row => ({
+      element: row,
+      name: row.querySelector('td:first-child')?.textContent.trim() || '',
+    }));
+
+    const fuse = new Fuse(originalRows, {
+      keys: ['name'],
+      threshold: 0.4, // adjust sensitivity (lower = stricter)
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.trim();
+      tableBody.innerHTML = ''; // clear current table
+
+      if (!searchTerm) {
+        originalRows.forEach(r => tableBody.appendChild(r.element));
+        return;
+      }
+
+      const results = fuse.search(searchTerm);
+      if (results.length) {
+        results.forEach(({ item }) => tableBody.appendChild(item.element));
+      } else {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="11" class="empty-state text-center">
+              <i class="fas fa-inbox fa-2x"></i>
+              <h5 class="mt-2">No department matches found</h5>
+              <p>Try a different keyword</p>
+            </td>
+          </tr>
+        `;
+      }
+    });
+  });
+
+  
+</script>
+</body>
+</html>
+
+

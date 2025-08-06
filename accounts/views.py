@@ -11,34 +11,65 @@ from core_app.models import Department, District
 from collector.models import CollectorProfile
 from officer.models import OfficerProfile
 from user.models import User
+from django.contrib.auth import update_session_auth_hash
 
+from district_officer.models import DistrictOfficerProfile  # make sure it's imported
 
-# -------------------------------
-# Login View
-# -------------------------------
 def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
-
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
 
             user = authenticate(request, username=username, password=password)
-
             if user:
-                if user.is_active:
-                    login(request, user)
-                    return redirect('accounts:dashboard')  # 🧭 Common dashboard route
-                else:
+                # Check if user is inactive in User model
+                if not user.is_active:
                     messages.error(request, "Your account is inactive.")
-            else:
-                messages.error(request, "Invalid username or password.")
+                    return redirect('accounts:login')
+
+                # Additional check for Collectors
+                if user.user_type == 'COLLECTOR':
+                    try:
+                        collector_profile = CollectorProfile.objects.get(user=user)
+                        if not collector_profile.is_active:
+                            messages.error(request, "Your collector account has been deactivated.")
+                            return redirect('accounts:login')
+                    except CollectorProfile.DoesNotExist:
+                        messages.error(request, "Collector profile not found.")
+                        return redirect('accounts:login')
+
+                # Additional check for District Officers
+                if user.user_type == 'district_officer':
+                    try:
+                        do_profile = DistrictOfficerProfile.objects.get(user=user)
+                        if not do_profile.is_active:
+                            messages.error(request, "Your district officer account has been deactivated.")
+                            return redirect('accounts:login')
+                    except DistrictOfficerProfile.DoesNotExist:
+                        messages.error(request, "District Officer profile not found.")
+                        return redirect('accounts:login')
+
+                # === first‑time login redirect ===
+                groups = set(user.groups.values_list('name', flat=True))
+                first_login_roles = {'collector', 'district_officer'}
+                is_first_login = (user.last_login is None)
+
+                if first_login_roles & groups and is_first_login:
+                    login(request, user)                       # create session
+                    request.session['force_pwd_reset'] = True  # mark session only
+                    return redirect('accounts:custom_reset_password')
+                # ========================
+
+                login(request, user)
+                return redirect('accounts:dashboard')
+
+            messages.error(request, "Invalid username or password.")
     else:
         form = LoginForm()
 
     return render(request, 'accounts/login.html', {'form': form})
-
 
 # -------------------------------
 # Logout View
@@ -65,7 +96,7 @@ def dashboard(request):
             'departments': Department.objects.all(),
             'users': User.objects.all(),
         })
-        return render(request, 'admin_dashboard.html', context)
+        return render(request, 'core_app/department_form.html', context)
 
     # === Collector Dashboard ===
     elif 'collector' in groups:
@@ -94,8 +125,49 @@ def dashboard(request):
 
     # === Public User Dashboard ===
     elif 'public' in groups:
-        return render(request, 'public_user/public_dashboard.html', {'user': user})
+        return render(request, 'user/create_public_user.html', {'user': user})
+    
+    elif 'district_officer' in groups:
+            try:
+                # Instead of rendering here, redirect to dedicated view
+                return redirect('district_officer:DO_dashboard')  # URL name should point to your collector_dashboard view
+            except CollectorProfile.DoesNotExist:
+                messages.error(request, "DO profile not found.")
+                return redirect('accounts:login')
+
 
     # === Fallback (Invalid Group or No Group Assigned) ===
     messages.error(request, "Access denied. Invalid role.")
     return redirect('accounts:login')
+
+
+
+
+# accounts/views.py
+
+
+@login_required
+def custom_reset_password(request):
+    if request.method == 'POST':
+        password1 = request.POST.get('password1', '').strip()
+        password2 = request.POST.get('password2', '').strip()
+
+        if not password1 or not password2:
+            messages.error(request, "Please fill in all fields.")
+        elif password1 != password2:
+            messages.error(request, "Passwords do not match.")
+        elif len(password1) < 8:
+            messages.error(request, "Password must be at least 8 characters.")
+        else:
+            # Change password
+            user = request.user
+            user.set_password(password1)
+            user.save()
+
+            # Optional: keep user logged in after password change
+            update_session_auth_hash(request, user)
+
+            messages.success(request, "Password changed successfully.")
+            return redirect('accounts:login')
+
+    return render(request, 'accounts/custom_reset_password.html')

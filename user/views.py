@@ -22,7 +22,7 @@ def create_public_user(request):
                 password = user_form.cleaned_data['password']
                 user_instance = user_form.save(commit=False)
                 user_instance.set_password(password)
-                user_instance.user_type = 'PUBLIC'
+                user_instance.user_type = 'public'
                 user_instance.is_active = True
                 user_instance.date_joined = timezone.now()
                 user_instance.save()
