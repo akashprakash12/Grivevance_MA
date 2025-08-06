@@ -271,6 +271,7 @@ def rank_departments(department_queryset):
     return [{k: v for k, v in dept.items() if k != 'score'} for dept in top3]
 
 
+
 @login_required
 def collector_dashboard(request):
     try:

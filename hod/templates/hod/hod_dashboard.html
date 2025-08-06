@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>HOD Dashboard</title>
+       {% load static %}
+       <link rel="stylesheet" href="{% static 'css/hod_dashboard.css' %}">
+   </head>
+<body>
+    <div class="container">
+        <h1>{{ profile.user.first_name }}{{profile.user.second_name}}</h1>
+        <h2>Your Department: {{ profile.department.name }}</h2>
+
+        <h3>Grievances in Your Department</h3>
+        <ul>
+            {% for grievance in grievances %}
+                <li>{{ grievance.grievance_id}}-{{ grievance.subject}} - Status: {{ grievance.status }}</li>
+            {% empty %}
+                <li>No grievances found.</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Officers in Your Department</h3>
+        <ul>
+            {% for officer in officers %}
+                <li>{{ officer.user.username }}</li>
+            {% empty %}
+                <li>No officers found in your department.</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Actions</h3>
+        <ul>
+            <li><a href="{% url 'hod:assign_grievance' %}">Assign Grievance</a></li>
+            <li><a href="{% url 'hod:check_progress' %}">Check Grievance Progress</a></li>
+            <li><a href="{% url 'hod:approve_extension_requests' %}">Approve Date Extension Requests</a></li>
+            <li><a href="{% url 'hod:search_grievance' %}">Search Grievances</a></li>
+            <li><a href="{% url 'hod:officers_assigned_grievances' %}">View Assigned Grievances</a></li>
+        </ul>
+
+        <footer>
+            <p><a href="{% url 'accounts:logout' %}">Logout</a></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Verify Actions - HOD Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #121212;
+    color: #eee;
+    margin: 0; padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header {
+    width: 100%; max-width: 800px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+  }
+  h1 {
+    font-weight: 800;
+    font-size: 2rem;
+  }
+  .log-list {
+    background: #1e1e1e;
+    padding: 24px;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  .log-item {
+    padding: 16px;
+    border-bottom: 1px solid #333;
+  }
+  .log-item:last-child {
+    border-bottom: none;
+  }
+  time {
+    display: block;
+    font-size: 0.85rem;
+    color: #bbb;
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="material-icons" aria-hidden="true">fact_check</span>Action Verification - Grievance <!-- {{ grievance.grievance_id }} --></h1>
+</header>
+<section class="log-list" aria-label="Action Logs">
+  <!-- Example log items:
+  <article class="log-item">
+    <time datetime="2025-06-12T14:00:00Z">June 12, 2025, 2:00 PM</time>
+    <p>Officer John Doe marked site inspection completed.</p>
+  </article> -->
+</section>
+</body>
+</html>

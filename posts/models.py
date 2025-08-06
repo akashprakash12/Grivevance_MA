@@ -10,7 +10,7 @@ class Post(models.Model):
     likes = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
     permalink_url = models.URLField(max_length=500, blank=True, null=True)
-    is_deleted = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)  # New field
 
     def __str__(self):
         return f"Post {self.post_id}"

@@ -16,24 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-# 🔻 Add these two imports
 from django.conf import settings
 from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin_app/', include('admin_app.urls')),
-    path('officer/', include('officer.urls')),       # ✅ Included once
+    path('officer/', include('officer.urls')),
     path('collector/', include('collector.urls')),
     path('', include('accounts.urls')),
     path('core/', include('core_app.urls')),
-    path('public_user/', include('user.urls', namespace='public_user')),  # ✅ correct
+    path('public_user/', include('user.urls', namespace='public_user')),
     path('grievance/', include('grievance_app.urls')),
     path('facebook/', include('posts.urls')),
-    path('district_officer/', include('district_officer.urls')),
-
-
-
+    path('district_officer/', include('district_officer.urls')),  # Your local change
+    path('hod/', include('hod.urls',namespace='hod'))  # Remote change
 ]
-# Serve media files during development
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
