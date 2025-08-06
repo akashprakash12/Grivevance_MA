@@ -130,9 +130,6 @@
           <button class="account-tab text-start px-3 py-2 rounded" data-tab="security">
             <i class="fas fa-shield-alt me-2"></i> Security
           </button>
-          <button class="account-tab text-start px-3 py-2 rounded" data-tab="notifications">
-            <i class="fas fa-bell me-2"></i> Notifications
-          </button>
           <button class="account-tab text-start px-3 py-2 rounded" data-tab="privacy">
             <i class="fas fa-lock me-2"></i> Privacy
           </button>
@@ -319,132 +316,37 @@
         </div>
       </div>
       
-      <!-- Notifications Tab -->
-      <div id="notifications-tab" class="account-content card-custom d-none">
-        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-bell me-2 text-accent"></i>Notification Preferences</h2>
-        
-        <form class="row g-4">
-          <div class="col-12 card border-0 bg-light">
-            <div class="card-body">
-              <h3 class="h5 fw-semibold mb-3">Email Notifications</h3>
-              
-              <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
-                <div>
-                  <label class="form-check-label fw-medium" for="status-updates">Complaint Status Updates</label>
-                  <p class="text-muted small">Receive emails when your complaint status changes</p>
-                </div>
-                <input class="form-check-input" type="checkbox" id="status-updates" checked>
-              </div>
-              
-              <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
-                <div>
-                  <label class="form-check-label fw-medium" for="announcements">Important Announcements</label>
-                  <p class="text-muted small">Receive important system updates and announcements</p>
-                </div>
-                <input class="form-check-input" type="checkbox" id="announcements" checked>
-              </div>
-              
-              <div class="form-check form-switch d-flex justify-content-between align-items-center">
-                <div>
-                  <label class="form-check-label fw-medium" for="newsletter">Newsletter</label>
-                  <p class="text-muted small">Receive monthly newsletter with grievance resolution statistics</p>
-                </div>
-                <input class="form-check-input" type="checkbox" id="newsletter">
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-12 card border-0 bg-light">
-            <div class="card-body">
-              <h3 class="h5 fw-semibold mb-3">Push Notifications</h3>
-              
-              <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
-                <div>
-                  <label class="form-check-label fw-medium" for="new-messages">New Messages</label>
-                  <p class="text-muted small">Notify me about new messages from support</p>
-                </div>
-                <input class="form-check-input" type="checkbox" id="new-messages" checked>
-              </div>
-              
-              <div class="form-check form-switch d-flex justify-content-between align-items-center">
-                <div>
-                  <label class="form-check-label fw-medium" for="urgent-updates">Urgent Updates</label>
-                  <p class="text-muted small">Notify me about urgent updates to my complaints</p>
-                </div>
-                <input class="form-check-input" type="checkbox" id="urgent-updates" checked>
-              </div>
-            </div>
-          </div>
-          
-          <div class="col-12 pt-3 border-top d-flex justify-content-end gap-3">
-            <button type="button" class="btn btn-outline-secondary">
-              Reset to Default
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Save Preferences
-            </button>
-          </div>
-        </form>
-      </div>
-      
-      <!-- Privacy Tab -->
+      <!-- Privacy Tab - Simplified with only Delete Account option -->
       <div id="privacy-tab" class="account-content card-custom d-none">
-        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-lock me-2 text-accent"></i>Privacy Settings</h2>
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-lock me-2 text-accent"></i>Account Deletion</h2>
         
-        <div class="row g-4">
-          <div class="col-12 card border-0 bg-light">
-            <div class="card-body">
-              <h3 class="h5 fw-semibold mb-3">Data Privacy</h3>
-              <p class="text-muted mb-4">We respect your privacy and are committed to protecting your personal information. Here you can control how your data is used.</p>
-              
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="data-collection" checked>
-                <label class="form-check-label fw-medium" for="data-collection">Allow data collection for analytics</label>
-                <p class="text-muted small">Help us improve our services by sharing anonymous usage data</p>
+        <div class="card border-danger">
+          <div class="card-body">
+            <div class="d-flex align-items-start">
+              <div class="flex-grow-1">
+                <h5 class="card-title text-danger">Delete Your Account</h5>
+                <p class="card-text">
+                  This will permanently delete your account and all associated data. This action cannot be undone.
+                </p>
+                <ul class="text-danger">
+                  <li>All your complaints and records will be permanently removed</li>
+                  <li>You won't be able to recover any information</li>
+                  <li>This action is irreversible</li>
+                </ul>
               </div>
-              
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="personalization" checked>
-                <label class="form-check-label fw-medium" for="personalization">Enable personalized recommendations</label>
-                <p class="text-muted small">Get tailored suggestions based on your complaint history</p>
-              </div>
+              <i class="fas fa-exclamation-triangle text-danger fa-3x ms-3"></i>
             </div>
-          </div>
-          
-          <div class="col-12 card border-0 bg-light">
-            <div class="card-body">
-              <h3 class="h5 fw-semibold mb-3">Data Export & Deletion</h3>
-              
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <p class="fw-medium mb-0">Export your data</p>
-                  <p class="text-muted small">Download a copy of all your personal data we store</p>
-                </div>
-                <button class="btn btn-outline-secondary btn-sm">
-                  Request Export
-                </button>
-              </div>
-              
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <p class="fw-medium mb-0">Delete your account</p>
-                  <p class="text-muted small">Permanently remove your account and all associated data</p>
-                </div>
-                <a href="{% url 'public_user:delete_public_user_by_public'%}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
-                  Delete Account
-                </a>
-              </div>
+            
+            <div class="mt-4">
+              <a href="{% url 'public_user:delete_public_user_by_public' %}" 
+                 class="btn btn-danger"
+                 onclick="return confirm('Are you absolutely sure you want to delete your account? This cannot be undone!');">
+                <i class="fas fa-trash-alt me-2"></i> Delete My Account Permanently
+              </a>
             </div>
-          </div>
-          
-          <div class="col-12 pt-3 border-top d-flex justify-content-end">
-            <button type="button" class="btn btn-primary">
-              Save Privacy Settings
-            </button>
           </div>
         </div>
       </div>
-      
     </div>
   </div>
 </div>
@@ -477,12 +379,6 @@
     });
   });
   
-  // Show password modal
-  function showPasswordModal() {
-    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
-    modal.show();
-  }
-  
   // Reset form to initial values
   function resetForm(formId) {
     document.getElementById(formId).reset();
@@ -491,8 +387,7 @@
   // Initialize the first tab as active
   document.querySelector('.account-tab.active').click();
 
-
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     const passwordForm = document.getElementById('password-change-form');
     if (passwordForm) {
         passwordForm.addEventListener('submit', function(e) {
@@ -530,9 +425,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         });
     }
-});
+  });
 
-$(document).ready(function() {
+  $(document).ready(function() {
     const districtSelect = $("#id_district");
     const talukSelect = $("#id_thaluk");
     const villageSelect = $("#id_village");
@@ -592,6 +487,6 @@ $(document).ready(function() {
             });
         }
     });
-});
+  });
 </script>
 {% endblock %}
