@@ -29,6 +29,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'expert-lizard-vastly.ngrok-free.app']
 
+SUPPORT_PHONE = "+91 7525460392"  # Replace with actual support number
+SUPPORT_EMAIL = "support@yourdomain.com"  # Replace with actual support email
+
 
 # Application definition
 INSTALLED_APPS = [

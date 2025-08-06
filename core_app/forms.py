@@ -14,6 +14,8 @@ class DeptForm(forms.ModelForm):
         # Remove 'district' field for collector to avoid validation error
         if request and hasattr(request.user, "collector_profile"):
             self.fields.pop('district')
+        elif request and hasattr(request.user, "district_officer_profile"):
+            self.fields.pop('district')
 
 class DistrictForm(forms.ModelForm):
     """
