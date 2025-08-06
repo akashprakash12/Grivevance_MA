@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.py[cod]
 *.pyc
+!static/data/Districtdataset.json
 
 # Environment files
 .env
