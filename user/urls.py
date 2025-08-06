@@ -14,6 +14,10 @@ from django.contrib.auth.views import LogoutView
 app_name = 'public_user'
 
 urlpatterns = [
+    path('api/districts/', views.get_districts, name='api_districts'),
+    path('api/taluks/<str:district_name>/', views.get_taluks, name='api_taluks'),
+    path('api/villages/<str:taluk_name>/', views.get_villages, name='api_villages'),
+    
     path('logout/', LogoutView.as_view(), name='logout'),
     path('', views.user_dashboard, name='user_dashboard'),
     path(('view/'), view_grievances, name='view_grievances'),

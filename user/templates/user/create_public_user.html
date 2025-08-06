@@ -1,30 +1,340 @@
-<!-- templates/user/create_public_user.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Create Public User</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register – Collector Portal</title>
+
+  <!-- Bootstrap & Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --indigo:#002855;
+      --indigo-light:#08438f;
+      --accent:#ffc107;
+      --bg:#f4f6f9;
+      --br:.9rem;
+    }
+
+    body{
+      font-family:'Segoe UI',system-ui,sans-serif;
+      background:var(--bg);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:1.5rem;
+    }
+
+    .login-card{
+      width:100%;
+      max-width:560px;
+      background:#fff;
+      border-left:6px solid var(--accent);
+      border-radius:var(--br);
+      box-shadow:0 .75rem 1.75rem rgba(0,0,0,.08);
+      padding:2.75rem 2.5rem 3rem;
+      transition:transform .3s ease, box-shadow .3s ease;
+    }
+    .login-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 1rem 2rem rgba(0,0,0,.12);
+    }
+
+    h2{
+      text-align:center;
+      color:var(--indigo);
+      font-weight:700;
+      font-size:2rem;
+      margin-bottom:2rem;
+      position:relative;
+      padding-bottom:.8rem;
+    }
+    h2::after{
+      content:'';
+      position:absolute;
+      left:50%;bottom:0;transform:translateX(-50%);
+      width:110px;height:4px;
+      background:var(--accent);
+      border-radius:3px;
+    }
+
+    h4 {
+      color: var(--indigo);
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .form-floating>label{font-size:15px;color:#555}
+    .form-control{
+      padding-top:1.3rem;
+      padding-bottom:.65rem;
+      font-size:16px;
+      border-radius:.55rem;
+    }
+    .form-control:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 .25rem rgba(255,193,7,.25);
+    }
+
+    .btn-login{
+      background:var(--indigo);
+      color:#fff;
+      padding:.8rem 1.6rem;
+      border-radius:.55rem;
+      font-weight:500;
+      border:none;
+      transition:background .2s ease, transform .2s ease;
+    }
+    .btn-login:hover{background:var(--indigo-light);transform:translateY(-2px)}
+
+    .text-danger small {
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .alert {
+      border-radius: var(--br);
+    }
+
+    .back-to-login {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: .9rem;
+      color: var(--indigo);
+      text-decoration: none;
+    }
+    .back-to-login:hover {
+      text-decoration: underline;
+    }
+
+    .spinner-border {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-width: 0.15em;
+    }
+
+    @media(max-width:576px){
+      .login-card{padding:2rem}
+      h2{font-size:1.6rem}
+    }
+  </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h2>Create Public User</h2>
-    <form method="post">
-        {% csrf_token %}
-        
-        <h4>User Details</h4>
-        {{ user_form.as_p }}
+  <div class="login-card">
+    <h2><i class="fas fa-user-plus me-2"></i>Register</h2>
 
-        <h4>Profile Details</h4>
-        {{ profile_form.as_p }}
-        
-        <button type="submit" class="btn btn-primary">Save</button>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <h4>User Details</h4>
+      {% for field in user_form %}
+        <div class="mb-3 form-floating">
+          {{ field }}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% if field.errors %}
+            <div class="text-danger small">{{ field.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <h4>Profile Details</h4>
+      {% for field in profile_form %}
+        {% if field.name in 'district thaluk village' %}
+          <!-- Special handling for location fields -->
+          <div class="mb-3 form-floating position-relative">
+            {{ field }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% if field.name == 'district' %}
+              <div class="position-absolute top-50 end-0 translate-middle-y me-2" id="district-spinner">
+                <div class="spinner-border spinner-border-sm text-secondary d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            {% elif field.name == 'thaluk' %}
+              <div class="position-absolute top-50 end-0 translate-middle-y me-2" id="taluk-spinner">
+                <div class="spinner-border spinner-border-sm text-secondary d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            {% elif field.name == 'village' %}
+              <div class="position-absolute top-50 end-0 translate-middle-y me-2" id="village-spinner">
+                <div class="spinner-border spinner-border-sm text-secondary d-none" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            {% endif %}
+            {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="mb-3 form-floating">
+            {{ field }}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|striptags }}</div>
+            {% endif %}
+            {% if field.help_text %}
+              <small class="text-muted">{{ field.help_text }}</small>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-login">
+          <i class="fas fa-save me-2"></i>Create Account
+        </button>
+      </div>
+
+      <div class="text-center mt-3">
+        <a href="{% url 'accounts:login' %}" class="back-to-login">
+          <i class="fas fa-arrow-left me-1"></i>Back to Login
+        </a>
+      </div>
     </form>
-    
-    {% for msg in messages %}
-        <div class="alert alert-info mt-2">{{ msg }}</div>
-    {% endfor %}
-</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    // Add floating labels to all form inputs
+    document.querySelectorAll('.form-floating input').forEach(input => {
+      // Add Bootstrap's form-control class if not present
+      if (!input.classList.contains('form-control')) {
+        input.classList.add('form-control');
+      }
+      
+      // Handle password fields
+      if (input.type === 'password') {
+        const parentDiv = input.closest('.form-floating');
+        if (parentDiv) {
+          // Create toggle button
+          const toggleBtn = document.createElement('button');
+          toggleBtn.type = 'button';
+          toggleBtn.className = 'btn position-absolute top-50 end-0 translate-middle-y me-2 p-0';
+          toggleBtn.setAttribute('aria-label', 'Show password');
+          toggleBtn.style.background = 'transparent';
+          toggleBtn.style.border = 'none';
+          
+          const icon = document.createElement('i');
+          icon.className = 'fa-solid fa-eye';
+          toggleBtn.appendChild(icon);
+          
+          // Insert after the input
+          parentDiv.appendChild(toggleBtn);
+          
+          // Add toggle functionality
+          toggleBtn.addEventListener('click', () => {
+            const isPwd = input.type === 'password';
+            input.type = isPwd ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+            toggleBtn.setAttribute('aria-label', isPwd ? 'Hide password' : 'Show password');
+          });
+        }
+      }
+    });
+
+    // District, Taluk, Village dropdown functionality
+    $(document).ready(function() {
+      const districtSelect = $("#id_district");
+      const talukSelect = $("#id_thaluk");
+      const villageSelect = $("#id_village");
+
+      const districtSpinner = $("#district-spinner .spinner-border");
+      const talukSpinner = $("#taluk-spinner .spinner-border");
+      const villageSpinner = $("#village-spinner .spinner-border");
+
+      // Initially disable Taluk & Village
+      talukSelect.prop("disabled", true);
+      villageSelect.prop("disabled", true);
+
+      // Load Districts on Page Load
+      districtSpinner.removeClass("d-none");
+      $.getJSON("{% url 'public_user:api_districts' %}", function(data) {
+        districtSelect.empty().append("<option value=''>Select District</option>");
+        $.each(data.districts, function(index, value) {
+          districtSelect.append("<option value='" + value + "'>" + value + "</option>");
+        });
+        // Set selected value if exists
+        if (districtSelect.data('value')) {
+          districtSelect.val(districtSelect.data('value'));
+        }
+      }).always(function() {
+        districtSpinner.addClass("d-none");
+      });
+
+      // On District Change → Load Taluks
+      districtSelect.on("change", function() {
+        let district = $(this).val();
+        talukSelect.empty().append("<option value=''>Select Taluk</option>").prop("disabled", true);
+        villageSelect.empty().append("<option value=''>Select Village</option>").prop("disabled", true);
+
+        if (district) {
+          talukSpinner.removeClass("d-none");
+          $.getJSON("/public_user/api/taluks/" + encodeURIComponent(district) + "/", function(data) {
+            $.each(data.taluks, function(index, value) {
+              talukSelect.append("<option value='" + value + "'>" + value + "</option>");
+            });
+            talukSelect.prop("disabled", false);
+            // Set selected value if exists
+            if (talukSelect.data('value')) {
+              talukSelect.val(talukSelect.data('value'));
+              talukSelect.trigger('change');
+            }
+          }).always(function() {
+            talukSpinner.addClass("d-none");
+          });
+        }
+      });
+
+      // On Taluk Change → Load Villages
+      talukSelect.on("change", function() {
+        let taluk = $(this).val();
+        villageSelect.empty().append("<option value=''>Select Village</option>").prop("disabled", true);
+
+        if (taluk) {
+          villageSpinner.removeClass("d-none");
+          $.getJSON("/public_user/api/villages/" + encodeURIComponent(taluk) + "/", function(data) {
+            $.each(data.villages, function(index, value) {
+              villageSelect.append("<option value='" + value + "'>" + value + "</option>");
+            });
+            villageSelect.prop("disabled", false);
+            // Set selected value if exists
+            if (villageSelect.data('value')) {
+              villageSelect.val(villageSelect.data('value'));
+            }
+          }).always(function() {
+            villageSpinner.addClass("d-none");
+          });
+        }
+      });
+
+      // Initialize with existing values if form is being re-displayed (e.g., due to validation errors)
+      if (districtSelect.val()) {
+        districtSelect.trigger('change');
+      }
+      if (talukSelect.val()) {
+        talukSelect.trigger('change');
+      }
+    });
+  </script>
 </body>
 </html>

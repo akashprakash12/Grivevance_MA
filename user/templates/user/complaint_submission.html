@@ -128,6 +128,24 @@
   .personal-info-field {
     margin-bottom: 1.25rem;
   }
+
+  /* Voice input styling */
+  .voice-input-group {
+    position: relative;
+  }
+  .voice-input-buttons {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+  }
+  #recording-indicator {
+    font-size: 0.8rem;
+    color: #dc3545;
+    margin-top: 5px;
+  }
 </style>
 {% endblock %}
 
@@ -214,15 +232,46 @@
           {% endif %}
         </div>
         
-        <div class="mb-3">
-          <label for="{{ form.description.id_for_label }}" class="form-label required-field">Description*</label>
-          {{ form.description }}
-          {% if form.description.errors %}
-            <div class="invalid-feedback d-block">
-              {{ form.description.errors }}
-            </div>
-          {% endif %}
-        </div>
+     <div class="mb-3">
+  <label for="{{ form.description.id_for_label }}" class="form-label required-field">Description*</label>
+  <div class="voice-input-container">
+    {{ form.description }}
+    <div class="voice-controls">
+      <!-- Microphone button with permission states -->
+      <button type="button" id="voice-btn" class="btn btn-sm btn-outline-secondary voice-btn">
+        <i class="fas fa-microphone"></i>
+      </button>
+      <!-- Clear button -->
+      <button type="button" id="clear-btn" class="btn btn-sm btn-outline-danger d-none">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    
+    <!-- Permission prompt (shown when permission needed) -->
+    <div id="permission-alert" class="alert alert-info mt-2 small d-none">
+      <i class="fas fa-info-circle me-2"></i>
+      <span>Microphone access is required for voice input.</span>
+      <button id="request-mic-btn" class="btn btn-link btn-sm p-0 ms-2">Enable microphone</button>
+    </div>
+    
+    <!-- Recording UI (shown during recording) -->
+    <div id="recording-ui" class="recording-ui mt-2 d-none">
+      <div class="recording-indicator">
+        <span class="recording-dot"></span>
+        <span class="recording-text ms-2">Recording...</span>
+      </div>
+      <div class="recording-timer ms-auto">
+        <span id="recording-time">0:00</span>
+      </div>
+    </div>
+    
+    <!-- Unsupported browser warning -->
+    <div id="unsupported-warning" class="alert alert-warning mt-2 small d-none">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      Voice input not supported in your browser. Try Chrome or Edge.
+    </div>
+  </div>
+</div>
         
         <div class="mb-3">
           <label class="form-label">Supporting Documents</label>
@@ -785,5 +834,219 @@
       $('#grievanceForm').data('submitted', true);
     });
   });
+
+
+async function enableMicrophone() {
+  try {
+    // First check if we can enumerate devices
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const hasMicrophone = devices.some(device => device.kind === 'audioinput');
+    
+    if (!hasMicrophone) {
+      throw new Error('No microphone detected');
+    }
+
+    // Then request permission
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(track => track.stop()); // Immediately release
+    
+    return true;
+  } catch (error) {
+    console.error("Microphone enable failed:", error);
+    showError(getErrorMessage(error));
+    return false;
+  }
+}
+
+function getErrorMessage(error) {
+  switch(error.name) {
+    case 'NotFoundError':
+    case 'DevicesNotFoundError':
+      return 'No microphone hardware detected. Please connect a microphone.';
+    case 'NotAllowedError':
+    case 'PermissionDeniedError':
+      return 'Microphone access blocked. Please allow permission in browser settings.';
+    case 'NotReadableError':
+      return 'Microphone is in use by another application.';
+    default:
+      return 'Could not access microphone. Please check your settings.';
+  }
+}
+document.addEventListener('DOMContentLoaded', function() {
+  const voiceBtn = document.getElementById('voice-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const textarea = document.getElementById('id_description');
+  const recordingUI = document.getElementById('recording-ui');
+  const recordingTime = document.getElementById('recording-time');
+  const permissionAlert = document.getElementById('permission-alert');
+  const requestMicBtn = document.getElementById('request-mic-btn');
+  const unsupportedWarning = document.getElementById('unsupported-warning');
+
+  let recognition;
+  let isRecording = false;
+  let recordingStart;
+  let timerInterval;
+  const MAX_RECORDING_TIME = 120; // 2 minutes
+
+  // Check browser support
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    unsupportedWarning.classList.remove('d-none');
+    voiceBtn.disabled = true;
+    return;
+  }
+
+  // Initialize speech recognition
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-IN';
+
+    recognition.onresult = function(event) {
+      let interim = '';
+      let final = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+      
+      textarea.value = final || interim;
+      if (textarea.value.trim()) {
+        clearBtn.classList.remove('d-none');
+      }
+    };
+
+    recognition.onerror = function(event) {
+      console.error('Speech recognition error:', event.error);
+      stopRecording();
+      handleRecognitionError(event.error);
+    };
+  }
+
+  // Handle recognition errors
+  function handleRecognitionError(error) {
+    switch(error) {
+      case 'not-allowed':
+      case 'permission-denied':
+        showPermissionPrompt();
+        break;
+      default:
+        console.warn('Speech recognition error:', error);
+    }
+  }
+
+  // Show permission prompt
+  function showPermissionPrompt() {
+    permissionAlert.classList.remove('d-none');
+  }
+
+  // Hide permission prompt
+  function hidePermissionPrompt() {
+    permissionAlert.classList.add('d-none');
+  }
+
+  // Start recording
+  async function startRecording() {
+    try {
+      // Request microphone permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Initialize if not already done
+      if (!recognition) {
+        initSpeechRecognition();
+      }
+      
+      isRecording = true;
+      recordingStart = Date.now();
+      
+      // Update UI
+      voiceBtn.classList.add('listening');
+      recordingUI.classList.remove('d-none');
+      hidePermissionPrompt();
+      
+      // Start timer
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+      
+      // Start recognition
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error("Couldn't start recognition:", err);
+        stopRecording();
+      }
+    } catch (err) {
+      console.error("Microphone access denied:", err);
+      showPermissionPrompt();
+    }
+  }
+
+  // Stop recording
+  function stopRecording() {
+    if (!isRecording) return;
+    
+    isRecording = false;
+    clearInterval(timerInterval);
+    
+    // Update UI
+    voiceBtn.classList.remove('listening');
+    recordingUI.classList.add('d-none');
+    
+    // Stop recognition
+    if (recognition) {
+      try {
+        recognition.stop();
+      recognition.onend = null; // Remove any existing onend handler
+      } catch (err) {
+        console.error("Error stopping recognition:", err);
+      }
+    }
+  }
+
+  // Update recording timer
+  function updateTimer() {
+    const elapsed = Math.floor((Date.now() - recordingStart) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    
+    recordingTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (elapsed >= MAX_RECORDING_TIME) {
+      stopRecording();
+    }
+  }
+
+  // Event listeners
+  voiceBtn.addEventListener('mousedown', startRecording);
+  voiceBtn.addEventListener('touchstart', startRecording);
+  
+  voiceBtn.addEventListener('mouseup', stopRecording);
+  voiceBtn.addEventListener('touchend', stopRecording);
+  voiceBtn.addEventListener('mouseleave', stopRecording);
+
+  clearBtn.addEventListener('click', () => {
+    textarea.value = '';
+    clearBtn.classList.add('d-none');
+  });
+
+  requestMicBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    startRecording();
+  });
+
+  // Handle page visibility changes
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isRecording) {
+      stopRecording();
+    }
+  });
+});
 </script>
 {% endblock %}

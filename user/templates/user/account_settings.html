@@ -90,6 +90,18 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
   }
+    .spinner {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid #ccc;
+    border-top: 2px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 </style>
 {% endblock %}
 
@@ -518,6 +530,68 @@ document.addEventListener('DOMContentLoaded', function() {
             return true;
         });
     }
+});
+
+$(document).ready(function() {
+    const districtSelect = $("#id_district");
+    const talukSelect = $("#id_thaluk");
+    const villageSelect = $("#id_village");
+
+    const districtSpinner = $("#district-spinner");
+    const talukSpinner = $("#taluk-spinner");
+    const villageSpinner = $("#village-spinner");
+
+    // Initially disable Taluk & Village
+    talukSelect.prop("disabled", true);
+    villageSelect.prop("disabled", true);
+
+    // Load Districts on Page Load
+    districtSpinner.removeClass("d-none");
+    $.getJSON("{% url 'public_user:api_districts' %}", function(data) {
+        districtSelect.empty().append("<option value=''>Select District</option>");
+        $.each(data.districts, function(index, value) {
+            districtSelect.append("<option value='" + value + "'>" + value + "</option>");
+        });
+    }).always(function() {
+        districtSpinner.addClass("d-none");
+    });
+
+    // On District Change → Load Taluks
+    districtSelect.on("change", function() {
+        let district = $(this).val();
+        talukSelect.empty().append("<option value=''>Select Taluk</option>").prop("disabled", true);
+        villageSelect.empty().append("<option value=''>Select Village</option>").prop("disabled", true);
+
+        if (district) {
+            talukSpinner.removeClass("d-none");
+            $.getJSON("/public_user/api/taluks/" + encodeURIComponent(district) + "/", function(data) {
+                $.each(data.taluks, function(index, value) {
+                    talukSelect.append("<option value='" + value + "'>" + value + "</option>");
+                });
+                talukSelect.prop("disabled", false);
+            }).always(function() {
+                talukSpinner.addClass("d-none");
+            });
+        }
+    });
+
+    // On Taluk Change → Load Villages
+    talukSelect.on("change", function() {
+        let taluk = $(this).val();
+        villageSelect.empty().append("<option value=''>Select Village</option>").prop("disabled", true);
+
+        if (taluk) {
+            villageSpinner.removeClass("d-none");
+            $.getJSON("/public_user/api/villages/" + encodeURIComponent(taluk) + "/", function(data) {
+                $.each(data.villages, function(index, value) {
+                    villageSelect.append("<option value='" + value + "'>" + value + "</option>");
+                });
+                villageSelect.prop("disabled", false);
+            }).always(function() {
+                villageSpinner.addClass("d-none");
+            });
+        }
+    });
 });
 </script>
 {% endblock %}
