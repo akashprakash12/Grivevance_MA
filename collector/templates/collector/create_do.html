@@ -1,35 +1,211 @@
-<!-- templates/collector/create_do.html -->
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Create District Officer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Create District Officer | Collector Dashboard</title>
+
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .form-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: var(--card-shadow);
+      border-left: 5px solid var(--accent);
+    }
+
+    .form-header {
+      color: var(--indigo);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-family: 'Titillium Web', sans-serif;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--indigo-light);
+    }
+
+    .form-control {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    }
+
+    .btn-submit {
+      background-color: var(--indigo);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.5rem 2rem;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--indigo-light);
+      transform: translateY(-2px);
+    }
+
+    .navbar-custom {
+      background: var(--indigo);
+      padding: 1.2rem 2rem;
+      border-bottom: 4px solid var(--indigo-light);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 1050;
+    }
+
+    .navbar-custom .navbar-logo {
+      height: 50px;
+      margin-right: 15px;
+    }
+
+    .navbar-custom .nav-link {
+      color: #ffffff !important;
+      margin-left: 1rem;
+      font-weight: 500;
+      transition: color 0.3s ease, transform 0.2s ease;
+    }
+
+    .navbar-custom .nav-link:hover {
+      color: #FFBF00 !important;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 <body>
-<div class="container mt-5">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h3 class="card-title text-center mb-4">Create District Officer</h3>
 
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
+<!-- NAVBAR -->
+<nav class="navbar-custom">
+  <div class="d-flex align-items-center">
+    <img src="{% static 'images/Kerala_Government.png' %}" alt="Kerala Government Logo" class="navbar-logo">
+    <span class="fw-bold text-white" style="font-size: 1.7rem; font-family: 'Titillium Web', sans-serif;">
+      {{ district }} Collector Portal
+    </span>
+  </div>
+  <ul class="nav gap-3 align-items-center">
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'district_officer:view_district_officers' %}">
+        <i class="fas fa-user me-1"></i> District Officer
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'collector:collector_dashboard' %}">
+        <i class="fas fa-home me-1"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'accounts:logout' %}">
+        <i class="fas fa-sign-out-alt me-1"></i> Logout
+      </a>
+    </li>
+  </ul>
+</nav>
 
-                <!-- Render all fields in the form -->
-                {{ user_form.as_p }}
+<!-- MAIN FORM CONTENT -->
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="form-container">
+        <h2 class="form-header">
+          <i class="fas fa-user-plus me-2"></i>
+          Create District Officer
+        </h2>
 
-                <button type="submit" class="btn btn-primary mt-3">Create Officer</button>
-            </form>
+        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+          {% csrf_token %}
 
-            {% if messages %}
-                <div class="mt-4">
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
+          {% for field in user_form %}
+            <div class="mb-3">
+              <label for="{{ field.id_for_label }}" class="form-label">
+                {{ field.label }}
+                {% if field.name != 'phone' %}
+                  <span class="text-danger">*</span>
+                {% endif %}
+              </label>
+              {{ field }}
+              <div class="invalid-feedback">
+                Please provide a valid {{ field.label|lower }}.
+              </div>
+            </div>
+          {% endfor %}
+
+          <div class="d-flex justify-content-between mt-4">
+            <a href="{% url 'district_officer:view_district_officers' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-arrow-left me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-submit">
+              <i class="fas fa-user-plus me-1"></i> Create Officer
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(() => {
+  'use strict';
+  const forms = document.querySelectorAll('.needs-validation');
+
+  forms.forEach(form => {
+    // Add required to all fields except phone
+    form.querySelectorAll('input, select, textarea').forEach(input => {
+      if (input.name && input.name.toLowerCase() !== 'phone' && input.type !== 'hidden') {
+        input.required = true;
+      }
+      if (!input.classList.contains('form-control') && input.type !== 'checkbox' && input.type !== 'radio') {
+        input.classList.add('form-control');
+      }
+    });
+
+    // Validate on submit
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+</script>
+
 </body>
 </html>

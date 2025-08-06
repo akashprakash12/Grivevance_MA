@@ -28,14 +28,21 @@ def department_list(request):
     depts = Department.objects.all()
     return render(request, "core_app/department_list.html", {"departments": depts})
 
-
 @login_required
 def department_create(request):
     user = request.user
     is_collector = _is_collector(user)
-    is_DO=_is_DO(user)
+    is_DO = _is_DO(user)
+    
     if DEBUG_PRINT:
         print("CREATE →", "collector" if is_collector else "admin")
+
+    # Get district based on user type
+    district = None
+    if is_collector:
+        district = user.collector_profile.district
+    elif is_DO:
+        district = user.district_officer_profile.district
 
     if request.method == "POST":
         form = DeptForm(request.POST, request=request)
@@ -43,19 +50,17 @@ def department_create(request):
             dept = form.save(commit=False)
             dept.code = auto_dept_id()
 
-            if is_collector:
-                dept.district = user.collector_profile.district  # force district
-            if is_DO:
-                dept.district=user.district_officer_profile.district
+            if district:  # Set district if user is collector or DO
+                dept.district = district
 
-            dept.created_by = user                           # NEW: always set creator
+            dept.created_by = user  # Set creator
             dept.save()
             messages.success(request, "Department created successfully.")
-        return redirect(
-            "collector:collector_dashboard" if is_collector
-            else "district_officer:DO_dashboard" if is_DO
-            else "core:department_list"
-        )
+            return redirect(
+                "collector:collector_dashboard" if is_collector
+                else "district_officer:DO_dashboard" if is_DO
+                else "core:department_list"
+            )
 
     else:
         form = DeptForm(request=request)
@@ -65,7 +70,11 @@ def department_create(request):
         if is_collector else "district_officer/do_dept_create.html" if is_DO else
         "core_app/department_form.html"
     )
-    return render(request, template, {"form": form})
+    
+    return render(request, template, {
+        "form": form,
+        "district": district  # Pass district to template
+    })
 
 @login_required
 def department_update(request, code):

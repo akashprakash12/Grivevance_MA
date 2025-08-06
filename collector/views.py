@@ -152,7 +152,7 @@ def update_collector(request, username):
         if user_form.is_valid() and profile_form.is_valid():
             # Save user
             user = user_form.save(commit=False)
-            user.username = auto_collector_id(district)
+            user.username = user.username
             user.save()
 
             # Save profile
@@ -368,7 +368,17 @@ def collector_dashboard(request):
 
     # Resolved is anything not in the above statuses (optional fallback)
     resolved_all = total_all - pending_all - in_progress_all - rejected_all - escalated_all
-
+    
+    
+    district_name = district.name.lower()
+    district_images_path = os.path.join(settings.STATICFILES_DIRS[0], 'images', district_name)
+    district_images = []
+    
+    if os.path.exists(district_images_path):
+        district_images = [
+            f for f in os.listdir(district_images_path)
+            if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))
+        ]
     context = {
         "collector": collector,
         "district": district,
@@ -385,6 +395,8 @@ def collector_dashboard(request):
         "all_grievances": all_grievances,
         "sort_by": sort_by,
         "dept_search": dept_search,
+        "district_images": district_images,
+
     }
     return render(request, "collector/collector_dashboard.html", context)
 
@@ -697,15 +709,20 @@ def grievance_report_view(request):
 def department_report_view(request):
     user_type = request.user.user_type
     district = None
-    
-    if user_type == "collector":
+    print("hello",request.user)
+    print("user_type is:", user_type)
+
+    if user_type == "COLLECTOR":
         user = get_object_or_404(CollectorProfile, user=request.user)
         district = user.district
         template="collector/department_report.html"
+        print("hello im coll")
+
     elif user_type == "district_officer":  # Changed this condition
         user = get_object_or_404(DistrictOfficerProfile, user=request.user)
         district = user.district
         template="district_officer/department_report.html"
+        print("hello im do")
 
     else:
         # Handle other user types or raise permission denied

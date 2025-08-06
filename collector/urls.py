@@ -46,7 +46,7 @@ path(
 
 # urls.py
 path("collector_dept_create/", views.collector_department_create, name="collector_department_create"),
-path('handover/', views.collector_handover_otp, name='collector_handover_otp'),
+# path('handover/', views.collector_handover_otp, name='collector_handover_otp'),
 
 path('handover/new-collector/', views.new_collector_info, name='new_collector_info'),
 

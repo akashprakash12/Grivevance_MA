@@ -1,3 +1,4 @@
+from pickle import TRUE
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -12,6 +13,9 @@ from django.db.models import Q, Count
 from django.db import IntegrityError
 from django.utils.crypto import get_random_string
 from django.core.exceptions import PermissionDenied
+from django.db import transaction  # Add this import at the top
+import os
+import random
 
 from grievance_app.models import Grievance
 from .models import DistrictOfficerProfile
@@ -20,7 +24,7 @@ from core_app.models import Department, District
 from .forms import DOCreateUserForm, DOUpdateUserForm, DistrictOfficerProfileForm
 from .utils import generate_do_id
 from collector.models import CollectorProfile
-from collector.views import rank_departments, _is_collector
+from collector.views import rank_departments, _is_collector,_is_DO
 
 @login_required
 def create_district_officer(request):
@@ -28,89 +32,91 @@ def create_district_officer(request):
     collector_district = getattr(collector_profile, "district", None)
     user_form = DOCreateUserForm(request.POST or None)
 
-    if request.method == "POST" and user_form.is_valid():
-        try:
-            if not collector_district:
-                messages.error(request, "District information is missing. Please contact the administrator.")
+    if not collector_district:
+        messages.error(request, "District information is missing. Please contact the administrator.")
+        return redirect('district_officer:view_district_officers')
+
+    if request.method == "POST":
+        if user_form.is_valid():
+            try:
+                # Check for existing active officer
+                if DistrictOfficerProfile.objects.filter(district=collector_district, is_active=True).exists():
+                    messages.error(
+                        request,
+                        "An active District Officer is already assigned to this district. "
+                        "Please deactivate the current officer before assigning a new one."
+                    )
+                    return redirect('district_officer:view_district_officers')
+
+                with transaction.atomic():
+                    username = generate_do_id(collector_district)
+                    password = get_random_string(length=12)
+
+                    user = user_form.save(commit=False)
+                    user.username = username
+                    user.set_password(password)
+                    user.user_type = "district_officer"
+                    user.is_active = True
+                    user.date_joined = timezone.now()
+                    user.save()
+
+                    DistrictOfficerProfile.objects.create(
+                        user=user,
+                        officer_id=username,
+                        district=collector_district,
+                        is_active=True,
+                        created_by=collector_profile
+                    )
+
+                    try:
+                        group = Group.objects.get(name='district_officer')
+                        user.groups.add(group)
+                    except Group.DoesNotExist:
+                        pass
+
+                    try:
+                        send_mail(
+                            subject=f"District Officer Account Created - {collector_district.name}",
+                            message=(
+                                f"Dear {user.first_name or 'District Officer'},\n\n"
+                                f"Your District Officer account has been created.\n\n"
+                                f"Username: {username}\n"
+                                f"Temporary Password: {password}\n\n"
+                                f"Login: {request.build_absolute_uri(settings.LOGIN_URL)}\n"
+                                f"Please change your password after logging in.\n\n"
+                                f"District: {collector_district.name}\n\n"
+                                f"This is an automated message."
+                            ),
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[user.email],
+                            fail_silently=False,
+                        )
+                        messages.success(request, f"Officer {username} created. Credentials sent to {user.email}.")
+                    except Exception as e:
+                        messages.warning(
+                            request,
+                            f"Officer created, but failed to send email: {str(e)}.\n"
+                            f"Manual credentials: Username: {username}, Password: {password}"
+                        )
+
+                return redirect("district_officer:view_district_officers")
+
+            except IntegrityError as e:
+                messages.error(request, f"Error creating profile: {str(e)}")
                 return redirect('district_officer:view_district_officers')
 
-            if DistrictOfficerProfile.objects.filter(district=collector_district, is_active=True).exists():
-                messages.error(
-                    request,
-                    "An active District Officer is already assigned to this district. "
-                    "Please deactivate the current officer before assigning a new one."
-                )
-                return redirect('district_officer:view_district_officers')
-
-            username = generate_do_id(collector_district)
-            password = get_random_string(length=12)
-
-            user = user_form.save(commit=False)
-            user.username = username
-            user.set_password(password)
-            user.user_type = "district_officer"
-            user.is_active = True
-            user.date_joined = timezone.now()
-            user.save()
-
-            DistrictOfficerProfile.objects.create(
-                user=user,
-                officer_id=username,
-                district=collector_district,
-                is_active=True,
-                created_by=collector_profile
-            )
-
-            try:
-                group = Group.objects.get(name='district_officer')
-                user.groups.add(group)
-            except Group.DoesNotExist:
-                pass
-
-            try:
-                send_mail(
-                    subject=f"District Officer Account Created - {collector_district.name}",
-                    message=(
-                        f"Dear {user.first_name or 'District Officer'},\n\n"
-                        f"Your District Officer account has been created.\n\n"
-                        f"Username: {username}\n"
-                        f"Temporary Password: {password}\n\n"
-                        f"Login: {request.build_absolute_uri(settings.LOGIN_URL)}\n"
-                        f"Please change your password after logging in.\n\n"
-                        f"District: {collector_district.name}\n\n"
-                        f"This is an automated message."
-                    ),
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    fail_silently=False,
-                )
-                messages.success(request, f"Officer {username} created. Credentials sent to {user.email}.")
             except Exception as e:
-                messages.warning(
-                    request,
-                    f"Officer created, but failed to send email: {str(e)}.\n"
-                    f"Manual credentials: Username: {username}, Password: {password}"
-                )
-
-            return redirect("district_officer:view_district_officers")
-
-        except IntegrityError as e:
-            # user.delete()
-            messages.error(request, f"Error creating profile: {str(e)}")
-            return redirect('district_officer:view_district_officers')
-
-        except Exception as e:
-            messages.error(request, f"An error occurred: {str(e)}")
-
-    elif request.method == "POST":
-        messages.error(request, "Please correct the form errors below.")
+                messages.error(request, f"An error occurred: {str(e)}")
+        else:
+            # Show specific form errors
+            for field, errors in user_form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
 
     return render(request, 'collector/create_do.html', {
         'user_form': user_form,
-        'is_collector': bool(collector_district),
         'collector_district': collector_district
     })
-
 
 @login_required
 def view_district_officer_profile(request):
@@ -141,55 +147,78 @@ def view_district_officer_profile(request):
 
     return render(request, "collector/do_profile_for_collector.html", context)
 
-
-
 @login_required
+@transaction.atomic
 def update_district_officer(request, officer_id):
     officer = get_object_or_404(DistrictOfficerProfile, officer_id=officer_id)
     user_obj = officer.user
 
-    collector_district = getattr(getattr(request.user, "collector_profile", None), "district", None)
+    # Determine user roles and permissions
     is_admin = request.user.is_superuser or request.user.user_type == "ADMIN"
-    is_collector = _is_collector(request.user) and collector_district == officer.district
-
-    if not (is_admin or is_collector):
+    is_collector = _is_collector(request.user)
+    is_do = _is_DO(request.user)
+    
+    # Get collector's district if collector
+    collector_district = getattr(getattr(request.user, "collector_profile", None), "district", None) if is_collector else None
+    
+    # Check permissions
+    can_edit = (
+        is_admin or
+        (is_collector and collector_district == officer.district) or
+        (is_do and request.user == user_obj)  # DO can only edit themselves
+    )
+    
+    if not can_edit:
         raise PermissionDenied("You are not authorized to update this profile.")
 
     if request.method == "POST":
         user_form = DOUpdateUserForm(request.POST, instance=user_obj)
         profile_form = DistrictOfficerProfileForm(request.POST, request.FILES, instance=officer, request=request)
         
-        # Preserve original values
-        original_is_active = officer.is_active
-
         if user_form.is_valid() and profile_form.is_valid():
             user = user_form.save(commit=False)
-            user.is_active = user_obj.is_active  # preserve user's is_active
+            
+            # Preserve original active status (no one can change it)
+            user.is_active = True
             user.save()
 
             profile = profile_form.save(commit=False)
-            profile.is_active = original_is_active  # prevent accidental reset
-            profile.district = officer.district     # re-set district in case disabled in form
+            
+            # Preserve original district and active status (no one can change these)
+            profile.district = officer.district
+            profile.is_active = True
             profile.save()
 
             messages.success(request, "Profile updated successfully.")
-            return redirect("district_officer:view_district_officers" if is_collector else "admin_app:admin_dashboard")
+            
+            # Determine redirect based on user type
+            if is_collector:
+                return redirect("district_officer:view_district_officers")
+            elif is_do:
+                return redirect("district_officer:DO_dashboard")
+            else:  # admin
+                return redirect("admin_app:admin_dashboard")
         else:
-            messages.error(request, "Please correct the errors.")
+            messages.error(request, "Please correct the errors below.")
     else:
         user_form = DOUpdateUserForm(instance=user_obj)
         profile_form = DistrictOfficerProfileForm(instance=officer, request=request)
 
-    template_name = "collector/update_do.html" if is_collector else "district_officer/update_do.html"
+    # Select appropriate template
+    if is_collector:
+        template_name = "collector/update_do.html"
+    elif is_do:
+        template_name = "district_officer/update_do.html"  # Special template for DO self-edits
+    else:
+        template_name = "district_officer/update_do.html"  # Admin template
 
     return render(request, template_name, {
         "user_form": user_form,
         "profile_form": profile_form,
         "officer": officer,
+        "is_self_edit": is_do,  # Flag for template to adjust UI
+        "can_change_status": False,  # Explicitly tell template status can't be changed
     })
-
-
-
 
 
 
@@ -238,7 +267,15 @@ def DO_dashboard(request):
     )
 
     top3_departments = rank_departments(Department.objects.filter(district=district))
-
+    district_name = district.name.lower()
+    district_images_path = os.path.join(settings.STATICFILES_DIRS[0], 'images', district_name)
+    district_images = []
+    
+    if os.path.exists(district_images_path):
+        district_images = [
+            f for f in os.listdir(district_images_path)
+            if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))
+        ]
     dept_data = []
     for d in departments:
         total, pending, rejected = d.total, d.pending, d.rejected
@@ -275,5 +312,7 @@ def DO_dashboard(request):
         "all_grievances": grievances,
         "departments": dept_data,
         "top3_departments": top3_departments,
+        "district_images": district_images,
+
     }
     return render(request, "district_officer/district_officer_dashboard.html", context)
