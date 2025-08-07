@@ -524,21 +524,22 @@
             <div class="carousel-header">
               <i class="fas fa-mountain me-2 text-warning"></i>Explore {{ district.name }}
             </div>
-            <div class="carousel-box">
+            <div class="carousel-box" style="height: 300px; width: 100%; overflow: hidden;">
               {% if district_images %}
                 {% for image in district_images %}
                   <div class="mySlides">
                     <img src="{% static 'images/'|add:district.name.lower|add:'/'|add:image %}" 
+                         style="width: 100%; height: 100%; object-fit: cover;"
                          alt="{{ district.name }} Image {{ forloop.counter }}">
                   </div>
                 {% endfor %}
               {% else %}
-                <!-- Fallback if no images found -->
+                <!-- Fallback images -->
                 <div class="mySlides">
-                  <img src="{% static 'images/default1.jpg' %}" alt="Default Image 1">
+                  <img src="{% static 'images/default1.jpg' %}" style="width: 100%; height: 100%; object-fit: cover;" alt="Default Image 1">
                 </div>
                 <div class="mySlides">
-                  <img src="{% static 'images/default2.jpg' %}" alt="Default Image 2">
+                  <img src="{% static 'images/default2.jpg' %}" style="width: 100%; height: 100%; object-fit: cover;" alt="Default Image 2">
                 </div>
               {% endif %}
             </div>
