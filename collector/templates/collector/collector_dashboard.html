@@ -546,35 +546,29 @@
   <div class="carousel-header">
     <i class="fas fa-mountain me-2 text-warning"></i>Explore {{ district.name }}
   </div>
-  <div class="carousel-box">
+  <div class="carousel-box" style="height: 300px; width: 100%; overflow: hidden;"> <!-- Fixed height & width -->
     <div id="districtCarousel" class="carousel slide" data-bs-ride="carousel">
       <div class="carousel-inner">
         {% if district_images %}
           {% for image in district_images %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
               <img src="{% static 'images/'|add:district.name.lower|add:'/'|add:image %}" 
-                   class="d-block w-100" 
-                   alt="{{ district.name }} Image {{ forloop.counter }}">
+                   class="d-block w-100 h-100 object-fit-cover" 
+                   >
             </div>
           {% endfor %}
         {% else %}
-          <!-- Fallback if no images found -->
+          <!-- Fallback images -->
           <div class="carousel-item active">
-            <img src="{% static 'images/default1.jpg' %}" class="d-block w-100" alt="Default Image 1">
+            <img src="{% static 'images/default1.jpg' %}" class="d-block w-100 h-100 object-fit-cover">
           </div>
           <div class="carousel-item">
-            <img src="{% static 'images/default2.jpg' %}" class="d-block w-100" alt="Default Image 2">
+            <img src="{% static 'images/default2.jpg' %}" class="d-block w-100 h-100 object-fit-cover" >
           </div>
         {% endif %}
       </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#districtCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#districtCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
+      <!-- Navigation buttons -->
+      
     </div>
   </div>
 </div>
