@@ -115,13 +115,14 @@ def dashboard(request):
             context['is_hod'] = profile.is_hod
 
             if profile.is_hod:
-                return redirect(request, 'hod:hod_dashboard', context)
+                return redirect( 'hod:hod_dashboard')
             else:
                 return render(request, 'officer/officer_dashboard.html', context)
 
         except OfficerProfile.DoesNotExist:
             messages.error(request, "Officer profile not found.")
             return redirect('accounts:login')
+
 
     # === Public User Dashboard ===
     elif 'public' in groups:

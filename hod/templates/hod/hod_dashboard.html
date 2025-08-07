@@ -1,47 +1,102 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-   <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>HOD Dashboard</title>
-       {% load static %}
-       <link rel="stylesheet" href="{% static 'css/hod_dashboard.css' %}">
-   </head>
+<head>
+    <meta charset="UTF-8">
+    <title>HOD Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/hod_dashboard.css' %}">
+</head>
 <body>
-    <div class="container">
-        <h1>{{ profile.user.first_name }}{{profile.user.second_name}}</h1>
-        <h2>Your Department: {{ profile.department.name }}</h2>
 
-        <h3>Grievances in Your Department</h3>
-        <ul>
-            {% for grievance in grievances %}
-                <li>{{ grievance.grievance_id}}-{{ grievance.subject}} - Status: {{ grievance.status }}</li>
-            {% empty %}
-                <li>No grievances found.</li>
-            {% endfor %}
-        </ul>
+<!-- Horizontal Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold d-flex flex-column" href="#">
+            <span>{{ profile.user.first_name }} {{ profile.user.last_name }}</span>
+            <small class="fw-normal"> {{ profile.department.name }}</small>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hodNavbar" aria-controls="hodNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <h3>Officers in Your Department</h3>
-        <ul>
-            {% for officer in officers %}
-                <li>{{ officer.user.username }}</li>
-            {% empty %}
-                <li>No officers found in your department.</li>
-            {% endfor %}
-        </ul>
+        <div class="collapse navbar-collapse" id="hodNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-        <h3>Actions</h3>
-        <ul>
-            <li><a href="{% url 'hod:assign_grievance' %}">Assign Grievance</a></li>
-            <li><a href="{% url 'hod:check_progress' %}">Check Grievance Progress</a></li>
-            <li><a href="{% url 'hod:approve_extension_requests' %}">Approve Date Extension Requests</a></li>
-            <li><a href="{% url 'hod:search_grievance' %}">Search Grievances</a></li>
-            <li><a href="{% url 'hod:officers_assigned_grievances' %}">View Assigned Grievances</a></li>
-        </ul>
+                <!-- Grievances Dropdown -->
+                <li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:assign_grievance' %}">Assign Grievance</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:check_progress' %}">Check Progress</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:search_grievance' %}">Search Grievances</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:officers_assigned_grievances' %}">Assigned Grievances</a>
+</li>
 
-        <footer>
-            <p><a href="{% url 'accounts:logout' %}">Logout</a></p>
-        </footer>
+                <!-- Requests Dropdown -->
+                <li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:approve_extension_requests' %}">Extension Approvals</a>
+</li>
+
+
+                <!-- Department Info -->
+            </ul>
+
+            <!-- Logout on Right -->
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
     </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container mt-4">
+
+    <!-- Grievances -->
+    <div class="section-title">📋 Grievances in Your Department</div>
+    <div class="card card-section">
+        <div class="card-body">
+            {% if grievances %}
+                <ul class="list-group">
+                    {% for grievance in grievances %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ grievance.grievance_id }} – {{ grievance.subject }}
+                            <span class="badge bg-secondary">{{ grievance.status }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No grievances found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Officers -->
+    <div class="section-title">👥 Officers in Your Department</div>
+    <div class="card card-section">
+        <div class="card-body">
+            {% if officers %}
+                <ul class="list-group">
+                    {% for officer in officers %}
+                        <li class="list-group-item">{{ officer.user.get_full_name }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No officers found in your department.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
