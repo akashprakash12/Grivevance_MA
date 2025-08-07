@@ -1,0 +1,1052 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Submit New Complaint | Kerala Grievance Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --indigo: #002855;
+    --indigo-light: #08438f;
+    --accent: #ffc107;
+    --bg: #f4f6f9;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+  }
+
+  .card-custom {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    transition: .2s;
+    border-left: 5px solid var(--accent);
+  }
+
+  .form-section {
+    transition: all 0.3s ease;
+  }
+  .form-section:not(.active) {
+    display: none;
+  }
+  
+  .step-indicator {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    color: #6b7280;
+    font-weight: 600;
+  }
+  .step-indicator.active {
+    background-color: var(--indigo);
+    color: white;
+  }
+  .step-indicator.completed {
+    background-color: var(--accent);
+    color: #000;
+  }
+  
+  .step-connector {
+    height: 2px;
+    background-color: #e5e7eb;
+    flex: 1;
+    margin: 0 10px;
+  }
+  .step-connector.active {
+    background-color: var(--indigo);
+  }
+  .step-connector.completed {
+    background-color: var(--accent);
+  }
+  
+  .step-label {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+  }
+  .step-label.active {
+    color: var(--indigo);
+  }
+  .step-label.completed {
+    color: var(--accent);
+  }
+  
+  .btn-accent {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+  .btn-accent:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+  }
+  
+  .file-upload {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .file-upload:hover {
+    border-color: var(--indigo);
+    background-color: rgba(0, 40, 85, 0.05);
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 0.25rem rgba(0, 40, 85, 0.25);
+  }
+  
+  .review-section {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .is-invalid {
+    border-color: #dc3545 !important;
+  }
+  .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875em;
+  }
+  
+  /* Improved required field indicators */
+  .required-field::after {
+    content: " *";
+    color: #dc3545;
+  }
+  
+  /* Better spacing for personal info section */
+  .personal-info-field {
+    margin-bottom: 1.25rem;
+  }
+
+  /* Voice input styling */
+  .voice-input-group {
+    position: relative;
+  }
+  .voice-input-buttons {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 5px;
+  }
+  #recording-indicator {
+    font-size: 0.8rem;
+    color: #dc3545;
+    margin-top: 5px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  {% if form.errors %}
+  <div class="alert alert-danger">
+    <strong>Error!</strong> Please correct the following errors:
+    <ul>
+      {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+          <li>{{ field|title }}: {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="card-custom">
+    <!-- Progress Steps -->
+    <div class="p-4 border-bottom">
+      <h1 class="h3 fw-bold mb-4"><i class="fas fa-file-alt me-2 text-accent"></i>File a New Grievance</h1>
+      
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-column align-items-center">
+          <div class="step-indicator active" id="step1-indicator">1</div>
+          <span class="step-label active">Complaint Details</span>
+        </div>
+        <div class="step-connector" id="connector1-2"></div>
+        <div class="d-flex flex-column align-items-center">
+          <div class="step-indicator" id="step2-indicator">2</div>
+          <span class="step-label">Personal Information</span>
+        </div>
+        <div class="step-connector" id="connector2-3"></div>
+        <div class="d-flex flex-column align-items-center">
+          <div class="step-indicator" id="step3-indicator">3</div>
+          <span class="step-label">Review & Submit</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Sections -->
+    <form id="grievanceForm" method="POST" enctype="multipart/form-data" action="{% url 'public_user:submit_complaint' %}">
+      {% csrf_token %}
+      
+      <!-- Section 1: Complaint Details -->
+      <div class="form-section active p-4" id="section1">
+        <h2 class="h5 fw-semibold mb-3 text-indigo"><i class="fas fa-info-circle me-2 text-accent"></i>Complaint Information</h2>
+        
+        <div class="row g-3 mb-3">
+          <!-- District field first -->
+          <div class="col-md-6">
+            <label for="{{ form.district.id_for_label }}" class="form-label required-field">District*</label>
+            {{ form.district }}
+            {% if form.district.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.district.errors }}
+              </div>
+            {% endif %}
+          </div>
+          
+          <!-- Department field second (will be populated via AJAX) -->
+          <div class="col-md-6">
+            <label for="{{ form.department.id_for_label }}" class="form-label required-field">Department*</label>
+            {{ form.department }}
+            {% if form.department.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.department.errors }}
+              </div>
+            {% endif %}
+            <div id="departmentLoading" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="{{ form.subject.id_for_label }}" class="form-label required-field">Subject*</label>
+          {{ form.subject }}
+          {% if form.subject.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.subject.errors }}
+            </div>
+          {% endif %}
+        </div>
+        
+     <div class="mb-3">
+  <label for="{{ form.description.id_for_label }}" class="form-label required-field">Description*</label>
+  <div class="voice-input-container">
+    {{ form.description }}
+    <div class="voice-controls">
+      <!-- Microphone button with permission states -->
+      <button type="button" id="voice-btn" class="btn btn-sm btn-outline-secondary voice-btn">
+        <i class="fas fa-microphone"></i>
+      </button>
+      <!-- Clear button -->
+      <button type="button" id="clear-btn" class="btn btn-sm btn-outline-danger d-none">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    
+    <!-- Permission prompt (shown when permission needed) -->
+    <div id="permission-alert" class="alert alert-info mt-2 small d-none">
+      <i class="fas fa-info-circle me-2"></i>
+      <span>Microphone access is required for voice input.</span>
+      <button id="request-mic-btn" class="btn btn-link btn-sm p-0 ms-2">Enable microphone</button>
+    </div>
+    
+    <!-- Recording UI (shown during recording) -->
+    <div id="recording-ui" class="recording-ui mt-2 d-none">
+      <div class="recording-indicator">
+        <span class="recording-dot"></span>
+        <span class="recording-text ms-2">Recording...</span>
+      </div>
+      <div class="recording-timer ms-auto">
+        <span id="recording-time">0:00</span>
+      </div>
+    </div>
+    
+    <!-- Unsupported browser warning -->
+    <div id="unsupported-warning" class="alert alert-warning mt-2 small d-none">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      Voice input not supported in your browser. Try Chrome or Edge.
+    </div>
+  </div>
+</div>
+        
+        <div class="mb-3">
+          <label class="form-label">Supporting Documents</label>
+          <div class="file-upload">
+            <input type="file" name="documents" id="documents" class="d-none" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx">
+            <label for="documents" class="cursor-pointer">
+              <i class="fas fa-cloud-upload-alt text-3xl mb-2" style="color: var(--indigo);"></i>
+              <p class="text-muted mb-1">Click to upload or drag and drop</p>
+              <p class="small text-muted">Images, Videos, Audio, PDF, DOC (Max 10MB each)</p>
+            </label>
+          </div>
+          
+          <div id="fileList" class="mt-2"></div>
+          {% if form.documents.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.documents.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="d-flex justify-content-end">
+          <button type="button" onclick="nextSection(2)" class="btn btn-primary">
+            Next <i class="fas fa-arrow-right ms-2"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Section 2: Personal Information - Enhanced Section -->
+      <div class="form-section p-4" id="section2">
+        <h2 class="h5 fw-semibold mb-4 text-indigo"><i class="fas fa-user-circle me-2 text-accent"></i>Personal Information</h2>
+        
+        <div class="personal-info-field">
+          <label for="{{ form.applicant_name.id_for_label }}" class="form-label required-field">Full Name</label>
+          {{ form.applicant_name }}
+          {% if form.applicant_name.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.applicant_name.errors }}
+            </div>
+          {% endif %}
+          <div class="form-text">Please enter your full legal name as per official documents</div>
+        </div>
+        
+        <div class="row g-3 mb-3">
+          <div class="col-md-6 personal-info-field">
+            <label for="{{ form.contact_number.id_for_label }}" class="form-label required-field">Contact Number</label>
+            {{ form.contact_number }}
+            {% if form.contact_number.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.contact_number.errors }}
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6 personal-info-field">
+            <label for="{{ form.email.id_for_label }}" class="form-label required-field">Email Address</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <div class="invalid-feedback d-block">
+                {{ form.email.errors }}
+              </div>
+            {% endif %}
+            <div class="form-text">We'll send updates to this email</div>
+          </div>
+        </div>
+        
+        <div class="personal-info-field">
+          <label for="{{ form.applicant_address.id_for_label }}" class="form-label required-field">Full Address</label>
+          {{ form.applicant_address }}
+          {% if form.applicant_address.errors %}
+            <div class="invalid-feedback d-block">
+              {{ form.applicant_address.errors }}
+            </div>
+          {% endif %}
+          <div class="form-text">Include street, city, state, and postal code</div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" onclick="prevSection(1)" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back
+          </button>
+          <button type="button" onclick="nextSection(3)" class="btn btn-primary">
+            Next <i class="fas fa-arrow-right ms-2"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Section 3: Review & Submit -->
+      <div class="form-section p-4" id="section3">
+        <h2 class="h5 fw-semibold mb-3 text-indigo"><i class="fas fa-check-circle me-2 text-accent"></i>Review Your Complaint</h2>
+        
+        <div class="review-section">
+          <h3 class="h6 fw-semibold mb-3">Complaint Details</h3>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <p class="small text-muted">Department</p>
+              <p id="review-dept" class="fw-medium"></p>
+            </div>
+            <div class="col-md-6">
+              <p class="small text-muted">District</p>
+              <p id="review-district" class="fw-medium"></p>
+            </div>
+            <div class="col-md-6">
+              <p class="small text-muted">Subject</p>
+              <p id="review-subject" class="fw-medium"></p>
+            </div>
+          </div>
+          <div class="mb-3">
+            <p class="small text-muted">Description</p>
+            <p id="review-description" class="fw-medium"></p>
+          </div>
+          <div>
+            <p class="small text-muted">Attachments</p>
+            <p id="review-attachments" class="fw-medium">No files attached</p>
+          </div>
+        </div>
+        
+        <div class="review-section">
+          <h3 class="h6 fw-semibold mb-3">Personal Information</h3>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <p class="small text-muted">Full Name</p>
+              <p id="review-name" class="fw-medium"></p>
+            </div>
+            <div class="col-md-6">
+              <p class="small text-muted">Contact Number</p>
+              <p id="review-phone" class="fw-medium"></p>
+            </div>
+            <div class="col-md-6">
+              <p class="small text-muted">Email</p>
+              <p id="review-email" class="fw-medium"></p>
+            </div>
+            <div class="col-md-6">
+              <p class="small text-muted">Address</p>
+              <p id="review-address" class="fw-medium"></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="declaration" required>
+          <label class="form-check-label" for="declaration">
+            I declare that the information provided is correct to the best of my knowledge.
+          </label>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+          <button type="button" onclick="prevSection(2)" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Back
+          </button>
+          <button type="submit" class="btn btn-accent">
+            <i class="fas fa-paper-plane me-2"></i> Submit Complaint
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center p-5">
+        <div class="w-16 h-16 bg-green-100 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4">
+          <i class="fas fa-check text-green-600 fa-2x"></i>
+        </div>
+        <h3 class="h4 fw-bold text-gray-800 mb-2">Complaint Submitted Successfully!</h3>
+        <p class="text-muted mb-4">Your complaint has been registered. You will receive a confirmation email shortly.</p>
+        <div class="bg-blue-50 p-3 rounded mb-4">
+          <p class="small text-muted">Your Complaint ID:</p>
+          <p class="fw-bold text-indigo" id="grievance-id-display"></p>
+        </div>
+        <button onclick="window.location.href='{% url 'public_user:user_dashboard' %}'" class="btn btn-primary w-100">
+          Return to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  // Form navigation
+  function nextSection(next) {
+    // Validate current section before proceeding
+    let valid = true;
+    const currentSection = document.querySelector('.form-section.active');
+    const inputs = currentSection.querySelectorAll('[required]');
+    
+    inputs.forEach(input => {
+      if (!input.value) {
+        input.classList.add('is-invalid');
+        valid = false;
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    });
+    
+    if (!valid) {
+      alert('Please fill all required fields before proceeding.');
+      return;
+    }
+    
+    // Update step indicators
+    document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+      indicator.classList.remove('active', 'completed');
+      if (index < next - 1) {
+        indicator.classList.add('completed');
+      } else if (index === next - 1) {
+        indicator.classList.add('active');
+      }
+    });
+    
+    // Update step connectors
+    document.querySelectorAll('.step-connector').forEach((connector, index) => {
+      connector.classList.remove('active', 'completed');
+      if (index < next - 2) {
+        connector.classList.add('completed');
+      } else if (index === next - 2) {
+        connector.classList.add('active');
+      }
+    });
+    
+    // Update step labels
+    document.querySelectorAll('.step-label').forEach((label, index) => {
+      label.classList.remove('active', 'completed');
+      if (index < next - 1) {
+        label.classList.add('completed');
+      } else if (index === next - 1) {
+        label.classList.add('active');
+      }
+    });
+    
+    // Show next section
+    document.querySelectorAll('.form-section').forEach(section => {
+      section.classList.remove('active');
+    });
+    document.getElementById(`section${next}`).classList.add('active');
+    
+    // If going to review section, populate review fields
+    if (next === 3) {
+      populateReviewSection();
+    }
+  }
+  
+  function prevSection(prev) {
+    // Update step indicators
+    document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+      indicator.classList.remove('active', 'completed');
+      if (index < prev - 1) {
+        indicator.classList.add('completed');
+      } else if (index === prev - 1) {
+        indicator.classList.add('active');
+      }
+    });
+    
+    // Update step connectors
+    document.querySelectorAll('.step-connector').forEach((connector, index) => {
+      connector.classList.remove('active', 'completed');
+      if (index < prev - 2) {
+        connector.classList.add('completed');
+      } else if (index === prev - 2) {
+        connector.classList.add('active');
+      }
+    });
+    
+    // Update step labels
+    document.querySelectorAll('.step-label').forEach((label, index) => {
+      label.classList.remove('active', 'completed');
+      if (index < prev - 1) {
+        label.classList.add('completed');
+      } else if (index === prev - 1) {
+        label.classList.add('active');
+      }
+    });
+    
+    // Show previous section
+    document.querySelectorAll('.form-section').forEach(section => {
+      section.classList.remove('active');
+    });
+    document.getElementById(`section${prev}`).classList.add('active');
+  }
+  
+  // Populate review section
+  function populateReviewSection() {
+    document.getElementById('review-dept').textContent = document.getElementById('id_department').options[document.getElementById('id_department').selectedIndex].text;
+    document.getElementById('review-district').textContent = document.getElementById('id_district').options[document.getElementById('id_district').selectedIndex].text;
+    document.getElementById('review-subject').textContent = document.getElementById('id_subject').value;
+    document.getElementById('review-description').textContent = document.getElementById('id_description').value;
+    document.getElementById('review-name').textContent = document.getElementById('id_applicant_name').value;
+    document.getElementById('review-phone').textContent = document.getElementById('id_contact_number').value;
+    document.getElementById('review-email').textContent = document.getElementById('id_email').value;
+    document.getElementById('review-address').textContent = document.getElementById('id_applicant_address').value;
+    
+    // Show attached files
+    const fileInput = document.getElementById('documents');
+    if (fileInput.files.length > 0) {
+      const fileList = Array.from(fileInput.files).map(file => 
+        `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
+      ).join('<br>');
+      document.getElementById('review-attachments').innerHTML = fileList;
+    } else {
+      document.getElementById('review-attachments').textContent = 'No files attached';
+    }
+  }
+  
+  // File upload handling
+  document.getElementById('documents').addEventListener('change', function(e) {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = '';
+    
+    if (this.files.length > 0) {
+      Array.from(this.files).forEach(file => {
+        const div = document.createElement('div');
+        div.className = 'd-flex justify-content-between align-items-center bg-light p-2 rounded mb-2';
+        div.innerHTML = `
+          <div class="d-flex align-items-center">
+            <i class="fas fa-file-alt text-indigo me-2"></i>
+            <span class="small">${file.name}</span>
+            <span class="small text-muted ms-2">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+          </div>
+          <button type="button" class="btn btn-link text-danger p-0" onclick="removeFile(this, '${file.name}')">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        fileList.appendChild(div);
+      });
+    }
+  });
+
+  function removeFile(button, fileName) {
+    const fileInput = document.getElementById('documents');
+    const files = Array.from(fileInput.files);
+    const updatedFiles = files.filter(file => file.name !== fileName);
+    
+    // Create new DataTransfer to update files
+    const dataTransfer = new DataTransfer();
+    updatedFiles.forEach(file => dataTransfer.items.add(file));
+    fileInput.files = dataTransfer.files;
+    
+    // Update UI
+    button.parentElement.remove();
+    
+    // If no files left, show default message
+    if (updatedFiles.length === 0) {
+      document.getElementById('fileList').innerHTML = '';
+    }
+  }
+  
+  document.getElementById('grievanceForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Validate declaration checkbox
+    if (!document.getElementById('declaration').checked) {
+        alert('Please confirm the declaration before submitting.');
+        return;
+    }
+    
+    // Set loading state
+    const submitBtn = this.querySelector('[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+    
+    try {
+        const formData = new FormData(this);
+        const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Show success modal
+            document.getElementById('grievance-id-display').textContent = data.grievance_id;
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+            successModal.show();
+            
+            // Redirect after modal closes
+            document.getElementById('successModal').addEventListener('hidden.bs.modal', () => {
+                window.location.href = data.redirect_url;
+            });
+        } else {
+            // Show detailed errors
+            let errorMessage = "Please correct the following errors:\n";
+            for (const field in data.errors) {
+                errorMessage += `• ${field}: ${data.errors[field].join(', ')}\n`;
+            }
+            alert(errorMessage);
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        alert('An error occurred while submitting. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Submit Complaint';
+    }
+  });
+
+  $(document).ready(function() {
+    $('#id_district').change(function() {
+        var district_code = $(this).val();
+        if (district_code) {
+            $('#departmentLoading').removeClass('d-none');
+            
+            $.ajax({
+                url: '{% url "public_user:ajax_load_departments" %}',
+                data: {
+                    'district': district_code
+                },
+                success: function(data) {
+                    var $department = $('#id_department');
+                    $department.empty();
+                    $department.append('<option value="">Select Department</option>');
+                    
+                    $.each(data, function(index, dept) {
+                        $department.append(
+                            $('<option></option>').val(dept.code).text(dept.name)
+                        );
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                },
+                complete: function() {
+                    $('#departmentLoading').addClass('d-none');
+                }
+            });
+        } else {
+            $('#id_department').empty();
+            $('#id_department').append('<option value="">Select Department</option>');
+        }
+    });
+  });
+
+  // Save form data to session storage
+  function saveFormData() {
+    const formData = {
+      district: $('#id_district').val(),
+      department: $('#id_department').val(),
+      subject: $('#id_subject').val(),
+      description: $('#id_description').val(),
+      // Note: File inputs can't be stored directly
+      applicant_name: $('#id_applicant_name').val(),
+      contact_number: $('#id_contact_number').val(),
+      email: $('#id_email').val(),
+      applicant_address: $('#id_applicant_address').val(),
+      currentSection: document.querySelector('.form-section.active').id
+    };
+    sessionStorage.setItem('grievanceFormData', JSON.stringify(formData));
+  }
+
+  // Load form data from session storage
+  function loadFormData() {
+    const savedData = sessionStorage.getItem('grievanceFormData');
+    if (savedData) {
+      const formData = JSON.parse(savedData);
+      
+      // Restore field values
+      $('#id_district').val(formData.district).trigger('change');
+      // Department will be loaded via the district change event
+      
+      // Small delay to ensure department AJAX completes
+      setTimeout(() => {
+        $('#id_department').val(formData.department);
+        $('#id_subject').val(formData.subject);
+        $('#id_description').val(formData.description);
+        $('#id_applicant_name').val(formData.applicant_name);
+        $('#id_contact_number').val(formData.contact_number);
+        $('#id_email').val(formData.email);
+        $('#id_applicant_address').val(formData.applicant_address);
+        
+        // Restore current section if not section 1
+        if (formData.currentSection && formData.currentSection !== 'section1') {
+          const sectionNum = parseInt(formData.currentSection.replace('section', ''));
+          showSection(sectionNum);
+        }
+      }, 300);
+    }
+  }
+
+  // Helper function to show a section and update progress indicators
+  function showSection(sectionNum) {
+    // Hide all sections
+    document.querySelectorAll('.form-section').forEach(section => {
+      section.classList.remove('active');
+    });
+    
+    // Show requested section
+    document.getElementById(`section${sectionNum}`).classList.add('active');
+    
+    // Update step indicators
+    document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+      indicator.classList.remove('active', 'completed');
+      if (index < sectionNum - 1) {
+        indicator.classList.add('completed');
+      } else if (index === sectionNum - 1) {
+        indicator.classList.add('active');
+      }
+    });
+    
+    // Update step connectors
+    document.querySelectorAll('.step-connector').forEach((connector, index) => {
+      connector.classList.remove('active', 'completed');
+      if (index < sectionNum - 2) {
+        connector.classList.add('completed');
+      } else if (index === sectionNum - 2) {
+        connector.classList.add('active');
+      }
+    });
+    
+    // Update step labels
+    document.querySelectorAll('.step-label').forEach((label, index) => {
+      label.classList.remove('active', 'completed');
+      if (index < sectionNum - 1) {
+        label.classList.add('completed');
+      } else if (index === sectionNum - 1) {
+        label.classList.add('active');
+      }
+    });
+  }
+
+  // Initialize when document is ready
+  $(document).ready(function() {
+    // Load saved data
+    loadFormData();
+    
+    // Save data on any form change
+    $('#grievanceForm').on('change input', 'input, textarea, select', saveFormData);
+    
+    // Clear storage on successful submission
+    $('#grievanceForm').on('submit', function() {
+      sessionStorage.removeItem('grievanceFormData');
+    });
+    
+    // Warn user before leaving page with unsaved changes
+    let formModified = false;
+    $('#grievanceForm').on('change input', 'input, textarea, select', function() {
+      formModified = true;
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+      if (formModified && !$('#grievanceForm').data('submitted')) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    });
+    
+    // Mark form as submitted when submit button is clicked
+    $('button[type="submit"]').on('click', function() {
+      $('#grievanceForm').data('submitted', true);
+    });
+  });
+
+
+async function enableMicrophone() {
+  try {
+    // First check if we can enumerate devices
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const hasMicrophone = devices.some(device => device.kind === 'audioinput');
+    
+    if (!hasMicrophone) {
+      throw new Error('No microphone detected');
+    }
+
+    // Then request permission
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(track => track.stop()); // Immediately release
+    
+    return true;
+  } catch (error) {
+    console.error("Microphone enable failed:", error);
+    showError(getErrorMessage(error));
+    return false;
+  }
+}
+
+function getErrorMessage(error) {
+  switch(error.name) {
+    case 'NotFoundError':
+    case 'DevicesNotFoundError':
+      return 'No microphone hardware detected. Please connect a microphone.';
+    case 'NotAllowedError':
+    case 'PermissionDeniedError':
+      return 'Microphone access blocked. Please allow permission in browser settings.';
+    case 'NotReadableError':
+      return 'Microphone is in use by another application.';
+    default:
+      return 'Could not access microphone. Please check your settings.';
+  }
+}
+document.addEventListener('DOMContentLoaded', function() {
+  const voiceBtn = document.getElementById('voice-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const textarea = document.getElementById('id_description');
+  const recordingUI = document.getElementById('recording-ui');
+  const recordingTime = document.getElementById('recording-time');
+  const permissionAlert = document.getElementById('permission-alert');
+  const requestMicBtn = document.getElementById('request-mic-btn');
+  const unsupportedWarning = document.getElementById('unsupported-warning');
+
+  let recognition;
+  let isRecording = false;
+  let recordingStart;
+  let timerInterval;
+  const MAX_RECORDING_TIME = 120; // 2 minutes
+
+  // Check browser support
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    unsupportedWarning.classList.remove('d-none');
+    voiceBtn.disabled = true;
+    return;
+  }
+
+  // Initialize speech recognition
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-IN';
+
+    recognition.onresult = function(event) {
+      let interim = '';
+      let final = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+      
+      textarea.value = final || interim;
+      if (textarea.value.trim()) {
+        clearBtn.classList.remove('d-none');
+      }
+    };
+
+    recognition.onerror = function(event) {
+      console.error('Speech recognition error:', event.error);
+      stopRecording();
+      handleRecognitionError(event.error);
+    };
+  }
+
+  // Handle recognition errors
+  function handleRecognitionError(error) {
+    switch(error) {
+      case 'not-allowed':
+      case 'permission-denied':
+        showPermissionPrompt();
+        break;
+      default:
+        console.warn('Speech recognition error:', error);
+    }
+  }
+
+  // Show permission prompt
+  function showPermissionPrompt() {
+    permissionAlert.classList.remove('d-none');
+  }
+
+  // Hide permission prompt
+  function hidePermissionPrompt() {
+    permissionAlert.classList.add('d-none');
+  }
+
+  // Start recording
+  async function startRecording() {
+    try {
+      // Request microphone permission
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Initialize if not already done
+      if (!recognition) {
+        initSpeechRecognition();
+      }
+      
+      isRecording = true;
+      recordingStart = Date.now();
+      
+      // Update UI
+      voiceBtn.classList.add('listening');
+      recordingUI.classList.remove('d-none');
+      hidePermissionPrompt();
+      
+      // Start timer
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+      
+      // Start recognition
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error("Couldn't start recognition:", err);
+        stopRecording();
+      }
+    } catch (err) {
+      console.error("Microphone access denied:", err);
+      showPermissionPrompt();
+    }
+  }
+
+  // Stop recording
+  function stopRecording() {
+    if (!isRecording) return;
+    
+    isRecording = false;
+    clearInterval(timerInterval);
+    
+    // Update UI
+    voiceBtn.classList.remove('listening');
+    recordingUI.classList.add('d-none');
+    
+    // Stop recognition
+    if (recognition) {
+      try {
+        recognition.stop();
+      recognition.onend = null; // Remove any existing onend handler
+      } catch (err) {
+        console.error("Error stopping recognition:", err);
+      }
+    }
+  }
+
+  // Update recording timer
+  function updateTimer() {
+    const elapsed = Math.floor((Date.now() - recordingStart) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    
+    recordingTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (elapsed >= MAX_RECORDING_TIME) {
+      stopRecording();
+    }
+  }
+
+  // Event listeners
+  voiceBtn.addEventListener('mousedown', startRecording);
+  voiceBtn.addEventListener('touchstart', startRecording);
+  
+  voiceBtn.addEventListener('mouseup', stopRecording);
+  voiceBtn.addEventListener('touchend', stopRecording);
+  voiceBtn.addEventListener('mouseleave', stopRecording);
+
+  clearBtn.addEventListener('click', () => {
+    textarea.value = '';
+    clearBtn.classList.add('d-none');
+  });
+
+  requestMicBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    startRecording();
+  });
+
+  // Handle page visibility changes
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isRecording) {
+      stopRecording();
+    }
+  });
+});
+</script>
+{% endblock %}

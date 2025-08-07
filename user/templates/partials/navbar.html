@@ -1,0 +1,145 @@
+{% load static %}
+
+<nav class="navbar-custom navbar navbar-expand-lg navbar-dark">
+  <div class="container-fluid mt-3">
+    <!-- Google Translate Widget -->
+    <div id="google_translate_element" style="position: absolute; right: 20px; top: 15px; z-index: 1000;"></div>
+    
+    <!-- Brand Logo with Kerala Watermark -->
+    <a class="navbar-brand" href="{% url 'accounts:dashboard' %}">
+      <div class="d-flex align-items-center">
+        <img src="{% static 'images/Kerala_Government.png' %}" 
+             alt="Kerala Government Logo" 
+             class="kerala-logo mb-3" 
+             >
+
+        <div class="d-flex flex-column">
+          <span class="fw-bold">Grievance Portal</span>
+          <small class="text-white-50">Government of Kerala</small>
+        </div>
+      </div>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <!-- Main Navigation Links -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="{% url 'public_user:user_dashboard' %}">
+            Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'public_user:help' %}">
+            Help
+          </a>
+        </li>
+      </ul>
+
+      <!-- Right-aligned elements -->
+      <div class="d-flex align-items-center ms-auto">
+        {% if user.is_authenticated %}
+          <!-- User Profile and Logout Section -->
+          <div class="d-flex align-items-center">
+            <div class="text-end me-3 d-none d-md-block text-white-50">
+              <div class="small">Welcome</div>
+              <div class="fw-bold">{{ user.first_name|default:user.username }}</div>
+            </div>
+            <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|default:user.username }}&background=random" 
+                 alt="User" class="rounded-circle me-3" width="40" height="40">
+            <a href="{% url 'accounts:logout' %}" class="btn btn-outline-light btn-sm">
+              <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </a>
+          </div>
+        {% else %}
+          <div class="d-flex align-items-center">
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm ms-2">
+              Login
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .navbar-custom {
+    background: var(--indigo);
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+  }
+
+  .navbar-custom .nav-link {
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .navbar-custom .nav-link:hover,
+  .navbar-custom .nav-link.active {
+    color: var(--accent) !important;
+    transform: translateY(-1px);
+  }
+
+  .navbar-custom .navbar-collapse {
+    flex-grow: 0;
+  }
+
+  /* Google Translate specific styles */
+  .goog-te-combo {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #333;
+    font-size: 14px;
+  }
+  
+  .goog-te-gadget {
+    color: transparent !important;
+  }
+  
+  .goog-te-banner-frame {
+    display: none !important;
+  }
+  
+  body {
+    top: 0px !important;
+  }
+
+  @media (max-width: 991.98px) {
+    .navbar-custom .navbar-nav {
+      margin-top: 1rem;
+    }
+    .navbar-custom .nav-item {
+      margin-bottom: 0.5rem;
+    }
+    #google_translate_element {
+      position: relative;
+      top: auto;
+      right: auto;
+      margin: 0.5rem 0;
+      width: 100%;
+    }
+    .goog-te-combo {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+// Google Translate initialization
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'en,ml,hi,ta', // English, Malayalam, Hindi, Tamil
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>

@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Account Settings | Kerala Grievance Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --indigo: #002855;
+    --indigo-light: #08438f;
+    --accent: #ffc107;
+    --bg: #f4f6f9;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+  }
+
+  .account-tab {
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    color: var(--indigo);
+  }
+  .account-tab.active {
+    border-bottom-color: var(--accent);
+    color: var(--indigo);
+    font-weight: 600;
+  }
+  .account-tab:hover:not(.active) {
+    border-bottom-color: var(--accent);
+    color: var(--indigo-light);
+  }
+  .avatar-upload {
+    position: relative;
+    display: inline-block;
+  }
+  .avatar-upload:hover .avatar-overlay {
+    opacity: 1;
+  }
+  .avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background-color: var(--indigo);
+    border-color: var(--indigo);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--indigo-light);
+    border-color: var(--indigo-light);
+  }
+
+  .card-custom {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    transition: .2s;
+  }
+
+  .card-custom:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
+
+  .border-custom {
+    border-left: 5px solid var(--accent);
+  }
+
+  .text-accent {
+    color: var(--accent);
+  }
+
+  .badge-accent {
+    background-color: var(--accent);
+    color: #000;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+  }
+    .spinner {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid #ccc;
+    border-top: 2px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3">
+      <div class="card-custom sticky-top" style="top: 20px;">
+        <div class="text-center mb-4">
+          <div class="avatar-upload mb-3 mx-auto">
+            <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|urlencode }}&background=random&size=128" alt="Profile" class="rounded-circle border border-4 border-white shadow" width="96" height="96">
+            <div class="avatar-overlay">
+              <span class="text-white"><i class="fas fa-camera me-1"></i> Change</span>
+            </div>
+          </div>
+          <h1 class="text-2xl font-bold mb-4">{{ user.get_full_name|default:user.username }}</h1>
+          <p class="text-muted small">{{ user.email }}</p>
+        </div>
+        
+        <nav class="nav flex-column gap-2">
+          <button class="account-tab active text-start px-3 py-2 rounded" data-tab="profile">
+            <i class="fas fa-user-circle me-2"></i> Profile
+          </button>
+          <button class="account-tab text-start px-3 py-2 rounded" data-tab="security">
+            <i class="fas fa-shield-alt me-2"></i> Security
+          </button>
+          <button class="account-tab text-start px-3 py-2 rounded" data-tab="privacy">
+            <i class="fas fa-lock me-2"></i> Privacy
+          </button>
+         
+          <a href="{% url 'accounts:logout' %}" class="nav-link text-danger px-3 py-2 rounded mt-3">
+            <i class="fas fa-sign-out-alt me-2"></i> Logout
+          </a>
+        </nav>
+      </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="col-md-9">
+      <!-- Profile Tab -->
+      <div id="profile-tab" class="account-content card-custom">
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-user-circle me-2 text-accent"></i>Profile Information</h2>
+        
+        <form method="post" class="row g-4" id="profile-form">
+          {% csrf_token %}
+          <input type="hidden" name="update_profile" value="1">
+          
+          <div class="col-md-6">
+            <label for="id_first_name" class="form-label">First Name*</label>
+            {{ user_form.first_name }}
+            {% if user_form.first_name.errors %}
+              <div class="text-danger">{{ user_form.first_name.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label for="id_last_name" class="form-label">Last Name*</label>
+            {{ user_form.last_name }}
+            {% if user_form.last_name.errors %}
+              <div class="text-danger">{{ user_form.last_name.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="col-12">
+            <label for="id_email" class="form-label">Email Address*</label>
+            {{ user_form.email }}
+            {% if user_form.email.errors %}
+              <div class="text-danger">{{ user_form.email.errors }}</div>
+            {% endif %}
+            <div class="form-text">You'll need to verify any email address changes.</div>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="id_phone" class="form-label">Phone Number</label>
+            {{ user_form.phone }}
+            {% if user_form.phone.errors %}
+              <div class="text-danger">{{ user_form.phone.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+            {{ profile_form.date_of_birth }}
+            {% if profile_form.date_of_birth.errors %}
+              <div class="text-danger">{{ profile_form.date_of_birth.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="col-12">
+            <label for="id_address" class="form-label">Address</label>
+            {{ profile_form.address }}
+            {% if profile_form.address.errors %}
+              <div class="text-danger">{{ profile_form.address.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6">
+            <label for="id_district" class="form-label">District</label>
+            {{ profile_form.district }}
+            {% if profile_form.district.errors %}
+              <div class="text-danger">{{ profile_form.district.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label for="id_gender" class="form-label">Gender</label>
+            {{ profile_form.gender }}
+            {% if profile_form.gender.errors %}
+              <div class="text-danger">{{ profile_form.gender.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6">
+            <label for="id_thaluk" class="form-label">Thaluk</label>
+            {{ profile_form.thaluk }}
+            {% if profile_form.thaluk.errors %}
+              <div class="text-danger">{{ profile_form.thaluk.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label for="id_village" class="form-label">Village</label>
+            {{ profile_form.village }}
+            {% if profile_form.village.errors %}
+              <div class="text-danger">{{ profile_form.village.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="col-md-6">
+            <label for="id_panchayath" class="form-label">Panchayath</label>
+            {{ profile_form.panchayath }}
+            {% if profile_form.panchayath.errors %}
+              <div class="text-danger">{{ profile_form.panchayath.errors }}</div>
+            {% endif %}
+          </div>
+         
+          
+          <div class="col-12 pt-3 border-top d-flex justify-content-end gap-3">
+            <button type="button" class="btn btn-outline-secondary" onclick="resetForm('profile-form')">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Security Tab -->
+      <div id="security-tab" class="account-content card-custom d-none">
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-shield-alt me-2 text-accent"></i>Security Settings</h2>
+        
+        <div class="row g-4">
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <h3 class="h5 fw-semibold mb-3">Change Password</h3>
+               <form method="post" id="password-change-form" action="{% url 'public_user:account_settings' %}#security" data-tab="security">
+        {% csrf_token %}
+        <input type="hidden" name="change_password" value="1">
+        
+        <div class="mb-3">
+          <label for="current-password" class="form-label">Current Password*</label>
+          <input type="password" id="current-password" name="current_password" class="form-control" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="new-password" class="form-label">New Password*</label>
+          <input type="password" id="new-password" name="new_password" class="form-control" required
+                 pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+                 title="Must contain at least 8 characters, one number and one special character">
+          <div class="form-text">Must be at least 8 characters with 1 number and 1 special character</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="confirm-password" class="form-label">Confirm New Password*</label>
+          <input type="password" id="confirm-password" name="confirm_new_password" class="form-control" required>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-primary">
+            Update Password
+          </button>
+        </div>
+      </form>
+            </div>
+          </div>
+          
+          <!-- Active Sessions Section -->
+          <div class="col-12 card border-0 bg-light">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h3 class="h5 fw-semibold">Active Sessions</h3>
+                  <p class="text-muted small">Manage devices that are logged into your account</p>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm">
+                  View Sessions
+                </button>
+              </div>
+              <div class="list-group list-group-flush">
+                <div class="list-group-item bg-light d-flex align-items-center">
+                  <i class="fas fa-desktop text-muted me-3"></i>
+                  <div class="flex-grow-1">
+                    <p class="fw-medium mb-0">{{ request.META.HTTP_USER_AGENT }}</p>
+                    <p class="text-muted small mb-0">Active now</p>
+                  </div>
+                  <button class="btn btn-link text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Privacy Tab - Simplified with only Delete Account option -->
+      <div id="privacy-tab" class="account-content card-custom d-none">
+        <h2 class="h4 fw-bold mb-4 text-indigo"><i class="fas fa-lock me-2 text-accent"></i>Account Deletion</h2>
+        
+        <div class="card border-danger">
+          <div class="card-body">
+            <div class="d-flex align-items-start">
+              <div class="flex-grow-1">
+                <h5 class="card-title text-danger">Delete Your Account</h5>
+                <p class="card-text">
+                  This will permanently delete your account and all associated data. This action cannot be undone.
+                </p>
+                <ul class="text-danger">
+                  <li>All your complaints and records will be permanently removed</li>
+                  <li>You won't be able to recover any information</li>
+                  <li>This action is irreversible</li>
+                </ul>
+              </div>
+              <i class="fas fa-exclamation-triangle text-danger fa-3x ms-3"></i>
+            </div>
+            
+            <div class="mt-4">
+              <a href="{% url 'public_user:delete_public_user_by_public' %}" 
+                 class="btn btn-danger"
+                 onclick="return confirm('Are you absolutely sure you want to delete your account? This cannot be undone!');">
+                <i class="fas fa-trash-alt me-2"></i> Delete My Account Permanently
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Tab switching functionality
+  document.querySelectorAll('.account-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Skip if this tab is already active
+      if (tab.classList.contains('active')) return;
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.account-tab').forEach(t => {
+        t.classList.remove('active');
+      });
+      
+      // Add active class to clicked tab
+      tab.classList.add('active');
+      
+      // Hide all content sections
+      document.querySelectorAll('.account-content').forEach(content => {
+        content.classList.add('d-none');
+      });
+      
+      // Show the selected content section
+      const tabId = tab.getAttribute('data-tab');
+      document.getElementById(`${tabId}-tab`).classList.remove('d-none');
+    });
+  });
+  
+  // Reset form to initial values
+  function resetForm(formId) {
+    document.getElementById(formId).reset();
+  }
+  
+  // Initialize the first tab as active
+  document.querySelector('.account-tab.active').click();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const passwordForm = document.getElementById('password-change-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Client-side validation
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                alert('Please fill in all password fields!');
+                e.preventDefault();
+                return false;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match!');
+                e.preventDefault();
+                return false;
+            }
+            
+            if (newPassword.length < 8) {
+                alert('Password must be at least 8 characters long!');
+                e.preventDefault();
+                return false;
+            }
+            
+            // Additional complexity check
+            const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+            if (!regex.test(newPassword)) {
+                alert('Password must contain at least one letter, one number and one special character!');
+                e.preventDefault();
+                return false;
+            }
+            
+            return true;
+        });
+    }
+  });
+
+  $(document).ready(function() {
+    const districtSelect = $("#id_district");
+    const talukSelect = $("#id_thaluk");
+    const villageSelect = $("#id_village");
+
+    const districtSpinner = $("#district-spinner");
+    const talukSpinner = $("#taluk-spinner");
+    const villageSpinner = $("#village-spinner");
+
+    // Initially disable Taluk & Village
+    talukSelect.prop("disabled", true);
+    villageSelect.prop("disabled", true);
+
+    // Load Districts on Page Load
+    districtSpinner.removeClass("d-none");
+    $.getJSON("{% url 'public_user:api_districts' %}", function(data) {
+        districtSelect.empty().append("<option value=''>Select District</option>");
+        $.each(data.districts, function(index, value) {
+            districtSelect.append("<option value='" + value + "'>" + value + "</option>");
+        });
+    }).always(function() {
+        districtSpinner.addClass("d-none");
+    });
+
+    // On District Change → Load Taluks
+    districtSelect.on("change", function() {
+        let district = $(this).val();
+        talukSelect.empty().append("<option value=''>Select Taluk</option>").prop("disabled", true);
+        villageSelect.empty().append("<option value=''>Select Village</option>").prop("disabled", true);
+
+        if (district) {
+            talukSpinner.removeClass("d-none");
+            $.getJSON("/public_user/api/taluks/" + encodeURIComponent(district) + "/", function(data) {
+                $.each(data.taluks, function(index, value) {
+                    talukSelect.append("<option value='" + value + "'>" + value + "</option>");
+                });
+                talukSelect.prop("disabled", false);
+            }).always(function() {
+                talukSpinner.addClass("d-none");
+            });
+        }
+    });
+
+    // On Taluk Change → Load Villages
+    talukSelect.on("change", function() {
+        let taluk = $(this).val();
+        villageSelect.empty().append("<option value=''>Select Village</option>").prop("disabled", true);
+
+        if (taluk) {
+            villageSpinner.removeClass("d-none");
+            $.getJSON("/public_user/api/villages/" + encodeURIComponent(taluk) + "/", function(data) {
+                $.each(data.villages, function(index, value) {
+                    villageSelect.append("<option value='" + value + "'>" + value + "</option>");
+                });
+                villageSelect.prop("disabled", false);
+            }).always(function() {
+                villageSpinner.addClass("d-none");
+            });
+        }
+    });
+  });
+</script>
+{% endblock %}

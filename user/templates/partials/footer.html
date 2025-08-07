@@ -1,0 +1,67 @@
+{% load static %}
+<footer class="footer-custom py-5 mt-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+       <img src="{% static 'images/Kerala_Government.png' %}" 
+     alt="Kerala Government Logo" 
+     class="kerala-logo mb-3" 
+     >
+
+        <p class="small text-white-50">A platform for citizens to raise concerns and track their resolution with Kerala Government departments.</p>
+      </div>
+      <div class="col-lg-2 col-md-4">
+        <h5 class="h6 text-white mb-3">Quick Links</h5>
+        <ul class="list-unstyled footer-links">
+          <li class="mb-2"><a href="{% url 'public_user:user_dashboard' %}">Home</a></li>
+          <li class="mb-2"><a href="{% url 'public_user:submit_complaint' %}">Submit Complaint</a></li>
+          <li class="mb-2"><a href="{% url 'public_user:view_grievances' %}">Track Status</a></li>
+          <li class="mb-2"><a href="{% url 'public_user:help' %}">FAQs</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-4">
+        <h5 class="h6 text-white mb-3">Departments</h5>
+        <ul class="list-unstyled footer-links">
+          <li class="mb-2"><a href="#">Public Works</a></li>
+          <li class="mb-2"><a href="#">Health</a></li>
+          <li class="mb-2"><a href="#">Education</a></li>
+          <li class="mb-2"><a href="#">Revenue</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 col-md-4">
+        <h5 class="h6 text-white mb-3">Contact Us</h5>
+        <ul class="list-unstyled footer-links">
+          <li class="mb-2"><i class="fas fa-envelope me-2"></i> grievances@kerala.gov.in</li>
+          <li class="mb-2"><i class="fas fa-phone me-2"></i> 0471-2345678</li>
+          <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Thiruvananthapuram, Kerala</li>
+        </ul>
+      </div>
+    </div>
+    <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+    <div class="text-center small text-white-50">
+      <p>© {% now "Y" %} Government of Kerala. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-custom {
+    background: var(--indigo);
+    color: white;
+  }
+
+  .footer-links a {
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s;
+    text-decoration: none;
+  }
+
+  .footer-links a:hover {
+    color: white;
+  }
+
+  .kerala-logo {
+    height: 60px;
+    margin-bottom: 1rem;
+  }
+</style>

@@ -1,5 +1,27 @@
+# Python cache
 __pycache__/
 *.pyc
+*.py[cod]
+*.pyc
+!static/data/Districtdataset.json
+
+# Environment files
 .env
-facebook_realtime.log
+
+# Log files
 *.log
+facebook_realtime.log
+
+# Media files
+media/
+
+# Migration backup (optional)
+*.sqlite3
+
+# Locale files (compiled translations)
+locale/*/LC_MESSAGES/*.mo
+*.json
+
+# VSCode or IDE settings (optional)
+.vscode/
+.idea/

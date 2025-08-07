@@ -1,0 +1,40 @@
+<!-- templates/partials/language_switcher.html -->
+{% load i18n %}
+{% if user.is_authenticated %}
+<div class="language-switcher">
+  <form action="{% url 'set_language' %}" method="post" id="languageForm">
+    {% csrf_token %}
+    <select name="language" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% get_current_language as LANGUAGE_CODE %}
+      {% get_available_languages as LANGUAGES %}
+      {% for lang in LANGUAGES %}
+        <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+          {{ lang.1 }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+{% endif %}
+
+<style>
+  .language-switcher {
+    margin-right: 1rem;
+  }
+  .language-switcher select {
+    background-color: var(--indigo);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    min-width: 120px;
+    cursor: pointer;
+  }
+  .language-switcher select:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: var(--accent);
+  }
+  .language-switcher select option {
+    background-color: white;
+    color: var(--indigo);
+  }
+</style>

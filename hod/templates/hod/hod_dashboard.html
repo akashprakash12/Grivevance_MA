@@ -13,7 +13,10 @@
 <!-- Horizontal Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="#">{{ profile.user.first_name }} {{ profile.user.last_name }}</a>
+        <a class="navbar-brand fw-bold d-flex flex-column" href="#">
+            <span>{{ profile.user.first_name }} {{ profile.user.last_name }}</span>
+            <small class="fw-normal"> {{ profile.department.name }}</small>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hodNavbar" aria-controls="hodNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -22,32 +25,26 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                 <!-- Grievances Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="grievanceDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Grievances
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'hod:assign_grievance' %}">Assign Grievance</a></li>
-                        <li><a class="dropdown-item" href="{% url 'hod:check_progress' %}">Check Progress</a></li>
-                        <li><a class="dropdown-item" href="{% url 'hod:search_grievance' %}">Search Grievances</a></li>
-                        <li><a class="dropdown-item" href="{% url 'hod:officers_assigned_grievances' %}">Assigned Grievances</a></li>
-                    </ul>
-                </li>
+                <li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:assign_grievance' %}">Assign Grievance</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:check_progress' %}">Check Progress</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:search_grievance' %}">Search Grievances</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:officers_assigned_grievances' %}">Assigned Grievances</a>
+</li>
 
                 <!-- Requests Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="requestDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Requests
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'hod:approve_extension_requests' %}">Extension Approvals</a></li>
-                    </ul>
-                </li>
+                <li class="nav-item">
+    <a class="nav-link" href="{% url 'hod:approve_extension_requests' %}">Extension Approvals</a>
+</li>
+
 
                 <!-- Department Info -->
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Department: {{ profile.department.name }}</a>
-                </li>
             </ul>
 
             <!-- Logout on Right -->

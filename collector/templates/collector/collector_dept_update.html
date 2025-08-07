@@ -1,0 +1,255 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Update Department | Collector Dashboard</title>
+  
+  <!-- Bootstrap & FontAwesome -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: var(--card-shadow);
+      border-left: 5px solid var(--accent);
+    }
+
+    .form-header {
+      color: var(--indigo);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--indigo-light);
+    }
+
+    .form-control {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+    }
+
+    .btn-submit {
+      background-color: var(--indigo);
+      color: white;
+      font-weight: 600;
+      padding: 0.5rem 2rem;
+      border-radius: 8px;
+      border: none;
+      transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--indigo-light);
+      transform: translateY(-2px);
+    }
+
+    .navbar-custom {
+  background: var(--indigo);
+  padding: 1.2rem 2rem;
+  border-bottom: 4px solid var(--indigo-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
+
+.navbar-custom .navbar-logo {
+  height: 50px;
+  margin-right: 15px;
+}
+
+.navbar-custom .navbar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.navbar-custom .nav-link {
+  color: #ffffff !important;
+  margin-left: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #FFBF00 !important; /* Goldenrod - dark yellow */
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.navbar-custom .dropdown-menu {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
+}
+
+.navbar-custom .dropdown-item:hover {
+  background-color: var(--indigo);
+  color: #ffffff;
+}
+
+.navbar-custom .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
+    .hod-selector {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+
+    .current-hod {
+      font-weight: 600;
+      color: var(--indigo);
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar-custom d-flex justify-content-between align-items-center">
+    <span class="fw-bold text-white">{{ district.name }} Collector Portal</span>
+    
+    <ul class="nav gap-3 align-items-center">
+      <li class="nav-item"><a class="nav-link text-white" href="{% url 'core:create_department' %}"><i class="fas fa-plus-circle me-1"></i> Create Dept</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- MAIN FORM CONTENT -->
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="form-container">
+          <h2 class="form-header">
+            <i class="fas fa-edit me-2"></i>
+            Update Department
+          </h2>
+
+          <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+              </div>
+            {% endif %}
+
+            {% for field in form %}
+              <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                  {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+
+            <!-- HOD Selection Section -->
+            <div class="hod-selector">
+              <div class="current-hod">
+                <i class="fas fa-user-tie me-2"></i>
+                Current HOD: 
+                {% if current_hod %}
+                  {{ current_hod.user.first_name|upper }} {{ current_hod.user.last_name|upper }}
+                {% else %}
+                  Not assigned
+                {% endif %}
+              </div>
+              
+              <label for="hod-select" class="form-label mt-2">Change HOD:</label>
+              <select class="form-select" id="hod-select" name="hod">
+                <option value="">-- Select HOD --</option>
+                {% for officer in all_officers %}
+                  <option value="{{ officer.id }}" {% if officer == current_hod %}selected{% endif %}>
+                    {{ officer.user.first_name|upper }} {{ officer.user.last_name|upper }} ({{ officer.user.username }})
+                  </option>
+                {% empty %}
+                  <option value="" disabled>No officers in this department</option>
+                {% endfor %}
+              </select>
+              <small class="form-text text-muted">Select an officer from this department to assign as HOD</small>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+              </a>
+              <button type="submit" class="btn btn-submit">
+                <i class="fas fa-save me-1"></i> Update Department
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Form validation
+    (function () {
+      'use strict'
+      
+      const forms = document.querySelectorAll('.needs-validation')
+      
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          
+          form.classList.add('was-validated')
+        }, false)
+      })
+    })()
+  </script>
+</body>
+</html>

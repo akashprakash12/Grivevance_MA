@@ -5,237 +5,261 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Post</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <link rel="stylesheet" href="{% static 'posts/css/style.css' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --fb-blue: #1877f2;
+      --fb-blue-dark: #166fe5;
+      --fb-green: #42b72a;
+      --fb-green-dark: #36a420;
+      --fb-bg: #f0f2f5;
+      --fb-card-bg: #ffffff;
+      --fb-text-primary: #050505;
+      --fb-text-secondary: #65676b;
+      --fb-divider: #ced0d4;
     }
     
     body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #1e3a8a 0%, #000000 100%);
+      font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--fb-bg);
       min-height: 100vh;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 20px;
+      color: var(--fb-text-primary);
     }
     
     .edit-container {
       width: 100%;
       max-width: 700px;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
-      padding: 40px;
-      animation: fadeIn 0.5s ease;
+      background: var(--fb-card-bg);
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin: 0 auto;
+      border: 1px solid var(--fb-divider);
     }
     
     .header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--fb-divider);
     }
     
     .header-icon {
-      width: 50px;
-      height: 50px;
-      margin: 0 auto 15px;
-      color: #3b82f6;
+      font-size: 2rem;
+      color: var(--fb-blue);
+      margin-bottom: 10px;
     }
     
     .header h1 {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
     
     .header p {
-      color: rgba(255, 255, 255, 0.7);
+      color: var(--fb-text-secondary);
       font-size: 14px;
     }
     
-    .error-message {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      color: #fecaca;
-      border-radius: 10px;
-      padding: 12px 15px;
-      margin-bottom: 25px;
-      font-size: 14px;
+    .alert-danger {
+      background-color: #fff4e6;
+      color: #cc3300;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 15px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      animation: shakeX 0.5s;
-    }
-    
-    .error-message svg {
-      margin-right: 10px;
-      min-width: 20px;
-    }
-    
-    .form-group {
-      margin-bottom: 25px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
       font-size: 14px;
-      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .alert-warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+    
+    .alert-danger i,
+    .alert-warning i {
+      margin-right: 10px;
+      font-size: 1rem;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 15px;
     }
     
     .form-control {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      padding: 15px;
-      color: white;
-      font-family: 'Inter', sans-serif;
+      border-radius: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--fb-divider);
+      transition: all 0.2s;
+      min-height: 120px;
       font-size: 15px;
-      resize: vertical;
-      min-height: 150px;
-      transition: all 0.3s ease;
     }
     
     .form-control:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+      border-color: var(--fb-blue);
+      box-shadow: 0 0 0 2px #e7f3ff;
     }
     
-    .form-hint {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
+    .form-text {
+      font-size: 13px;
+      color: var(--fb-text-secondary);
       margin-top: 5px;
+    }
+    
+    .time-input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .time-input {
+      width: 100px;
+    }
+    
+    .time-unit {
+      color: var(--fb-text-secondary);
+      font-size: 14px;
     }
     
     .button-group {
       display: flex;
-      gap: 15px;
-      margin-top: 30px;
-      flex-direction: column;
-    }
-    
-    @media (min-width: 576px) {
-      .button-group {
-        flex-direction: row;
-      }
+      gap: 10px;
+      margin-top: 20px;
     }
     
     .btn {
       flex: 1;
-      padding: 15px;
-      border-radius: 12px;
-      font-weight: 500;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 600;
       font-size: 15px;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 8px;
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: white;
-      border: none;
+      background-color: var(--fb-blue);
+      border-color: var(--fb-blue);
     }
     
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      background-color: var(--fb-blue-dark);
+      border-color: var(--fb-blue-dark);
     }
     
-    .btn-secondary {
-      background: transparent;
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    .btn-outline-secondary {
+      color: var(--fb-text-primary);
+      border-color: var(--fb-divider);
+      background-color: #f0f2f5;
     }
     
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateY(-2px);
-      border-color: rgba(255, 255, 255, 0.3);
+    .btn-outline-secondary:hover {
+      background-color: #e4e6eb;
+      border-color: var(--fb-divider);
     }
     
-    .btn svg {
-      margin-right: 8px;
-      width: 18px;
-      height: 18px;
+    .current-media {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--fb-text-secondary);
     }
     
-    .footer {
-      text-align: center;
-      margin-top: 30px;
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
-    }
-    
-    .footer a {
-      color: #93c5fd;
+    .current-media a {
+      color: var(--fb-blue);
       text-decoration: none;
     }
     
-    .footer a:hover {
+    .current-media a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <div class="edit-container animate__animated animate__fadeIn">
+  <div class="edit-container">
     <header class="header">
-      <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-      </svg>
+      <div class="header-icon">
+        <i class="fas fa-edit"></i>
+      </div>
       <h1>Edit Your Post</h1>
-      <p>Refine your message and make it perfect</p>
+      <p>Update your post details</p>
     </header>
 
     {% if error %}
-    <div class="error-message">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-      </svg>
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-circle"></i>
       {{ error }}
     </div>
     {% endif %}
 
-    <form method="post">
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      Note: Media cannot be edited here. Please edit media directly on Facebook.
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      <div class="form-group">
-        <label for="message">Your Message</label>
-        <textarea id="message" name="message" class="form-control" placeholder="Express your thoughts...">{{ post.message }}</textarea>
-        <p class="form-hint">Maximum 500 characters</p>
+      <div class="mb-3">
+        <label for="message" class="form-label">Description</label>
+        <textarea id="message" name="message" class="form-control" placeholder="Describe your complaint in detail..." required>{{ post.message }}</textarea>
+        <small class="form-text">Maximum 500 characters</small>
+      </div>
+      
+      {% if post.image %}
+      <div class="mb-3">
+        <label class="form-label">Current Media</label>
+        <div class="current-media">
+          <a href="{{ post.image.url }}" target="_blank">{{ post.image.name }}</a>
+        </div>
+      </div>
+      {% endif %}
+      
+      <div class="mb-3">
+        <label for="monitorDuration" class="form-label">Comment Monitoring Duration</label>
+        <div class="time-input-group">
+          <input type="number" class="form-control time-input" 
+                 name="monitor_duration" id="monitorDuration" 
+                 value="{{ time_limit }}" min="1" step="1" required>
+          <span class="time-unit">minutes</span>
+        </div>
+        <small class="text-muted">Monitoring will end {{ time_limit }} minutes after post was created</small>
       </div>
 
+      <div class="mb-3">
+        <label for="monitorEndTime" class="form-label">Comment Monitoring End Time</label>
+        <input type="datetime-local" class="form-control" name="monitor_end_time" id="monitorEndTime" 
+               value="{{ monitor_end_time }}" readonly>
+        <small class="form-text">Calculated from post creation time + duration</small>
+      </div>
+      
       <div class="button-group">
-        <a href="{% url 'manage_posts' %}" class="btn btn-secondary">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
+        <a href="{% url 'posts:manage_posts' %}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left"></i>
           Cancel
         </a>
         <button type="submit" class="btn btn-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Update Post
+          <i class="fas fa-check"></i>
+          Save Changes
         </button>
       </div>
     </form>
-    
-    <div class="footer">
-      <p>Need help? <a href="#">Contact support</a></p>
-    </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,127 +1,354 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>HOD Officers</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOD Officers - Collector Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --indigo: #002855;
+      --indigo-light: #08438f;
+      --accent: #ffc107;
+      --bg: #f4f6f9;
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+      --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, .12);
+    }
 
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f4f8fb;
-            padding: 30px;
-            margin: 0;
-        }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
+    .navbar-custom {
+  background: var(--indigo);
+  padding: 1.2rem 2rem;
+  border-bottom: 4px solid var(--indigo-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
 
-        table {
-            width: 90%;
-            margin: 0 auto;
-            border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
+.navbar-custom .navbar-logo {
+  height: 50px;
+  margin-right: 15px;
+}
 
-        th, td {
-            padding: 15px 20px;
-            text-align: left;
-        }
+.navbar-custom .navbar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
 
-        th {
-            background-color: #154360;
-            color: white;
-        }
+.navbar-custom .nav-link {
+  color: #ffffff !important;
+  margin-left: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
 
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+.navbar-custom .nav-link:hover {
+  color: #FFBF00 !important; /* Goldenrod - dark yellow */
+  text-decoration: none;
+  transform: translateY(-2px);
+}
 
-        tr:hover {
-            background-color: #d0e4f5;
-        }
+.navbar-custom .dropdown-menu {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
+}
 
-        td {
-            color: #2c3e50;
-        }
+.navbar-custom .dropdown-item:hover {
+  background-color: var(--indigo);
+  color: #ffffff;
+}
 
-        /* Tooltip styling */
-        .icon {
-            margin-left: 6px;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-        }
+.navbar-custom .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
 
-        .icon:hover {
-            color: #007bff;
-            cursor: pointer;
-        }
+    .container-custom {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
 
-        .icon[title]:hover::after {
-            content: attr(title);
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: #fff;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 999;
-        }
-    </style>
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-weight: 600;
+      color: var(--indigo);
+      font-size: 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .profile-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--card-shadow);
+      border-left: 4px solid var(--accent);
+    }
+
+    .profile-title {
+      font-weight: 600;
+      color: var(--indigo);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .profile-badge {
+      background: var(--accent);
+      color: var(--indigo);
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+
+    .profile-detail {
+      margin-bottom: 0.5rem;
+    }
+
+    .profile-detail strong {
+      color: var(--indigo-light);
+      min-width: 80px;
+      display: inline-block;
+    }
+
+    .officer-table {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+    }
+
+    .officer-table thead th {
+      background: var(--indigo);
+      color: white;
+      font-weight: 500;
+      padding: 1rem 1.5rem;
+    }
+
+    .officer-table tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    .officer-table tbody tr:hover {
+      background: rgba(0, 40, 85, 0.03);
+    }
+
+    .officer-table tbody td {
+      padding: 1rem 1.5rem;
+      vertical-align: middle;
+      border-top: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .action-btn {
+      color: #db4437;
+      font-size: 1.1rem;
+      transition: all 0.2s ease;
+      padding: 0.25rem;
+      border-radius: 50%;
+    }
+
+    .action-btn:hover {
+      color: #c1351d;
+      transform: scale(1.1);
+    }
+
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      color: #e5e7eb;
+      margin-bottom: 1rem;
+    }
+
+  
+      .container-custom {
+        padding: 1.5rem 1rem;
+      }
+    
+  </style>
 </head>
 <body>
+  <!-- NAVBAR -->
+  <!-- NAVBAR -->
+<nav class="navbar-custom">
+  <div class="d-flex align-items-center">
+    <img src="{% static 'images/Kerala_Government.png' %}" alt="Kerala Government Logo" class="navbar-logo">
+    <span class="fw-bold text-white" style="font-size: 1.7rem; font-family: 'Titillium Web', sans-serif;">
+      {{ district.name }} Collector Portal
+    </span>
+  </div>
+  
+  <ul class="nav gap-3 align-items-center">
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'core:create_department' %}">
+        <i class="fas fa-plus-circle me-1"></i> Create Dept
+      </a>
+    </li>
 
-<h2>HOD Officers in {{ district }}</h2>
+    <!-- District Officer Link -->
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'district_officer:view_district_officers' %}">
+        <i class="fas fa-user me-1"></i> District Officer
+      </a>
+    </li>
 
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Department</th>
-        <th>Email</th>
-        <th>Phone</th>
-    </tr>
+    <!-- Reports Dropdown -->
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-file-alt me-1"></i> Reports
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="{% url 'collector:grievance_report' %}">
+          <i class="fas fa-file-contract me-2"></i> Grievance Report
+        </a></li>
+        <li><a class="dropdown-item" href="{% url 'collector:get_department_report_data' %}">
+          <i class="fas fa-building me-2"></i> Department Report
+        </a></li>
+        <li><a class="dropdown-item" href="#">
+          <i class="fas fa-building me-2"></i> Officer Report
+        </a></li>
+      </ul>
+    </li>
+    
+    <!-- Facebook Post Nav Link -->
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'posts:index' %}" target="_blank">
+        <i class="fab fa-facebook me-1"></i> FB Post
+      </a>
+    </li>
+    
+    <!-- Other Links -->
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'collector:collector_profile' %}">
+        <i class="fas fa-user me-1"></i> Profile
+      </a>
+    </li>
+    
+    <li class="nav-item"><a class="nav-link" href="{% url 'collector:collector_dashboard' %}"><i class="fas fa-home me-1"></i> Dashboard</a></li>
+    <li class="nav-item">
+      <a class="nav-link text-white" href="{% url 'accounts:logout' %}">
+        <i class="fas fa-sign-out-alt me-1"></i> Logout
+      </a>
+    </li>
+  </ul>
+</nav>
 
-    {% for officer in hod_officers %}
-    <tr>
-        <td>{{ officer.user.first_name }} {{ officer.user.last_name }}</td>
-        <td>{{ officer.department.name }}</td>
+  <div class="container-custom">
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-user-tie"></i> Heads of Departments
+      </h1>
+    </div>
 
-        <!-- Email -->
-        <td>
-            {{ officer.user.email }}
-            <a href="{% url 'collector:send_mail' officer.user.email %}" 
-   target="_blank" class="icon" title="Send Email as Collector">
-    <i class="fas fa-envelope" style="color:#db4437;"></i>
-</a>
+    {% if do_details %}
+    <div class="profile-card">
+      <h3 class="profile-title">
+        <i class="fas fa-user-shield"></i> District Officer
+        <span class="profile-badge">Deputy Administrator</span>
+      </h3>
+      <div class="profile-detail">
+        <strong>Name:</strong> {{ do_details.user.first_name }} {{ do_details.user.last_name }}
+      </div>
+      <div class="profile-detail">
+        <strong>Email:</strong> {{ do_details.user.email }}
+        <a href="{% url 'collector:send_mail' do_details.user.email %}" 
+           target="_blank" class="action-btn" title="Send Email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </div>
+      <div class="profile-detail">
+        <strong>Phone:</strong> {{ do_details.user.phone }}
+      </div>
+    </div>
+    {% endif %}
 
-          </td>
-          
+    <div class="officer-table">
+      {% if hod_officers %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Contact</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for officer in hod_officers %}
+            <tr>
+              <td>
+                <strong>{{ officer.user.first_name|upper }} {{ officer.user.last_name|upper }}</strong>
+              </td>
+              <td>{{ officer.department.name|upper }}</td>
+              <td>
+                <div class="d-flex flex-column">
+                  <span>{{ officer.user.email }}</span>
+                  {% if officer.user.phone %}
+                  <small class="text-muted">{{ officer.user.phone }}</small>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <a href="{% url 'collector:send_mail' officer.user.email %}" 
+                   target="_blank" class="action-btn" title="Send Email">
+                  <i class="fas fa-envelope"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-user-slash"></i>
+          </div>
+          <h5>No HOD Officers Found</h5>
+          <p class="text-muted">There are currently no Heads of Departments in this district.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 
-        <!-- Phone (WhatsApp link, optional) -->
-        <td>
-            {{ officer.user.phone }}
-           
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="4" class="no-data">No HODs found in your district.</td>
-    </tr>
-    {% endfor %}
-</table>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      });
+    });
+  </script>
 </body>
 </html>

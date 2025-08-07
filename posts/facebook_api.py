@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class FacebookAPI:
     def __init__(self):
-        self.access_token = settings.FB_ACCESS_TOKEN
+        self.access_token = "EAAWySti66ogBPBoyB2Rqp3FChsOpeCNbZB6IkbFDSUMAOwuBSRIzxMdpgyVfELRWiQqM6dQ28rciJVuwBek53f3pipwUZAPZBvWsFUkOGVD5ni3MZCftGeED8ZAqfAAHbX6ZBD0keSZCT8C0ZCpenHJObyYuu4tkxG9BuwpaprAZBbXyPdpnLQpSKzDqmA9Cm41MeKe7xcnQX"
         self.page_id = settings.FB_PAGE_ID
         self.base_url = 'https://graph.facebook.com/v20.0'
         self.excel_file = os.path.join(settings.BASE_DIR, 'comments', 'comments.xlsx')
@@ -32,15 +32,28 @@ class FacebookAPI:
         self.max_retries = 3
         self.retry_delay = 5
         self.api_timeout = 30
+        self.required_fields = 'id,message,created_time,permalink_url,comments.summary(true),attachments'
 
     def validate_token(self):
-        url = f"{self.base_url}/me?access_token={self.access_token}"
-        response = self.make_api_request(url)
+        url = f"{self.base_url}/{self.page_id}"
+        params = {
+            'fields': 'id,name,access_token',
+            'access_token': self.access_token
+        }
+        response = self.make_api_request(url, params)
         if response and 'id' in response:
             logger.info("Access token validated successfully")
             return True
         logger.error(f"Access token validation failed. Response: {response}")
         return False
+
+    def get_post_details(self, post_id):
+        url = f"{self.base_url}/{post_id}"
+        params = {
+            'fields': self.required_fields,
+            'access_token': self.access_token
+        }
+        return self.make_api_request(url, params)
 
     def make_api_request(self, url, params=None, method='GET', data=None, files=None):
         for attempt in range(self.max_retries):
@@ -51,111 +64,189 @@ class FacebookAPI:
                     response = requests.delete(url, params=params, timeout=self.api_timeout)
                 else:
                     response = requests.get(url, params=params, timeout=self.api_timeout)
+                
                 response.raise_for_status()
                 return response.json()
             except requests.exceptions.HTTPError as e:
-                logger.error(f"HTTP Error: {e}, Response: {e.response.text}")
+                error_response = {}
+                try:
+                    error_response = e.response.json()
+                except:
+                    error_response = {'error': {'message': str(e)}}
+                
+                logger.error(f"HTTP Error: {e}, Response: {error_response}")
+                
+                # Handle rate limiting
                 if e.response.status_code == 429:
                     retry_after = int(e.response.headers.get('Retry-After', self.retry_delay))
                     logger.warning(f"Rate limited. Retrying after {retry_after} seconds...")
                     time.sleep(retry_after)
                     continue
-                return None
+                
+                return error_response
             except requests.exceptions.RequestException as e:
                 logger.warning(f"Attempt {attempt + 1} failed: {e}")
                 time.sleep(self.retry_delay * (attempt + 1))
+        
         logger.error(f"Failed to make API request after {self.max_retries} attempts")
-        return None
+        return {'error': {'message': 'API request failed after retries'}}
 
     def post_to_page(self, message=None, image_path=None):
+        response = None
+    
         if not image_path:
+            # Text-only post
             url = f"{self.base_url}/{self.page_id}/feed"
-            params = {'access_token': self.access_token}
-            data = {'message': message or ''}
+            params = {
+                'access_token': self.access_token,
+                'message': message or '',
+                'published': 'true'
+            }
+            response = self.make_api_request(url, params=params, method='POST')
         else:
-            file_ext = os.path.splitext(image_path)[1].lower()
-            if file_ext in {'.png', '.jpg', '.jpeg', '.gif'}:
-                url = f"{self.base_url}/{self.page_id}/photos"
-                params = {'access_token': self.access_token, 'message': message or ''}
-                files = {'source': open(image_path, 'rb')}
-            elif file_ext in {'.mp4', '.mov', '.avi'}:
-                url = f"https://graph-video.facebook.com/v20.0/{self.page_id}/videos"
-                params = {'access_token': self.access_token, 'description': message or ''}
-                files = {'source': open(image_path, 'rb')}
-            else:
-                logger.error(f"Unsupported file type: {file_ext}")
+            try:
+                file_ext = os.path.splitext(image_path)[1].lower()
+            
+                if file_ext in {'.png', '.jpg', '.jpeg', '.gif'}:
+                    # Photo post
+                    url = f"{self.base_url}/{self.page_id}/photos"
+                    params = {
+                        'access_token': self.access_token,
+                        'published': 'true'
+                    }
+                    if message:
+                        params['message'] = message
+                
+                    with open(image_path, 'rb') as f:
+                        files = {'source': f}
+                        response = self.make_api_request(url, params=params, method='POST', files=files)
+                
+                elif file_ext in {'.mp4', '.mov', '.avi'}:
+                    # Video post
+                    url = f"https://graph-video.facebook.com/v20.0/{self.page_id}/videos"
+                    params = {
+                        'access_token': self.access_token,
+                        'description': message or '',
+                        'published': 'true'
+                    }
+                
+                    with open(image_path, 'rb') as f:
+                        files = {'source': f}
+                        response = self.make_api_request(url, params=params, method='POST', files=files)
+            except Exception as e:
+                logger.error(f"Error posting media: {str(e)}", exc_info=True)
                 return None
-            response = self.make_api_request(url, params=params, method='POST', files=files)
-            files['source'].close()
-            return response
-
-        response = self.make_api_request(url, params=params, method='POST', data=data)
+    
         if response and 'id' in response:
-            logger.info(f"Successfully posted: Post ID={response['id']}")
+            # Ensure post_id is in the format PAGEID_POSTID
+            if '_' not in response['id']:
+                response['id'] = f"{self.page_id}_{response['id']}"
+    
         return response
 
-    def update_post(self, post_id, message):
+    def update_post(self, post_id, message, remove_media=False):
         url = f"{self.base_url}/{post_id}"
-        params = {'access_token': self.access_token}
-        data = {'message': message}
-        response = self.make_api_request(url, params=params, method='POST', data=data)
-        if response and 'success' in response:
-            logger.info(f"Successfully updated post: Post ID={post_id}")
-        return response
+        params = {
+            'access_token': self.access_token,
+            'message': message
+        }
+        if remove_media:
+            params['attached_media'] = '[]'
+    
+        response = self.make_api_request(url, params=params, method='POST')
+    
+        # Consider it successful if we get permission error (post exists but we can't access)
+        if response and 'error' in response and response['error'].get('code') == 10:
+            return {'success': True}
+    
+        return response if response else {'success': False}
 
     def delete_post(self, post_id):
+        if '_' not in post_id:
+            post_id = f"{self.page_id}_{post_id}"
+        
         url = f"{self.base_url}/{post_id}"
-        params = {'access_token': self.access_token}
-        response = self.make_api_request(url, params=params, method='DELETE')
-        if response and 'success' in response:
-            logger.info(f"Successfully deleted post: Post ID={post_id}")
-        return response
-
-    def get_complaint_posts(self, last_post_time=None):
-        url = f"{self.base_url}/{self.page_id}/posts"
         params = {
-            'fields': 'id,created_time,message,permalink_url,likes.summary(true),comments.summary(true)',
-            'access_token': self.access_token,
-            'limit': 10
+            'access_token': self.access_token
         }
-        data = self.make_api_request(url, params)
-        if not data or 'data' not in data:
-            logger.warning("No post data returned from API")
-            return [], set(), last_post_time
+        
+        response = self.make_api_request(url, params=params, method='DELETE')
+        
+        # Handle special cases
+        if response and 'error' in response:
+            error_code = response['error'].get('code')
+            # Permission error or post not found - consider these as "success" for our purposes
+            if error_code in [10, 100]:
+                return {'success': True}
+        
+        # Standard successful response
+        if response and response.get('success'):
+            return response
+        
+        # If we got here, it's a real failure
+        return {
+            'success': False,
+            'error': response.get('error', {'message': 'Unknown error'}) if response else {'message': 'No response'}
+        }
 
-        complaint_posts = []
-        fetched_post_ids = set()
-        current_latest_time = last_post_time
+    def get_comments(self, post_id, since=None):
+        if '_' not in post_id:
+            post_id = f"{self.page_id}_{post_id}"
 
-        for post in data['data']:
-            post_time = post['created_time']
-            if not current_latest_time or post_time > current_latest_time:
-                current_latest_time = post_time
-            fetched_post_ids.add(post['id'])
-            if post.get('message', '').lower().find('#complaint') != -1:
-                complaint_posts.append(post)
-                logger.info(f"Found #complaint post: ID={post['id']}")
-
-        return complaint_posts, fetched_post_ids, current_latest_time
-
-    def get_comments(self, post_id):
         url = f"{self.base_url}/{post_id}/comments"
         params = {
             'fields': 'id,created_time,from{name,id},message,comment_count,like_count',
             'access_token': self.access_token,
             'limit': self.max_comments_per_post,
-            'order': 'chronological'
+            'order': 'chronological',
+            'filter': 'stream'
         }
+
+        if since:
+            params['since'] = since.isoformat()
+
         comments = []
-        while url:
-            data = self.make_api_request(url, params if url.endswith('/comments') else None)
-            if not data or 'data' not in data:
-                break
-            for comment in data['data']:
-                comments.append(comment)
-            url = data.get('paging', {}).get('next', None)
-            params = None
-            time.sleep(0.5)
+        try:
+            while url:
+                data = self.make_api_request(url, params if 'comments' in url else None)
+                if not data or not isinstance(data, dict) or 'data' not in data:
+                    break
+
+                for comment in data.get('data', []):
+                    if not isinstance(comment, dict):
+                        continue
+                
+                    try:
+                        comment_data = {
+                            'id': comment.get('id', ''),
+                            'user': comment.get('from', {}).get('name', 'Unknown User'),
+                            'message': comment.get('message', '[No message]'),
+                            'created_time': datetime.now(timezone.utc),
+                            'author_id': comment.get('from', {}).get('id', ''),
+                            'like_count': comment.get('like_count', 0),
+                            'comment_count': comment.get('comment_count', 0),
+                            'is_reply': 'parent' in comment
+                        }
+                    
+                        if 'created_time' in comment:
+                            try:
+                                comment_data['created_time'] = datetime.strptime(
+                                    comment['created_time'], '%Y-%m-%dT%H:%M:%S%z'
+                                )
+                            except ValueError as e:
+                                logger.warning(f"Invalid created_time format for comment {comment.get('id')}: {str(e)}")
+                    
+                        comments.append(comment_data)
+                    except Exception as e:
+                        logger.error(f"Error processing comment {comment.get('id')}: {str(e)}")
+                        continue
+
+                url = data.get('paging', {}).get('next', None)
+                time.sleep(0.5)
+    
+        except Exception as e:
+            logger.error(f"Error fetching comments for post {post_id}: {str(e)}", exc_info=True)
+
         logger.info(f"Found {len(comments)} comments for post {post_id}")
         return comments
 
@@ -165,9 +256,9 @@ class FacebookAPI:
             'URL', 'Parent ID', 'Parent Content', 'Likes', 'Comment Count'
         ]
         new_data = []
-        # Get deleted post IDs
+        
         deleted_post_ids = set(Post.objects.filter(is_deleted=True).values_list('post_id', flat=True))
-        # Only include posts that are not deleted
+        
         for post in posts:
             if post['id'] not in deleted_post_ids:
                 new_data.append({
@@ -183,13 +274,13 @@ class FacebookAPI:
                     'Likes': post.get('likes', {}).get('summary', {}).get('total_count', 0),
                     'Comment Count': post.get('comments', {}).get('summary', {}).get('total_count', 0)
                 })
-                # Only include comments for non-deleted posts
+                
                 for comment in comments_dict.get(post['id'], []):
                     new_data.append({
                         'Type': 'Comment',
                         'ID': comment['id'],
-                        'Author': comment.get('from', {}).get('name', 'Unknown'),
-                        'Author ID': comment.get('from', {}).get('id', ''),
+                        'Author': comment.get('user', 'Unknown'),
+                        'Author ID': comment.get('author_id', ''),
                         'Time': comment['created_time'],
                         'Content': comment.get('message', '[No text]'),
                         'URL': f"{post.get('permalink_url', '')}?comment_id={comment['id']}",
@@ -208,22 +299,21 @@ class FacebookAPI:
         if file_exists:
             df_existing = pd.read_excel(self.excel_file)
             df_existing['Time'] = pd.to_datetime(df_existing['Time'], errors='coerce', utc=True)
-            # Filter out deleted posts and their comments
             df_existing = df_existing[
                 (~df_existing['ID'].isin(deleted_post_ids)) & 
                 (~df_existing['Parent ID'].isin(deleted_post_ids))
             ]
-            # Update existing data with new likes/comments
+            
             for idx, row in df_new.iterrows():
                 mask = df_existing['ID'] == row['ID']
                 if mask.any():
                     df_existing.loc[mask, 'Likes'] = row['Likes']
                     df_existing.loc[mask, 'Comment Count'] = row['Comment Count']
                     df_existing.loc[mask, 'Time'] = row['Time']
+            
             df_combined = pd.concat([df_new, df_existing], ignore_index=True)
             df_combined = df_combined.drop_duplicates(subset=['ID'], keep='first')
             df_combined = df_combined.sort_values('Time', ascending=False, na_position='last')
-            # Filter again to ensure no deleted posts or comments
             df_combined = df_combined[
                 (~df_combined['ID'].isin(deleted_post_ids)) & 
                 (~df_combined['Parent ID'].isin(deleted_post_ids))

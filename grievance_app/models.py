@@ -4,6 +4,9 @@ from datetime import timedelta
 from django.utils.translation import gettext_lazy as _
 from core_app.models import Department, District
 
+from django.contrib.auth import get_user_model  # Add this import at the top
+
+User = get_user_model()  # Add this line
 
 
 class Grievance(models.Model):
@@ -87,19 +90,16 @@ class Grievance(models.Model):
     applicant_name = models.CharField(
     max_length=100,
     verbose_name=_("Applicant Name"),
-    default="N/A"
     )
 
     applicant_address = models.TextField(
         verbose_name=_("Applicant Address"),
-        help_text=_("Provide full residential address"),
-        default="N/A"
+        help_text=_("Provide full residential address"),  
     )
 
     contact_number = models.CharField(
     max_length=15,
     verbose_name=_("Phone Number"),
-    default="0000000000"
     )
 
     email = models.EmailField(
@@ -115,6 +115,14 @@ class Grievance(models.Model):
         on_delete=models.CASCADE,
         verbose_name=_("Department District"),
         default=1  # Or set dynamically in the form
+    )
+    
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name=_("Created By"),
+        related_name='grievances',
+       
     )
 
     remark = models.TextField(verbose_name="Remark", blank=True, null=True)
@@ -133,9 +141,6 @@ class Grievance(models.Model):
     
     def save(self, *args, **kwargs):
         """Auto-generate grievance ID and set due date on creation"""
-        if not self.grievance_id:
-            last_id = Grievance.objects.aggregate(models.Max('id'))['id__max'] or 0
-            self.grievance_id = f"GY-{timezone.now().year}-{last_id+1:04d}"
         
         if not self.due_date:
             days_map = {
@@ -155,3 +160,11 @@ class Grievance(models.Model):
             self.status not in ['RESOLVED', 'REJECTED'] 
             and timezone.now().date() > self.due_date
         )
+# grievance_app/models.py
+class GrievanceDocument(models.Model):
+    grievance = models.ForeignKey(Grievance, on_delete=models.CASCADE, related_name='documents')
+    file = models.FileField(upload_to='grievance_documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Document for {self.grievance.grievance_id}"

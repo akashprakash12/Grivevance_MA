@@ -2,10 +2,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-from core_app.models import District  # Add this import at the top
+from core_app.models import District
 from django.db import transaction
 from datetime import datetime
-# models.py (add above the User model)
 
 class IDTracker(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -81,13 +80,12 @@ class PublicUserProfile(models.Model):
     panchayath = models.CharField(max_length=100, verbose_name=_("Panchayath"))
 
     district = models.ForeignKey(
-    District,
-    on_delete=models.SET_NULL,
-    null=True,
-    blank=True,
-    verbose_name="District"
-)
-
+        District,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="District"
+    )
 
     class Meta:
         verbose_name = _("Public User Profile")

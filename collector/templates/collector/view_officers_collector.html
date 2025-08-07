@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Officers in Your District</h2>
+<table class="table">
+  <thead>
+    <tr><th>Username</th><th>Name</th><th>Dept</th><th>Role</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    {% for op in officers %}
+    <tr>
+      <td>{{ op.user.username }}</td>
+      <td>{{ op.user.get_full_name }}</td>
+      <td>{{ op.department.name }}</td>
+      <td>{{ op.is_hod|yesno:"HOD,Officer" }}</td>
+      <td>
+        <a href="{% url 'officer:update_officer' op.user.username %}">Edit</a> |
+        <a href="{% url 'officer:delete_officer' op.user.username %}" 
+           onclick="return confirm('Delete this officer?')">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
