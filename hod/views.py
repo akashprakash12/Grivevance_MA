@@ -5,10 +5,29 @@ from django.contrib import messages
 from grievance_app.models import Grievance
 from officer.models import OfficerProfile, GrievanceAssignment, GrievanceStatusLog
 
+@login_required
+def update_hod(request, hod_id):
+    hod = get_object_or_404(HOD, id=hod_id)
+    # Handle form here (for now, just render a placeholder)
+    return render(request, 'hod/update_hod.html', {'hod': hod})
 
+@login_required
+def delete_hod(request, hod_id):
+    hod = get_object_or_404(HOD, id=hod_id)
+    if request.method == "POST":
+        hod.user.is_active = False
+        hod.user.save()
+        messages.success(request, "HOD account deactivated.")
+        return redirect('hod:hod_profile')  # or wherever appropriate
+    return redirect('hod:hod_profile')
+    
 def is_hod(user):
     return hasattr(user, 'officerprofile') and user.officerprofile.is_hod
 
+@login_required
+def hod_profile(request):
+    user = request.user
+    return render(request, 'hod/view_profile.html', {'user': user})
 
 @login_required
 def hod_dashboard(request):

@@ -1,0 +1,102 @@
+{% extends 'hod/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid container-custom">
+  <div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white rounded-top">
+          <h4 class="mb-0"><i class="fas fa-user-cog me-2"></i>Update HOD Profile</h4>
+        </div>
+        <div class="card-body px-4 py-4">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" class="form-control" name="first_name" value="{{ hod.user.first_name }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control" name="last_name" value="{{ hod.user.last_name }}" required>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" value="{{ hod.user.email }}" required>
+              </div>
+              <div class="col-md-6">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="text" class="form-control" name="phone" value="{{ hod.phone_number }}" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="department" class="form-label">Department</label>
+              <input type="text" class="form-control" name="department" value="{{ hod.department }}" required>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-save me-1"></i> Update
+              </button>
+              <a href="{% url 'hod:hod_profile' %}" class="btn btn-outline-secondary px-4">
+                <i class="fas fa-times me-1"></i> Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+  .container-custom {
+    max-width: 1200px;
+  }
+
+  .card {
+    border-radius: 12px;
+    border-left: 6px solid #4e73df; /* Bootstrap primary color */
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  }
+
+  .card-header {
+    border-bottom: 1px solid #e3e6f0;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #4e73df;
+  }
+
+  .form-control:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+  }
+
+  .btn-success {
+    background-color: #1cc88a;
+    border-color: #1cc88a;
+  }
+
+  .btn-success:hover {
+    background-color: #17a673;
+    border-color: #17a673;
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #f8f9fc;
+    border-color: #d1d3e2;
+  }
+</style>
+{% endblock %}

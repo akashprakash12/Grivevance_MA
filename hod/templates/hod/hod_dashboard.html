@@ -22,30 +22,29 @@
         </button>
 
         <div class="collapse navbar-collapse" id="hodNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                <!-- Grievances Dropdown -->
-                <li class="nav-item">
-    <a class="nav-link" href="{% url 'hod:assign_grievance' %}">Assign Grievance</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'hod:check_progress' %}">Check Progress</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'hod:search_grievance' %}">Search Grievances</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'hod:officers_assigned_grievances' %}">Assigned Grievances</a>
-</li>
+    <li class="nav-item me-2">
+        <a class="btn btn-outline-light" href="{% url 'hod:assign_grievance' %}">Assign Grievance</a>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-outline-light" href="{% url 'hod:check_progress' %}">Check Progress</a>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-outline-light" href="{% url 'hod:search_grievance' %}">Search Grievances</a>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-outline-light" href="{% url 'hod:officers_assigned_grievances' %}">Assigned Grievances</a>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-outline-light" href="{% url 'hod:approve_extension_requests' %}">Extension Approvals</a>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-outline-light" href="{% url 'hod:hod_profile' %}">View Profile</a>  <!-- 👈 Add your view name -->
+    </li>
 
-                <!-- Requests Dropdown -->
-                <li class="nav-item">
-    <a class="nav-link" href="{% url 'hod:approve_extension_requests' %}">Extension Approvals</a>
-</li>
+</ul>
 
-
-                <!-- Department Info -->
-            </ul>
 
             <!-- Logout on Right -->
             <ul class="navbar-nav ms-auto">

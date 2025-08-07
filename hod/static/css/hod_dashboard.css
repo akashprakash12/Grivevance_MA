@@ -14,10 +14,17 @@ body {
     padding-bottom: 30px;
 }
 
+ .navbar {
+    background: #002855 !important;
+  }
+
+
 /* Section headings */
 .section-title {
     font-size: 1.4rem;
     color: #002855;
+    border-left: 3px solid #FFBF00;
+    padding-left: 10px;
     font-weight: bold;
     margin-bottom: 15px;
 }
