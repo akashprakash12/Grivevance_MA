@@ -11,4 +11,7 @@ urlpatterns = [
     path('search/', views.search_grievance, name='search_grievance'),
     path('officers/', views.officers_assigned_grievances, name='officers_assigned_grievances'),
     path('hod_dashboard/', views.hod_dashboard, name='hod_dashboard'),
+    path('profile/', views.hod_profile, name='hod_profile'),
+    path('update/<int:hod_id>/', views.update_hod, name='update_hod'),
+    path('delete/<int:hod_id>/', views.delete_hod, name='delete_hod'),
 ]
