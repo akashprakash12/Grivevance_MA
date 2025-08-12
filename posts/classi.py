@@ -5,11 +5,18 @@ from datetime import datetime, timedelta
 import google.generativeai as genai
 import pandas as pd
 import textwrap
+from dotenv import load_dotenv
 from posts.classify import extract_details_and_classify
+
+# Load environment variables
+load_dotenv()
 
 # Configure Gemini AI
 try:
-    genai.configure(api_key='AIzaSyC86ncGOtqfoS9RJV-e_atb29VPpRYnUtE')
+    api_key = os.getenv('api_key')
+    if not api_key:
+        raise ValueError("api_key environment variable not set")
+    genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
 except Exception as e:
     raise RuntimeError(f"Failed to initialize Gemini model: {str(e)}")

@@ -2,17 +2,24 @@ import os
 import json
 import google.generativeai as genai
 import textwrap
+from dotenv import load_dotenv
 
-# Configure Gemini AI with secure API key handling
+# Load environment variables
+load_dotenv()
+
+# Configure Gemini AI
 try:
-    genai.configure(api_key='AIzaSyC86ncGOtqfoS9RJV-e_atb29VPpRYnUtE')
+    api_key = os.getenv('api_key')
+    if not api_key:
+        raise ValueError("API key not found in environment variables")
+    genai.configure(api_key=api_key)
 except Exception as e:
     raise RuntimeError(f"Failed to configure Gemini API: {str(e)}")
 
 def extract_details_and_classify(comment):
     """
-    Enhanced function to extract details and classify Facebook comments with better error handling
-    and consistent JSON output structure.
+    Extract details and classify Facebook comments with structured output.
+    Handles both English and Malayalam comments.
     """
     departments = [
         "sports", "LSGD", "SC/ST", "forest", "Drinking water supply",
@@ -52,7 +59,6 @@ def extract_details_and_classify(comment):
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(prompt)
         
-        # Clean and parse the response
         json_str = response.text.strip()
         for prefix in ['```json', '```']:
             if json_str.startswith(prefix):
@@ -62,7 +68,6 @@ def extract_details_and_classify(comment):
         
         data = json.loads(json_str)
         
-        # Validate department classification
         if data['department'] not in departments:
             data['department'] = 'Other'
             
