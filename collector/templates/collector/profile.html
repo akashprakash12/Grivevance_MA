@@ -29,7 +29,62 @@
       padding: 30px;
       color: var(--text-main);
     }
+    .navbar-custom {
+  background: var(--indigo);
+  padding: 1.2rem 2rem;
+  border-bottom: 4px solid var(--indigo-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
 
+.navbar-custom .navbar-logo {
+  height: 50px;
+  margin-right: 15px;
+}
+
+.navbar-custom .navbar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.navbar-custom .nav-link {
+  color: #ffffff !important;
+  margin-left: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #FFBF00 !important; /* Goldenrod - dark yellow */
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.navbar-custom .dropdown-menu {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
+}
+
+.navbar-custom .dropdown-item:hover {
+  background-color: var(--indigo);
+  color: #ffffff;
+}
+
+.navbar-custom .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
     .profile-card {
       max-width: 1100px;
       margin: 2rem auto;
@@ -50,6 +105,41 @@
       width: 100%;
       background: linear-gradient(to right, var(--primary), transparent);
     }
+
+    .handover-top-right {
+  position: absolute;
+  top: 60px; /* Changed from 20px to 40px for a slight downward shift */
+  right: 20px;
+  z-index: 10;
+}
+
+
+    .btn-custom {
+      padding: 0.75rem 1.75rem;
+      font-weight: 500;
+      font-size: 1rem;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-handover {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-handover:hover {
+  background-color: #8b0000; /* Dark red */
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 
     .header {
       display: flex;
@@ -156,20 +246,6 @@
       gap: 1rem;
     }
 
-    .btn-custom {
-      padding: 0.75rem 1.75rem;
-      font-weight: 500;
-      font-size: 1rem;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      border: none;
-      cursor: pointer;
-    }
-
     .btn-back {
       background-color: var(--secondary);
       color: white;
@@ -192,45 +268,11 @@
       transform: translateY(-1px);
     }
 
-    .action-group {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  .btn-handover {
-    background-color: #dc3545;
-    color: white;
-  }
-  
-  .btn-handover:hover {
-    background-color: #bb2d3b;
-    color: white;
-  }
-  
-  @media (max-width: 768px) {
-    .action-group {
-      width: 100%;
-    }
-    
-    .action-group a, 
-    .action-group button {
-      flex: 1;
-      text-align: center;
-    }
-  }
-
-    .btn-handover:hover {
-      background-color: var(--warning-dark);
-      color: white;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
     @media (max-width: 768px) {
       .profile-card {
         padding: 2rem;
       }
-      
+
       .header {
         flex-direction: column;
         text-align: center;
@@ -245,22 +287,28 @@
       .primary-actions {
         flex-direction: column;
       }
-      
+
       .primary-actions a {
         width: 100%;
         text-align: center;
         justify-content: center;
       }
-      
-      .btn-handover {
-        width: 100%;
-        min-width: auto;
+
+      .handover-top-right {
+        position: static;
+        margin-top: 1rem;
+        align-self: flex-end;
       }
     }
   </style>
 </head>
 <body>
   <div class="profile-card">
+    <!-- Handover button moved to top right -->
+    <button onclick="confirmHandover()" class="btn btn-handover btn-custom handover-top-right">
+      <i class="fas fa-exchange-alt"></i> Hand Over
+    </button>
+
     <div class="header">
       <div class="profile-image">
         {% if profile_picture %}
@@ -312,14 +360,9 @@
         <a href="{% url 'collector:collector_dashboard' %}" class="btn btn-back btn-custom">
           <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
-        <div class="action-group">
-          <a href="{% url 'collector:update_collector' username %}" class="btn btn-edit btn-custom">
-            <i class="fas fa-edit"></i> Edit Profile
-          </a>
-          <button onclick="confirmHandover()" class="btn btn-handover btn-custom ms-2">
-            <i class="fas fa-exchange-alt"></i> Hand Over
-          </button>
-        </div>
+        <a href="{% url 'collector:update_collector' username %}" class="btn btn-edit btn-custom">
+          <i class="fas fa-edit"></i> Edit Profile
+        </a>
       </div>
     </div>
   </div>
@@ -331,7 +374,6 @@
       }
     }
   </script>
-  <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

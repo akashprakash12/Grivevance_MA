@@ -1,4 +1,7 @@
-import logging  # Add this line
+import logging
+from django import template
+from django.core.exceptions import PermissionDenied
+from district_officer.models import DistrictOfficerProfile  # Add this line
 logger = logging.getLogger(__name__)  # Add this line
 # Standard imports
 import random
@@ -9,6 +12,7 @@ import string
 import smtplib
 import secrets
 import csv
+from io import BytesIO  #
 from pathlib import Path
 from urllib.parse import quote
 from email.mime.text import MIMEText
@@ -18,7 +22,13 @@ import pandas as pd
 import openpyxl  # Required for Excel export
 from fpdf import FPDF
 from pathlib import Path
+from django.http import JsonResponse
+from .forms import AdministrativeOrderForm
+from .models import CollectorOrder, CollectorOrderAssignment
+from openpyxl.utils import get_column_letter  # Add this import at the top
 
+from openpyxl import Workbook
+from openpyxl.styles import Font
 # Django imports
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden, FileResponse, HttpResponseRedirect
@@ -58,6 +68,17 @@ from officer.models import OfficerProfile
 from core_app.views import auto_dept_id
 from core_app.forms import DeptForm
 import traceback
+
+def _is_collector(user) -> bool:
+    is_collector = CollectorProfile.objects.filter(user=user).exists()
+    print("im collector for grievance excel")
+    return is_collector
+
+
+def _is_DO(user) -> bool:
+    is_do = DistrictOfficerProfile.objects.filter(user=user).exists()
+    print("im do for grievance excel")
+    return is_do
 
 ### ------------------------- ###
 ###  Collector CRUD Functions ###
@@ -114,7 +135,7 @@ def update_collector(request, username):
     # Ensure only collectors can access
     if request.user.user_type != "COLLECTOR":
         messages.error(request, "Only collectors may access this page")
-        return redirect("home")
+        return HttpResponse("acess denied or something went wrong")
 
     user_obj = request.user
     profile_obj = get_object_or_404(CollectorProfile, user=user_obj)
@@ -131,7 +152,7 @@ def update_collector(request, username):
         if user_form.is_valid() and profile_form.is_valid():
             # Save user
             user = user_form.save(commit=False)
-            user.username = auto_collector_id(district)
+            user.username = user.username
             user.save()
 
             # Save profile
@@ -261,7 +282,7 @@ def collector_dashboard(request):
         )
     except CollectorProfile.DoesNotExist:
         messages.error(request, "Access denied. Collector profile not found.")
-        return redirect("login")
+        return redirect("accounts:login")
 
     district = collector.district
 
@@ -348,7 +369,17 @@ def collector_dashboard(request):
 
     # Resolved is anything not in the above statuses (optional fallback)
     resolved_all = total_all - pending_all - in_progress_all - rejected_all - escalated_all
-
+    
+    
+    district_name = district.name.lower()
+    district_images_path = os.path.join(settings.STATICFILES_DIRS[0], 'images', district_name)
+    district_images = []
+    
+    if os.path.exists(district_images_path):
+        district_images = [
+            f for f in os.listdir(district_images_path)
+            if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))
+        ]
     context = {
         "collector": collector,
         "district": district,
@@ -365,38 +396,58 @@ def collector_dashboard(request):
         "all_grievances": all_grievances,
         "sort_by": sort_by,
         "dept_search": dept_search,
+        "district_images": district_images,
+
     }
     return render(request, "collector/collector_dashboard.html", context)
 
 
 
 @login_required
-def collector_profile_view(request):
-    user = request.user  # Logged-in user (from User model)
+def collector_do_profile_view(request):
+    user = request.user
 
-    try:
-        # Get the collector profile connected to this user
-        profile = CollectorProfile.objects.get(user=user)
-        collector_profile = {
-                    'full_name': f"{user.first_name} {user.last_name}",
-                    'email': user.email,
-                    'username': user.username,
-                    'district': profile.district.name,
-                    'official_address': profile.official_address,
-                    'collector_id': profile.collector_id,
-                    'tenure_start': profile.tenure_start,
-                    'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
-                }
+    if _is_collector(user):
+        try:
+            profile = CollectorProfile.objects.get(user=user)
+            collector_profile = {
+                'full_name': f"{user.first_name} {user.last_name}",
+                'email': user.email,
+                'username': user.username,
+                'district': profile.district.name,
+                'official_address': profile.official_address,
+                'collector_id': profile.collector_id,
+                'tenure_start': profile.tenure_start,
+                'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+            }
+            return render(request, 'collector/profile.html', collector_profile)
+        except CollectorProfile.DoesNotExist:
+            messages.error(request, "Collector profile not found.")
+            return redirect('collector:collector_dashboard')
 
-        return render(request, 'collector/profile.html', collector_profile)
+    elif _is_DO(user):
+        try:
+            profile = DistrictOfficerProfile.objects.select_related('user', 'district').get(user=user)
+            do_profile = {
+                'full_name': f"{user.first_name} {user.last_name}",
+                'email': user.email,
+                'username': user.username,
+                'district': profile.district.name,
+                'officer_id': profile.officer_id,
+                'assigned_on': profile.assigned_on,
+                'profile_picture': profile.profile_picture.url if profile.profile_picture else None,
+                "official_address":profile.official_address
+            }
+            return render(request, 'district_officer/profile.html', do_profile)
+        except DistrictOfficerProfile.DoesNotExist:
+            messages.error(request, "District Officer profile not found.")
+            return redirect('district_officer:DO_dashboard')
 
-    except CollectorProfile.DoesNotExist:
-        messages.error(request, "Collector profile not found.")
-        return redirect('dashboard')
-
+    else:
+        messages.error(request, "Access denied. Unknown role.")
 
 @login_required
-def collector_change_password(request):
+def change_password(request):
     """Handle password changes"""
     if request.method == "POST":
         user = request.user
@@ -415,7 +466,10 @@ def collector_change_password(request):
                 user.save()
                 update_session_auth_hash(request, user)
                 messages.success(request, "Password changed successfully!")
-                return redirect("collector:update_collector", username=user.username)
+                if _is_collector(user):
+                    return redirect("collector:update_collector", username=user.username)
+                if _is_DO(user):
+                    return redirect("district_officer:update_district_officer", username=user.username)
             except ValidationError as e:
                 for error in e.messages:
                     messages.error(request, error)
@@ -487,13 +541,21 @@ def collector_department_create(request):
 
 def department_card_view(request, department_id):
     # ---------- basic context ----------
-    collector = get_object_or_404(
-        CollectorProfile.objects.select_related('district'),
-        user=request.user
-    )
-    district    = collector.district
-    department  = get_object_or_404(Department, code=department_id)
+    if _is_collector(request.user):
+        collector = get_object_or_404(
+            CollectorProfile.objects.select_related('district'),
+            user=request.user
+        )
+        district = collector.district
+        template='collector/each_dept.html'
+    if _is_DO(request.user):
+        do=get_object_or_404(DistrictOfficerProfile.objects.select_related('district'),user=request.user)
+        district=do.district
+        print("helooooooo")
+        template='district_officer/each_dept.html'
 
+    department  = get_object_or_404(Department, code=department_id)
+    
     # ---------- filters from request ----------
     status_filter = request.GET.get("status", "ALL")
     date_from     = request.GET.get("date_from")
@@ -553,7 +615,7 @@ def department_card_view(request, department_id):
         "date_to":        date_to,
         "search_query":   search_query,
     }
-    return render(request, "collector/each_dept.html", context)
+    return render(request, template, context)
 
 
 
@@ -597,30 +659,80 @@ def update_remark(request):
 ### ------------------------- ###
 ###  Reporting & Export Views ###
 ### ------------------------- ###
-
 @login_required
 def grievance_report_view(request):
-    collector = get_object_or_404(CollectorProfile, user=request.user)
-    district = collector.district
-    departments = Department.objects.filter(district=district)
+    print(f"[DEBUG] grievance_report_view accessed by {request.user.username}")
+    
+    user_type = request.user.user_type.lower()  # Normalize casing
+    print(f"[DEBUG] user_type: {user_type}")
 
-    grievances = _filtered_grievance_qs(request, district)
+    district = None
 
-    return render(request, "collector/grievance_report.html", {
-        "grievances": grievances,
-        "departments": departments,
-        "request": request,
-        "district": district
-    })
+    try:
+        if user_type == "collector":
+            profile = get_object_or_404(CollectorProfile, user=request.user)
+            district = profile.district
+            print(f"[DEBUG] Collector district: {district}")
+        elif user_type == "district_officer":
+            profile = get_object_or_404(DistrictOfficerProfile, user=request.user)
+            district = profile.district
+            print(f"[DEBUG] District Officer district: {district}")
+        else:
+            print(f"[DEBUG] Invalid user type: {user_type}")
+            raise PermissionDenied("You don't have permission to view this report")
 
+        departments = Department.objects.filter(district=district)
+        print(f"[DEBUG] Departments count: {departments.count()}")
+
+        grievances = _filtered_grievance_qs(request, district)
+        print(f"[DEBUG] Grievances count: {grievances.count()}")
+
+        if _is_collector(request.user):
+            template = "collector/grievance_report.html"
+        elif _is_DO(request.user):
+            template = "district_officer/grievance_report.html"
+        else:
+            print("[DEBUG] User matched no known role (collector/DO)")
+            return HttpResponseForbidden("Access Denied: You do not have permission to view this page.")
+
+        print(f"[DEBUG] Using template: {template}")
+
+        return render(request, template, {
+            "grievances": grievances,
+            "departments": departments,
+            "district": district
+        })
+
+    except Exception as e:
+        print(f"[ERROR] grievance_report_view failed: {e}")
+        return HttpResponseForbidden("Something went wrong or access denied.")
 @login_required
 def department_report_view(request):
-    collector = get_object_or_404(CollectorProfile, user=request.user)
-    district = collector.district
+    user_type = request.user.user_type
+    district = None
+    print("hello",request.user)
+    print("user_type is:", user_type)
+
+    if user_type == "COLLECTOR":
+        user = get_object_or_404(CollectorProfile, user=request.user)
+        district = user.district
+        template="collector/department_report.html"
+        print("hello im coll")
+
+    elif user_type == "district_officer":  # Changed this condition
+        user = get_object_or_404(DistrictOfficerProfile, user=request.user)
+        district = user.district
+        template="district_officer/department_report.html"
+        print("hello im do")
+
+    else:
+        # Handle other user types or raise permission denied
+        raise PermissionDenied("You don't have permission to view this report")
+
 
     qs = Department.objects.filter(district=district)
     search = request.GET.get("search")
-    sort_by =部门 = request.GET.get("sort_by")
+    sort_by = request.GET.get("sort_by")
 
     if search:
         qs = qs.filter(name__icontains=search)
@@ -655,29 +767,34 @@ def department_report_view(request):
     # ✅ Store final filtered and sorted data for export
     request.session['filtered_department_report'] = report_data
 
-    paginator = Paginator(report_data, 10)
-    page_obj = paginator.get_page(request.GET.get("page"))
+    # paginator = Paginator(report_data, 10)
+    # page_obj = paginator.get_page(request.GET.get("page"))
 
     total_depts = qs.count()
     avg_resolution_rate = round(sum(d["resolution_rate"] for d in report_data) / total_depts, 2) if total_depts else 0
 
     context = {
         "district": district,
-        "department_report": page_obj,
+        "department_report": report_data,
         "department_count": total_depts,
         "summary": {
             "total_depts": total_depts,
             "avg_resolution_rate": avg_resolution_rate,
         }
     }
-    return render(request, "collector/department_report.html", context)
+    return render(request, template, context)
 
-
+@login_required
 def export_grievance_excel(request):
     # Get the collector based on logged-in user
-    collector = get_object_or_404(CollectorProfile, user=request.user)
-    district = collector.district
-
+    if _is_collector(request.user):
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        district = collector.district
+    elif _is_DO(request.user):
+        do = get_object_or_404(DistrictOfficerProfile, user=request.user)
+        district = do.district
+    else:
+        HttpResponse("permission denied")
     # Get filtered grievance queryset and select relevant fields
     qs = _filtered_grievance_qs(request, district).values(
         'grievance_id',
@@ -763,8 +880,14 @@ def export_grievance_excel(request):
 @login_required
 def export_grievance_pdf(request):
     try:
-        collector = get_object_or_404(CollectorProfile, user=request.user)
-        district = collector.district
+        if _is_collector(request.user):
+            collector = get_object_or_404(CollectorProfile, user=request.user)
+            district = collector.district
+        elif _is_DO(request.user):
+            do = get_object_or_404(DistrictOfficerProfile, user=request.user)
+            district = do.district
+        else:
+            HttpResponse("permission denied")
         grievances = _filtered_grievance_qs(request, district)
 
         pdf = FPDF(orientation='L', unit='mm', format='A4')
@@ -846,8 +969,16 @@ def export_grievance_pdf(request):
         return redirect("collector:grievance_report")
 @login_required
 def export_department_excel(request):
-    collector = get_object_or_404(CollectorProfile, user=request.user)
-    district = collector.district
+    
+    if _is_collector(request.user):
+        collector = get_object_or_404(CollectorProfile, user=request.user)
+        district = collector.district
+    elif _is_DO(request.user):
+        do = get_object_or_404(DistrictOfficerProfile, user=request.user)
+        district = do.district
+
+    else:
+        HttpResponse("permission denied")
 
     report_data = request.session.get("filtered_department_report")
 
@@ -907,8 +1038,15 @@ def export_department_excel(request):
 @login_required
 def export_department_pdf(request):
     try:
-        collector = get_object_or_404(CollectorProfile, user=request.user)
-        district = collector.district
+        if _is_collector(request.user):
+            collector = get_object_or_404(CollectorProfile, user=request.user)
+            district = collector.district
+        elif _is_DO(request.user):
+            do = get_object_or_404(DistrictOfficerProfile, user=request.user)
+            district = do.district
+
+        else:
+            HttpResponse("permission denied")
 
         report_data = request.session.get("filtered_department_report", [])
 
@@ -981,8 +1119,14 @@ def export_department_pdf(request):
 @login_required
 def details_download(request, grievance_id):
     try:
-        collector = get_object_or_404(CollectorProfile, user=request.user)
-        district = collector.district
+        if _is_collector(request.user):
+            collector = get_object_or_404(CollectorProfile, user=request.user)
+            district = collector.district
+        elif _is_DO(request.user):
+            do = get_object_or_404(DistrictOfficerProfile, user=request.user)
+            district = do.district
+        else:
+            HttpResponse("permission denied")
 
         grievance = get_object_or_404(
             Grievance.objects.select_related("department", "district"),
@@ -1112,8 +1256,13 @@ def details_download(request, grievance_id):
 def department_grievances_download(request, department_id):
     try:
         # 1. Security/ownership checks
-        collector = get_object_or_404(CollectorProfile, user=request.user)
-        district = collector.district
+        if _is_collector(request.user):
+            collector = get_object_or_404(CollectorProfile, user=request.user)
+            district = collector.district
+        if _is_DO(request.user):
+            do=get_object_or_404(DistrictOfficerProfile,user=request.user)
+            district = do.district
+
         department = get_object_or_404(Department, code=department_id, district=district)
 
         # 2. Apply filters from request
@@ -1235,43 +1384,170 @@ def department_grievances_download(request, department_id):
         print(f"Error in PDF generation: {str(e)}")
         return HttpResponse(f"An error occurred while generating the PDF: {str(e)}", status=500)
 
+@login_required
+def export_department_grievances_excel(request, department_id):
+    """
+    Export department grievances to Excel with filters preserved
+    """
+    try:
+        if _is_collector(request.user):
+            collector = get_object_or_404(CollectorProfile, user=request.user)
+            district = collector.district
+            department = get_object_or_404(Department, code=department_id, district=district)
+
+        if _is_DO(request.user):
+            do=get_object_or_404(DistrictOfficerProfile,user=request.user)
+            district = do.district
+            department = get_object_or_404(Department, code=department_id, district=district)
+
+        
+        # 2. Apply filters (same as department_card_view)
+        grievances = Grievance.objects.filter(
+            district=district,
+            department=department
+        ).select_related('department')
+        
+        status_filter = request.GET.get("status", "ALL")
+        if status_filter != "ALL":
+            grievances = grievances.filter(status=status_filter)
+            
+        date_from = request.GET.get("date_from")
+        date_to = request.GET.get("date_to")
+        if date_from:
+            grievances = grievances.filter(date_filed__gte=date_from)
+        if date_to:
+            grievances = grievances.filter(date_filed__lte=date_to)
+            
+        search_query = request.GET.get("search", "").strip()
+        if search_query:
+            grievances = grievances.filter(
+                Q(grievance_id__icontains=search_query) |
+                Q(contact_number__icontains=search_query)
+            )
+            
+        # 3. Create Excel workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Grievances"
+        
+        # Headers
+        headers = [
+            "Grievance ID", "Date Filed", "Status", "Priority",
+            "Applicant Name", "Contact", "Address", "Subject", 
+            "Description", "Due Date", "Last Updated"
+        ]
+        ws.append(headers)
+        
+        # Data rows
+        for grievance in grievances:
+            ws.append([
+                grievance.grievance_id,
+                grievance.date_filed.strftime('%Y-%m-%d %H:%M') if grievance.date_filed else "",
+                grievance.get_status_display(),
+                grievance.get_priority_display(),
+                grievance.applicant_name,
+                grievance.contact_number,
+                grievance.applicant_address,
+                grievance.subject,
+                grievance.description,
+                grievance.due_date.strftime('%Y-%m-%d') if grievance.due_date else "",
+                grievance.last_updated.strftime('%Y-%m-%d %H:%M') if grievance.last_updated else "",
+            ])
+        
+        # Style headers
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+        
+        # Column widths
+        column_widths = [18, 16, 12, 12, 25, 15, 30, 30, 50, 12, 16]
+        for i, width in enumerate(column_widths, 1):
+            ws.column_dimensions[get_column_letter(i)].width = width
+            
+        # 4. Return the file
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        filename = f"{department.code}_grievances_{timezone.now().strftime('%Y%m%d')}.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+        
+    except Exception as e:
+        messages.error(request, f"Failed to generate Excel: {str(e)}")
+        return redirect('collector:department_card', department_id=department_id)
 ### ------------------------- ###
 ###  Communication Views      ###
 ### ------------------------- ###
 
+
+
+def collector_or_do_check(user):
+    return _is_collector(user) or _is_DO(user)
+
 @login_required
 def officer_details(request):
-    # Get collector and district
-    collector_profile = get_object_or_404(CollectorProfile.objects.select_related('district'), user=request.user)
-    district = collector_profile.district
+    # Get user profile and district
+    if _is_collector(request.user):
+        profile = get_object_or_404(CollectorProfile, user=request.user)
+        template = "collector/hod_list.html"
+    else:
+        profile = get_object_or_404(DistrictOfficerProfile, user=request.user)
+        template = "district_officer/hod_list.html"
+    
+    district = profile.district
 
-    # Get HOD officers in the collector's district
+    # Get HOD officers in the district
     hod_officers = OfficerProfile.objects.select_related('user', 'department') \
         .filter(is_hod=True, department__district=district)
-
+    
+    # Get active DO for the district (if any)
+    do_details = DistrictOfficerProfile.objects.filter(
+        district=district, 
+        is_active=True
+    ).first()
+    collector_details=CollectorProfile.objects.filter(
+        district=district, 
+        is_active=True
+    ).first()
     context = {
+        "profile": profile,
+        "do_details": do_details,
         'hod_officers': hod_officers,
-        'district': district.name,
-    }
+        "collector_details": collector_details,  # Only relevant in DO portal
 
-    return render(request, 'collector/hod_list.html', context)
+        'district': district,  # Pass district object
+        'is_collector': _is_collector(request.user),
+    }
+    return render(request, template, context)
 
 @login_required
 def send_email_redirect(request, officer_email):
-    collector_email = request.user.email  # Dynamic sender (logged-in user)
-
+    if not officer_email or '@' not in officer_email:
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    
     # Gmail Compose URL
     compose_url = f"https://mail.google.com/mail/?view=cm&fs=1&tf=1&to={quote(officer_email)}"
+    
+    # Add subject if needed
+    if hasattr(request.user, 'collectorprofile'):
+        subject = f"Regarding {request.user.collectorprofile.district.name} District Matters"
+        compose_url += f"&su={quote(subject)}"
+    
+    return HttpResponseRedirect(compose_url)
 
-    # Redirect to Gmail account chooser (if not signed in / wrong account)
-    redirect_url = (
-        "https://accounts.google.com/AccountChooser"
-        f"?continue={quote(compose_url, safe='')}"
-        f"&Email={quote(collector_email)}"
-        "&service=mail"
-    )
 
-    return HttpResponseRedirect(redirect_url)
+
+
+
+
+
+
+
+
 
 ### ------------------------- ###
 ###  Helper Functions         ###
@@ -1372,7 +1648,6 @@ def validate_email(email):
     return re.match(r'^[^@]+@[^@]+\.[^@]+$', email) is not None
 
 
-
 # Constants
 OTP_EXPIRY_MINUTES = 5
 MAX_ATTEMPTS = 3
@@ -1406,14 +1681,54 @@ def collector_handover_otp(request):
             # Send OTP email
             try:
                 send_mail(
-                    subject="Collector Handover OTP Verification",
-                    message=f"Your OTP is: {otp}\nValid for {OTP_EXPIRY_MINUTES} minutes.",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
+        subject=f"Collector Role Handover Verification – {request.user.collector_profile.district.name}",
+        message=f"""\
+    Dear {request.user.first_name},
+
+    You are initiating the official handover of your Collector responsibilities for the district of {request.user.collector_profile.district.name}.
+
+    To proceed with this process, please use the secure one-time verification code provided below:
+
+    One-Time Password (OTP): {otp}  
+    Valid Until: {(django_now() + timedelta(minutes=OTP_EXPIRY_MINUTES)).strftime('%I:%M %p on %d %b %Y')}
+
+    ------------------------------------------------------------
+    Important Security Notice:
+    - This OTP grants full access to the role transfer process.
+    - Do not share this code with anyone under any circumstances.
+    - The Grievance Redressal System team will never request this code via email, phone, or any other communication channel.
+    - If you did not initiate this request, please report the activity immediately.
+
+    ------------------------------------------------------------
+    Post-Verification Process:
+    - A new Collector account will be generated upon successful verification.
+    - Your current administrative access will be permanently revoked.
+    - Confirmation emails will be sent to both involved parties following the completion of the process.
+
+    Disclaimer:  
+    Unauthorized use of this code, including intentional or accidental sharing, will be considered a serious breach of protocol. The current account holder will be held fully responsible for any consequences, as per the Digital Governance Security Policy.
+
+    ------------------------------------------------------------
+    For safety-related queries or assistance, please contact GULBEE:
+
+    Security Desk:+91 9999988888  
+    Email: security@gulbee-system.org
+
+
+    Thank you for your dedicated service.
+
+    Sincerely,  
+    Office of Digital Governance  
+    Grievance Redressal System  
+    https://portal.grievance-system.org
+    """,
+
+                    from_email="Grievance System Security <no-reply@grievance-system.org>",
                     recipient_list=[request.user.email],
                 )
-                messages.success(request, "OTP sent to your registered email.")
+                messages.success(request, "Verification code sent to your email.")
             except Exception as e:
-                messages.error(request, "Failed to send OTP. Please try again.")
+                messages.error(request, "Failed to send verification code. Please try again.")
                 return render(request, "collector/handover.html", {"step": "generate"})
 
             return render(request, "collector/handover.html", {
@@ -1427,7 +1742,7 @@ def collector_handover_otp(request):
             session_otp = request.session.get("handover_otp")
             generated_at = request.session.get("otp_generated_at")
             if not session_otp or not generated_at:
-                messages.error(request, "OTP expired. Please generate a new one.")
+                messages.error(request, "Verification code expired. Please request a new one.")
                 return redirect("collector:collector_handover_otp")
 
             # Check OTP expiration
@@ -1435,7 +1750,7 @@ def collector_handover_otp(request):
             if django_now() > expiry_time:
                 request.session.pop("handover_otp", None)
                 request.session.pop("otp_generated_at", None)
-                messages.error(request, "OTP expired. Please generate a new one.")
+                messages.error(request, "Verification code expired. Please request a new one.")
                 return redirect("collector:collector_handover_otp")
 
             # Check attempt limit
@@ -1445,7 +1760,7 @@ def collector_handover_otp(request):
                 request.session["otp_cooldown_until"] = cooldown_until
                 request.session.pop("handover_otp", None)
                 request.session.pop("otp_generated_at", None)
-                messages.error(request, f"Too many attempts. Wait {COOLDOWN_MINUTES} minute(s).")
+                messages.error(request, f"Too many attempts. Please wait {COOLDOWN_MINUTES} minute(s).")
                 return redirect("collector:collector_handover_otp")
 
             # Verify OTP
@@ -1456,7 +1771,7 @@ def collector_handover_otp(request):
                 return redirect("collector:new_collector_info")
             else:
                 request.session["otp_attempts"] = attempts
-                messages.error(request, f"Invalid OTP. {MAX_ATTEMPTS-attempts} attempts left.")
+                messages.error(request, f"Invalid code. {MAX_ATTEMPTS-attempts} attempts remaining.")
                 return render(request, "collector/handover.html", {
                     "step": "verify",
                     "otp_expiry_minutes": OTP_EXPIRY_MINUTES
@@ -1470,38 +1785,30 @@ def new_collector_info(request):
     Collect new collector's basic info after OTP verification
     and complete the handover process with new collector OTP verification
     """
-    # Check if OTP was verified for current collector
     if not request.session.get('otp_verified'):
-        messages.error(request, "OTP verification required first")
+        messages.error(request, "Verification required first")
         return redirect('collector:collector_handover_otp')
     
     current_collector = request.user.collector_profile
     district = current_collector.district
     
     if request.method == 'POST':
-        # Check if this is the OTP verification step
         if request.session.get('new_collector_data') and 'new_collector_otp' in request.POST:
             return _verify_new_collector_otp(request)
-        
-        # Otherwise, handle initial form submission
         return _process_new_collector_info(request, current_collector, district)
     
-    # If we have pending new collector data, show OTP verification
     if request.session.get('new_collector_data'):
         return render(request, 'collector/verify_new_collector_otp.html')
     
-    # Otherwise show the initial form
     return render(request, 'collector/new_collector_info.html')
 
 def _process_new_collector_info(request, current_collector, district):
     """Handle the initial form submission"""
-    # Get form data
     first_name = request.POST.get('first_name', '').strip()
     last_name = request.POST.get('last_name', '').strip()
     email = request.POST.get('email', '').strip().lower()
     phone = request.POST.get('phone', '').strip()
     
-    # Basic validation
     if not all([first_name, last_name, email]):
         messages.error(request, "First name, last name and email are required")
         return render(request, 'collector/new_collector_info.html', {
@@ -1511,17 +1818,6 @@ def _process_new_collector_info(request, current_collector, district):
             'phone': phone,
         })
     
-    # # Check if email is already used
-    # if User.objects.filter(email=email).exists():
-    #     messages.error(request, "This email is already registered")
-    #     return render(request, 'collector/new_collector_info.html', {
-    #         'first_name': first_name,
-    #         'last_name': last_name,
-    #         'email': '',
-    #         'phone': phone,
-    #     })
-    
-    # Generate OTP for new collector
     otp = str(random.randint(100000, 999999))
     request.session['new_collector_data'] = {
         'first_name': first_name,
@@ -1531,30 +1827,51 @@ def _process_new_collector_info(request, current_collector, district):
         'otp': otp,
         'otp_created_at': timezone.now().isoformat(),
     }
-    
-    # Send OTP to new collector's email
+
     try:
         send_mail(
-            subject="Your Collector Account Verification OTP",
-            message=f"""
-            Hello {first_name} {last_name},
-            
-            You are being assigned as the new Collector for {district.name}.
-            
-            Your verification OTP is: {otp}
-            
-            This OTP is valid for 10 minutes.
-            
-            Regards,
-            Grievance Redressal System
-            """,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+    subject="Confirm Your Appointment as Collector – Grievance Redressal System",
+    message=f"""\
+Dear {first_name} {last_name},
+
+We are pleased to inform you that you have been selected for the esteemed position of Collector in the district of {district.name}, under the Grievance Redressal System.
+
+To complete your appointment, please verify your identity using the one-time security code below:
+
+Verification Code: {otp}  
+Code Expiry: 10 minutes from the time this email was sent
+
+------------------------------------------------------------
+Next Steps:
+- Your official Collector account will be created upon successful verification.
+- Login credentials will be sent to your registered email address.
+- You will be required to set a new password upon your first login.
+
+------------------------------------------------------------
+Security Advisory:
+- This code is strictly confidential.
+- Do not share this code with anyone under any circumstances.
+- If you did not expect this communication or are unaware of this nomination, please disregard this message and report any suspicious activity to the support team.
+
+------------------------------------------------------------
+We look forward to your leadership and contribution to the governance framework.
+For safety-related queries or assistance, please contact GULBEE:
+
+    Security Desk:+91 9999988888  
+    Email: security@gulbee-system.org
+Sincerely,  
+Grievance Redressal Team  
+noreply@grievance-system.com
+""",
+
+
+            from_email="noreply@grievance-system.com",
             recipient_list=[email],
         )
-        messages.info(request, "OTP sent to new collector's email for verification")
+        messages.info(request, "Verification code sent to the new collector.")
         return redirect('collector:new_collector_info')
     except Exception as e:
-        messages.error(request, f"Failed to send OTP: {str(e)}")
+        messages.error(request, "Failed to send verification code.")
         return render(request, 'collector/new_collector_info.html', {
             'first_name': first_name,
             'last_name': last_name,
@@ -1562,7 +1879,7 @@ def _process_new_collector_info(request, current_collector, district):
             'phone': phone,
         })
 def _verify_new_collector_otp(request):
-    """Verify the OTP from new collector"""
+    """Verify the OTP from new collector and complete handover"""
     session_data = request.session.get('new_collector_data')
     if not session_data:
         messages.error(request, "Session expired. Please start over.")
@@ -1571,21 +1888,21 @@ def _verify_new_collector_otp(request):
     # Check OTP expiry (10 minutes)
     otp_created_at = datetime.fromisoformat(session_data['otp_created_at'])
     if django_now() - otp_created_at > timedelta(minutes=10):
-        messages.error(request, "OTP expired. Please start over.")
+        messages.error(request, "Verification code expired.")
         request.session.pop('new_collector_data', None)
         return redirect('collector:collector_handover_otp')
     
     # Verify OTP
     submitted_otp = request.POST.get('new_collector_otp', '').strip()
     if submitted_otp != session_data['otp']:
-        messages.error(request, "Invalid OTP. Please try again.")
+        messages.error(request, "Invalid verification code.")
         return render(request, 'collector/verify_new_collector_otp.html')
-    
-    # OTP verified - create the new collector
+
     try:
         with transaction.atomic():
-            # Generate random password
+            # Generate credentials
             password = get_random_string(12)
+            district = request.user.collector_profile.district
             
             # Create new user
             new_user = User.objects.create(
@@ -1593,17 +1910,21 @@ def _verify_new_collector_otp(request):
                 last_name=session_data['last_name'],
                 email=session_data['email'],
                 phone=session_data['phone'] if session_data['phone'] else None,
-                username=auto_collector_id(request.user.collector_profile.district),
+                username=auto_collector_id(district),
                 password=make_password(password),
                 user_type='COLLECTOR',
                 is_active=True,
                 date_joined=django_now()
             )
             
+            # Assign to collector group
+            collector_group, _ = Group.objects.get_or_create(name='collector')
+            new_user.groups.add(collector_group)
+            
             # Create collector profile
             CollectorProfile.objects.create(
                 user=new_user,
-                district=request.user.collector_profile.district,
+                district=district,
                 collector_id=new_user.username,
                 tenure_start=django_now().date(),
                 official_address="NA",
@@ -1611,23 +1932,138 @@ def _verify_new_collector_otp(request):
                 is_active=True
             )
             
-            # Clear all session data
-            request.session.pop('otp_verified', None)
-            request.session.pop('new_collector_data', None)
+            # Deactivate current collector
+            current_user = request.user
+            current_user.is_active = False
+            current_user.save()
             
-            messages.success(request, "Handover completed successfully!")
+            # Deactivate current collector profile
+            try:
+                current_collector = CollectorProfile.objects.get(user=current_user)
+                current_collector.is_active = False
+                current_collector.save()
+            except CollectorProfile.DoesNotExist:
+                pass
+            
+            # Clear user session
+            from django.contrib.auth import logout
+            logout(request)
+            
+# Send notification emails
+            try:
+                # Email to new collector
+                send_mail(
+    subject="Welcome to the Grievance Redressal System – Collector Credentials Enclosed",
+    message=f"""\
+Dear {new_user.first_name},
+
+Congratulations on your appointment as the Collector of {district.name}.
+
+This position carries a significant responsibility in fostering transparency, ensuring accountability, and delivering timely resolution to public grievances within your jurisdiction.
+
+------------------------------------------------------------
+Your Login Credentials:
+- Username: {new_user.username}
+- Temporary Password: {password}
+- Login Portal: https://grievance-system.example.com/login
+
+------------------------------------------------------------
+Next Steps:
+1. Log in and change your password immediately.
+2. Update your profile information and preferences.
+3. Begin overseeing grievance management and district-level operations.
+
+------------------------------------------------------------
+Learn More:
+Gain an understanding of our system’s structure, role hierarchy, and operational protocols:  
+https://grievance-system.example.com/about
+
+------------------------------------------------------------
+Security Notice:
+- This communication is confidential and intended solely for the recipient.
+- All system activities and transitions are monitored and logged.
+- Sharing this email or its contents is strictly prohibited and will result in full accountability for any resulting misuse.
+- Unauthorized use or disclosure may lead to disciplinary action and legal consequences.
+
+------------------------------------------------------------
+We value your leadership and look forward to your service in advancing public governance.
+
+Wishing you success in this important role.
+For safety-related queries or assistance, please contact GULBEE:
+
+    Security Desk:+91 9999988888  
+    Email: security@gulbee-system.org
+Sincerely,  
+Grievance Redressal System Team  
+support@example.com | +1 (555) 123-4567
+"""
+,
+
+                    from_email="noreply@grievance-system.com",
+                    recipient_list=[new_user.email],
+                )
+
+                # Email to current collector
+                send_mail(
+    subject="Collector Handover Completed – Acknowledgment of Your Service",
+    message=f"""\
+Dear {current_user.first_name},
+
+This is to confirm that the handover of the Collector responsibilities for the district of {district.name} has been successfully completed.  
+Your duties have now been formally transitioned to Mr./Ms. {new_user.first_name} {new_user.last_name}.
+
+------------------------------------------------------------
+Acknowledgment of Your Service:
+We sincerely thank you for your valuable contributions throughout your tenure.  
+Your leadership and dedication have made a significant and lasting impact on the grievance redressal framework of the district.
+
+------------------------------------------------------------
+Important Notice:
+As part of this secure transition, your access to the system has been permanently revoked.
+
+Disclaimer:  
+Any misuse, mishandling, or unauthorized activity involving your credentials during the transition period will be considered a breach of the system's security policy.  
+In such cases, you may be held fully accountable and subject to disciplinary or legal action as applicable.
+
+------------------------------------------------------------
+Review Your Service Record:
+To view a summary of your actions and contributions during your tenure, please refer to the report below:  
+https://grievance-system.example.com/contribution-report?user={current_user.username}
+
+------------------------------------------------------------
+We extend our best wishes for your continued success in your future endeavors.  
+Your service has been greatly valued and appreciated.
+
+For safety-related queries or assistance, please contact GULBEE:
+
+    Security Desk:+91 9999988888  
+    Email: security@gulbee-system.org
+Sincerely,  
+Grievance Redressal System Team  
+noreply@grievance-system.com
+"""
+,
+
+                    from_email="noreply@grievance-system.com",
+                    recipient_list=[current_user.email],
+    )
+
+            except Exception as email_error:
+                logger.error(f"Failed to send handover emails: {str(email_error)}")
+            
+            # Clear all session data
+            request.session.flush()
+            
+            messages.success(request, "Handover completed successfully! The new collector can now login.")
             return redirect('accounts:login')
             
     except Exception as e:
-        messages.error(request, f"Error during handover: {str(e)}")
+        logger.error(f"Handover failed: {str(e)}")
+        messages.error(request, "Error during handover process. Please contact support.")
         return redirect('collector:collector_handover_otp')
-
 def handover_complete(request):
-    """Show handover completion page before redirecting to login"""
     messages.success(request, "Handover completed successfully!")
     return redirect('accounts:login')
-
-
 
 
 User = get_user_model()
@@ -1673,18 +2109,85 @@ def collector_forgot_password(request):
     }
 
     # Send OTPs
+    # Send OTP to collector
     send_mail(
-        subject="Your Password Reset OTP",
-        message=f"Dear {user.first_name},\n\nYour OTP is: {collector_otp}",
+    subject="Your Password Reset OTP – Confidential",
+    message=f"""\
+Dear {user.first_name},
+
+You have requested to reset your password for the Collector Portal.  
+Please use the following One-Time Password (OTP) to proceed:
+
+OTP: {collector_otp}
+
+------------------------------------------------------------
+Security Advisory:
+- This OTP is strictly confidential.
+- Do not share this code with anyone under any circumstances.
+- Any unauthorized usage or sharing of this code will be fully tracked.
+- You will be held solely responsible for any activity performed using your credentials.
+
+This OTP is valid for a limited period. Kindly enter it promptly to complete your password reset.
+
+If you did not initiate this request, please contact support immediately to secure your account.
+
+------------------------------------------------------------
+All password reset activities are monitored and logged to ensure system integrity and your personal security.
+
+For safety-related queries or assistance, please contact GULBEE:
+
+    Security Desk:+91 9999988888  
+    Email: security@gulbee-system.org
+Sincerely,  
+Grievance Redressal System Team  
+noreply@grievance-system.com
+"""
+,
+
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
     )
+
+    # Send OTP to District Officer
     send_mail(
-        subject="Collector Password Reset Approval",
-        message=f"OTP for district officer: {officer_otp}",
+    subject="Collector Password Reset – OTP Approval Required",
+    message=f"""\
+Dear District Officer,
+
+A password reset request has been initiated by the Collector of {district.name}.  
+In accordance with security protocols, your approval is required to authorize this action.
+
+Please find below your One-Time Password (OTP) for approval:
+
+Approval OTP: {officer_otp}
+
+------------------------------------------------------------
+Confidentiality Notice:
+- This OTP must be communicated **only** to the concerned Collector.
+- Do **not** share or forward this code to anyone else under any circumstances.
+- All actions during this password reset process are monitored and securely logged.
+- Any misuse, unauthorized sharing, or breach will result in full accountability and may lead to disciplinary or legal consequences.
+
+By providing this OTP, you affirm that the request has been verified and approved by you.
+
+If you believe this request is suspicious or unauthorized, please report it immediately to the system administrator.
+
+------------------------------------------------------------
+Thank you for upholding the security and integrity of district-level operations.
+
+For safety-related queries or assistance, please contact GULBEE:
+
+    Security Desk:+91 9999988888  
+    Email: security@gulbee-system.org
+Sincerely,  
+Grievance Redressal System Team  
+noreply@grievance-system.com
+"""
+,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[officer_email],
     )
+
 
     messages.info(request, "OTPs sent to you and your district officer.")
     return redirect("collector:collector_verify_two_otps")
@@ -1748,3 +2251,153 @@ def collector_reset_password(request):
             return redirect("accounts:login")
 
     return render(request, "collector/reset_password.html")    
+
+
+
+
+# @login_required
+# def create_collector_order(request):
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         district = collector.district
+#     except CollectorProfile.DoesNotExist:
+#         return redirect("collector:collector_dashboard")
+
+#     departments = Department.objects.filter(district=district).order_by('name')
+
+#     if request.method == "POST":
+#         form = AdministrativeOrderForm(request.POST, request.FILES, user=request.user)
+#         if form.is_valid():
+#             order = form.save(commit=False)
+#             order.assigned_by = request.user
+#             order.created_at = timezone.now()
+
+#             if not order.assigned_officer:
+#                 selected_depts = form.cleaned_data['departments']
+#                 hods = OfficerProfile.objects.filter(department__in=selected_depts, is_hod=True)
+#                 if hods.exists():
+#                     order.assigned_officer = hods.first()
+
+#             order.save()
+#             form.save_m2m()
+#             return redirect("collector:collector_dashboard")
+#     else:
+#         form = AdministrativeOrderForm(user=request.user)
+
+#     return render(request, "collector/create_order.html", {"form": form, "departments": departments})
+
+
+# @login_required
+# def get_officers_by_department(request):
+#     dept_ids = request.GET.getlist('dept_ids[]')
+#     officers = OfficerProfile.objects.filter(
+#         department_id__in=dept_ids, is_hod=True
+#     ).select_related('user', 'department')
+
+#     officer_list = [
+#         {
+#             "id": officer.id,
+#             "name": f"{officer.user.first_name} {officer.user.last_name} ({officer.department.name})"
+#         }
+#         for officer in officers
+#     ]
+#     return JsonResponse({"officers": officer_list})
+
+
+
+
+
+
+
+#for collector ordering
+
+
+# @login_required
+# def create_collector_order(request):
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         district = collector.district
+#     except CollectorProfile.DoesNotExist:
+#         return redirect("collector:collector_dashboard")
+
+#     departments = Department.objects.filter(district=district).order_by("name")
+
+#     if request.method == "POST":
+#         title = request.POST.get("title")
+#         remark = request.POST.get("remark")
+#         due_date = request.POST.get("due_date")
+#         attachment = request.FILES.get("attachment")
+
+#         # Validate required fields
+#         if not (title and remark and due_date and request.POST.getlist("departments[]")):
+#             return render(
+#                 request,
+#                 "collector/create_order.html",
+#                 {
+#                     "departments": departments,
+#                     "error": "All required fields must be filled, and at least one department must be selected."
+#                 }
+#             )
+
+#         # Create the order
+#         order = CollectorOrder.objects.create(
+#             title=title,
+#             remark=remark,
+#             due_date=due_date,
+#             attachment=attachment,
+#             assigned_by=request.user,
+#             created_at=timezone.now()
+#         )
+
+#         # Process departments and officers
+#         dept_ids = request.POST.getlist("departments[]")
+#         officer_ids = request.POST.getlist("officers[]")
+
+#         for dept_id in dept_ids:
+#             try:
+#                 department = Department.objects.get(code=dept_id, district=district)
+#                 order.departments.add(department)
+
+#                 # If no officers selected, assign to HOD
+#                 if not officer_ids:
+#                     try:
+#                         hod = OfficerProfile.objects.get(department=department, is_hod=True)
+#                         CollectorOrderAssignment.objects.create(order=order, officer=hod)
+#                     except OfficerProfile.DoesNotExist:
+#                         # Skip if no HOD exists for the department
+#                         continue
+#                 else:
+#                     # Assign to selected officers
+#                     for officer_id in officer_ids:
+#                         try:
+#                             officer = OfficerProfile.objects.get(id=officer_id, department__district=district)
+#                             CollectorOrderAssignment.objects.create(order=order, officer=officer)
+#                         except OfficerProfile.DoesNotExist:
+#                             continue  # Skip invalid officer IDs
+#             except Department.DoesNotExist:
+#                 continue  # Skip invalid department IDs
+
+#         return redirect("collector:collector_dashboard")
+
+#     return render(request, "collector/create_order.html", {"departments": departments})
+
+# @login_required
+# def get_officers_by_department(request):
+#     dept_ids = request.GET.getlist('dept_ids[]')
+#     try:
+#         collector = get_object_or_404(CollectorProfile, user=request.user)
+#         officers = OfficerProfile.objects.filter(
+#             department__code__in=dept_ids,
+#             department__district=collector.district
+#         ).select_related('user', 'department')
+
+#         officer_list = [
+#             {
+#                 "id": officer.id,
+#                 "name": f"{officer.user.first_name} {officer.user.last_name} ({officer.department.name})"
+#             }
+#             for officer in officers
+#         ]
+#         return JsonResponse({"officers": officer_list})
+#     except CollectorProfile.DoesNotExist:
+#         return JsonResponse({"officers": []}, status=403)

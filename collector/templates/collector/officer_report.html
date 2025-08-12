@@ -17,6 +17,62 @@
       --accent:#ffc107;
       --bg:#f4f6f9;
       --card-shadow:0 2px 8px rgba(0,0,0,.08);
+      .navbar-custom {
+  background: var(--indigo);
+  padding: 1.2rem 2rem;
+  border-bottom: 4px solid var(--indigo-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
+
+.navbar-custom .navbar-logo {
+  height: 50px;
+  margin-right: 15px;
+}
+
+.navbar-custom .navbar-brand {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.navbar-custom .nav-link {
+  color: #ffffff !important;
+  margin-left: 1rem;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #FFBF00 !important; /* Goldenrod - dark yellow */
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.navbar-custom .dropdown-menu {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(251, 238, 2, 0.15);
+}
+
+.navbar-custom .dropdown-item:hover {
+  background-color: var(--indigo);
+  color: #ffffff;
+}
+
+.navbar-custom .dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}
     }
     html,body{height:100%;overflow:auto}
     body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg)}
